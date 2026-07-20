@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>铜锅记 · 运营管理后台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --cream:#FBF3E7; --cream-2:#F3E6D2; --broth:#B7371F; --broth-dark:#8E2A17;
+      --copper:#C4894A; --copper-light:#E3B876; --ink:#2B2118; --ink-soft:#6B5D4F;
+      --line:#E9DCC7; --veg:#4C7A52; --card:#FFFDF9; --blue:#4A5F8A;
+    }
+    *{box-sizing:border-box; margin:0; padding:0;}
+    body{
+      background:var(--cream); color:var(--ink); font-family:'Noto Sans SC',sans-serif;
+      padding:20px 18px 40px;
+    }
+    h1,h2,h3,.display{ font-family:'Noto Serif SC', serif; }
+    .container{ max-width:960px; margin:0 auto; }
+
+    /* --- 登录遮罩 --- */
+    #loginOverlay{
+      position:fixed; inset:0; background:rgba(43,33,24,.55); backdrop-filter:blur(6px);
+      display:flex; align-items:center; justify-content:center; z-index:2000;
+      padding:20px;
+      transition: opacity .4s ease;
+    }
+    #loginOverlay.hidden{ opacity:0; pointer-events:none; }
+    .login-card{
+      background:var(--card); max-width:380px; width:100%; border-radius:28px;
+      padding:32px 28px; box-shadow:0 24px 48px rgba(0,0,0,.35);
+      text-align:center;
+    }
+    .login-card .logo{ font-size:26px; font-weight:900; color:var(--broth); margin-bottom:4px; }
+    .login-card .sub{ font-size:13px; color:var(--ink-soft); margin-bottom:22px; }
+    .login-card input{
+      width:100%; padding:13px 16px; border-radius:14px; border:1px solid var(--line);
+      font-size:15px; font-family:inherit; background:#fff; margin-bottom:14px;
+    }
+    .login-card input:focus{ outline:2px solid var(--copper); outline-offset:1px; }
+    .login-card button{
+      width:100%; background:var(--broth); color:#fff; border:none;
+      padding:14px; border-radius:14px; font-weight:700; font-size:16px; cursor:pointer;
+    }
+    .login-card .error{ color:#B7371F; font-size:13px; margin-top:8px; min-height:20px; }
+
+    /* --- 原有样式 --- */
+    .topbar{
+      background:var(--broth); color:#fff; border-radius:18px;
+      padding:18px 22px; display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:12px; margin-bottom:24px;
+      box-shadow:0 8px 24px rgba(43,33,24,.12);
+    }
+    .topbar .brand{ font-size:20px; font-weight:900; letter-spacing:1px; }
+    .topbar .sub{ font-size:12px; color:#F1D9C2; margin-left:8px; font-weight:400; }
+    .top-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+    .top-actions button{
+      background:rgba(255,255,255,.15); border:none; color:#fff;
+      padding:8px 16px; border-radius:999px; font-weight:600; font-size:12.5px;
+      cursor:pointer; transition:.2s; display:flex; align-items:center; gap:6px;
+    }
+    .top-actions button:hover{ background:rgba(255,255,255,.25); }
+    .top-actions button:active{ transform:scale(.96); }
+
+    .stats-grid{
+      display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:14px;
+      margin-bottom:28px;
+    }
+    .stat-card{
+      background:var(--card); border:1px solid var(--line); border-radius:16px;
+      padding:14px 16px; text-align:center;
+    }
+    .stat-card .num{ font-size:24px; font-weight:800; color:var(--broth); }
+    .stat-card .label{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
+    .section{
+      background:var(--card); border:1px solid var(--line); border-radius:18px;
+      padding:18px 20px; margin-bottom:20px;
+    }
+    .section-head{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:14px; flex-wrap:wrap; gap:8px;
+    }
+    .section-head h2{ font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px; }
+    .section-head .badge-num{
+      background:var(--broth); color:#fff; font-size:12px; font-weight:700;
+      padding:0 10px; border-radius:999px; line-height:22px;
+    }
+    .filter-row{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      margin-bottom:12px;
+    }
+    .filter-row input, .filter-row select{
+      padding:8px 14px; border-radius:10px; border:1px solid var(--line);
+      background:#fff; font-size:13px; font-family:inherit;
+    }
+    .filter-row button{
+      padding:8px 18px; border-radius:10px; border:none; font-weight:600;
+      background:var(--broth); color:#fff; cursor:pointer;
+    }
+
+    table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+    th{ background:var(--cream-2); text-align:left; padding:10px 8px; border-bottom:2px solid var(--line); }
+    td{ padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+    .small{ font-size:11.5px; color:var(--ink-soft); }
+    .tag{
+      display:inline-block; padding:2px 10px; border-radius:999px; font-size:11px; font-weight:700;
+    }
+    .tag-delivered{ background:#E4EFE3; color:var(--veg); }
+    .tag-pending{ background:#FCE7E1; color:var(--broth); }
+    .tag-ready{ background:#E4EAF2; color:var(--blue); }
+    .tag-assigned{ background:#FBEFD9; color:#9A6A1F; }
+    .action-btn{
+      border:none; background:transparent; cursor:pointer; font-size:13px;
+      padding:4px 8px; border-radius:8px; transition:.15s;
+      color:var(--ink-soft);
+    }
+    .action-btn:hover{ background:var(--cream-2); }
+    .action-btn.danger:hover{ background:#FCE7E1; color:var(--broth); }
+
+    .modal-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(3px);
+      display:none; align-items:center; justify-content:center; z-index:1000;
+      padding:20px;
+    }
+    .modal-overlay.open{ display:flex; }
+    .modal-box{
+      background:var(--card); max-width:460px; width:100%; border-radius:24px;
+      padding:28px 24px; box-shadow:0 20px 40px rgba(0,0,0,.3);
+      position:relative;
+    }
+    .modal-close{
+      position:absolute; top:14px; right:18px; font-size:22px; cursor:pointer;
+      background:transparent; border:0; color:var(--ink-soft);
+    }
+    .modal-box h2{ font-size:20px; margin-bottom:6px; }
+    .modal-box .sub{ font-size:13px; color:var(--ink-soft); margin-bottom:18px; }
+    .modal-box .form-group{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+    .modal-box .form-group label{ font-weight:600; font-size:13px; }
+    .modal-box .form-group input{
+      padding:10px 14px; border-radius:10px; border:1px solid var(--line);
+      font-size:14px; font-family:inherit;
+    }
+    .modal-box .form-group input:focus{ outline:2px solid var(--copper); outline-offset:1px; }
+    .modal-box .btn-primary{
+      width:100%; background:var(--broth); color:#fff; border:none;
+      padding:13px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer;
+    }
+    .modal-box .btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
+    .modal-box .msg{ color:var(--broth); font-size:13px; margin-top:6px; min-height:20px; }
+
+    .export-btns{ display:flex; gap:8px; flex-wrap:wrap; }
+    .export-btns button{
+      background:var(--cream-2); border:1px solid var(--line); padding:6px 14px;
+      border-radius:999px; font-weight:600; cursor:pointer; font-size:12px;
+      transition:.2s;
+    }
+    .export-btns button:hover{ background:var(--line); }
+
+    .tab-row{
+      display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--line);
+      padding-bottom:8px; flex-wrap:wrap;
+    }
+    .tab-row .tab-btn{
+      padding:6px 16px; border-radius:999px; border:1px solid transparent;
+      font-weight:600; cursor:pointer; background:transparent; color:var(--ink-soft);
+      font-size:13px;
+    }
+    .tab-row .tab-btn.active{
+      background:var(--broth); color:#fff; border-color:var(--broth);
+    }
+    .logout-btn{
+      background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+      color:#fff; padding:6px 14px; border-radius:999px; font-weight:600; cursor:pointer;
+      font-size:12px;
+    }
+    .logout-btn:hover{ background:rgba(255,255,255,.2); }
+  </style>
+</head>
+<body>
+
+<!-- ====== 登录遮罩 ====== -->
+<div id="loginOverlay">
+  <div class="login-card">
+    <div class="logo">🔐 铜锅记</div>
+    <div class="sub">运营管理后台 · 请输入密码</div>
+    <input type="password" id="loginPasswordInput" placeholder="请输入管理密码" autofocus />
+    <button id="loginSubmitBtn">进入后台</button>
+    <div class="error" id="loginErrorMsg"></div>
+  </div>
+</div>
+
+<!-- ====== 主界面 ====== -->
+<div class="container" id="mainApp" style="display:none;">
+  <div class="topbar">
+    <div>
+      <span class="brand">铜锅记 · 运营后台</span>
+      <span class="sub">数据中枢</span>
+    </div>
+    <div class="top-actions">
+      <button id="refreshBtn">🔄 刷新数据</button>
+      <button id="exportAllExcel">📥 导出全部 Excel</button>
+      <button class="logout-btn" id="logoutBtn">🚪 退出登录</button>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>📦 订单总览 <span class="badge-num" id="orderCount">0</span></h2>
+      <div class="export-btns">
+        <button id="exportOrdersExcel">📥 导出订单</button>
+      </div>
+    </div>
+    <div class="filter-row">
+      <input type="date" id="orderDateFrom" />
+      <input type="date" id="orderDateTo" />
+      <select id="orderStatusFilter"><option value="">全部状态</option>
+        <option value="pending">待接单</option><option value="preparing">制作中</option>
+        <option value="ready">待取餐</option><option value="assigned">骑手已接</option>
+        <option value="picked_up">已取餐</option><option value="delivered">已送达</option>
+        <option value="rejected">已拒绝</option>
+      </select>
+      <button id="filterOrdersBtn">筛选</button>
+      <button id="resetOrderFilter">重置</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table id="orderTable">
+        <thead><tr><th>订单号</th><th>状态</th><th>顾客</th><th>总额</th><th>配送费</th><th>时间</th><th>操作</th></tr></thead>
+        <tbody id="orderBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 用户管理 -->
+  <div class="section">
+    <div class="section-head">
+      <h2>👥 账户管理</h2>
+      <div class="export-btns">
+        <button id="exportUsersExcel">📥 导出用户</button>
+      </div>
+    </div>
+    <div class="tab-row">
+      <button class="tab-btn active" data-tab="restaurants">🏪 商家</button>
+      <button class="tab-btn" data-tab="riders">🛵 骑手</button>
+      <button class="tab-btn" data-tab="customers">👤 顾客</button>
+    </div>
+    <div id="userTableWrap" style="overflow-x:auto;">
+      <table id="userTable">
+        <thead><tr><th>名称</th><th>手机</th><th>地址</th><th>类型</th><th>操作</th></tr></thead>
+        <tbody id="userBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 模态框 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <button class="modal-close" id="modalCloseBtn">✕</button>
+      <h2 id="modalTitle">操作</h2>
+      <div class="sub" id="modalSub">请输入新密码或确认删除</div>
+      <div class="form-group" id="modalPasswordGroup">
+        <label>新密码</label>
+        <input type="password" id="modalPassword" placeholder="请输入新密码" />
+      </div>
+      <div class="msg" id="modalMsg"></div>
+      <button class="btn-primary" id="modalConfirmBtn">确认</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ============================================================
+// 1. 登录密码管理 (硬编码，可自行修改)
+// ============================================================
+const ADMIN_PASSWORD = 'admin123';  // 👈 在此修改管理密码
+
+// 登录状态
+let isLoggedIn = false;
+
+const loginOverlay = document.getElementById('loginOverlay');
+const mainApp = document.getElementById('mainApp');
+const loginInput = document.getElementById('loginPasswordInput');
+const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+const loginErrorMsg = document.getElementById('loginErrorMsg');
+
+function checkLogin(){
+  if(isLoggedIn){
+    loginOverlay.classList.add('hidden');
+    mainApp.style.display = 'block';
+  } else {
+    loginOverlay.classList.remove('hidden');
+    mainApp.style.display = 'none';
+  }
+}
+
+function doLogin(){
+  const pwd = loginInput.value.trim();
+  if(pwd === ADMIN_PASSWORD){
+    isLoggedIn = true;
+    loginErrorMsg.textContent = '';
+    // 保存 session (刷新页面保持登录)
+    try { sessionStorage.setItem('tgj_admin_logged', 'true'); } catch(e) {}
+    checkLogin();
+    // 加载数据
+    loadAllData().then(() => { refreshUI(); });
+  } else {
+    loginErrorMsg.textContent = '❌ 密码错误，请重试';
+    loginInput.value = '';
+    loginInput.focus();
+  }
+}
+
+loginSubmitBtn.addEventListener('click', doLogin);
+loginInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') doLogin(); });
+
+// 检查 session 是否已登录
+try {
+  if(sessionStorage.getItem('tgj_admin_logged') === 'true'){
+    isLoggedIn = true;
+  }
+} catch(e) {}
+
+// 退出登录
+document.getElementById('logoutBtn').addEventListener('click', function(){
+  isLoggedIn = false;
+  try { sessionStorage.removeItem('tgj_admin_logged'); } catch(e) {}
+  checkLogin();
+  // 清空数据展示
+  document.getElementById('orderBody').innerHTML = '';
+  document.getElementById('userBody').innerHTML = '';
+  document.getElementById('statsGrid').innerHTML = '';
+  loginInput.value = '';
+  loginErrorMsg.textContent = '';
+  loginInput.focus();
+});
+
+// ============================================================
+// 2. Firebase 及数据逻辑 (同之前，加入登录保护)
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDrrk3exoaA4PjYVlNnlIr1-qZcHYfXZtk",
+  authDomain: "restaurants-cs.firebaseapp.com",
+  databaseURL: "https://restaurants-cs-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "restaurants-cs",
+  storageBucket: "restaurants-cs.firebasestorage.app",
+  messagingSenderId: "209872919844",
+  appId: "1:209872919844:web:c1730801cd51d615e867b1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let allOrders = {};
+let allRestaurants = {};
+let allUsers = {};
+let userList = [];
+
+const ordersRef = db.ref('orders');
+const orderStatusMap = {
+  'pending':'待接单','preparing':'制作中','ready':'待取餐',
+  'assigned':'骑手已接','picked_up':'已取餐','delivered':'已送达','rejected':'已拒绝'
+};
+
+function loadAllData(){
+  return Promise.all([
+    new Promise(resolve => ordersRef.once('value', snap => { allOrders = snap.val() || {}; resolve(); })),
+    new Promise(resolve => db.ref('restaurants').once('value', snap => { allRestaurants = snap.val() || {}; resolve(); })),
+    new Promise(resolve => db.ref('users').once('value', snap => { allUsers = snap.val() || {}; resolve(); })),
+  ]);
+}
+
+function buildUserList(){
+  const list = [];
+  Object.entries(allRestaurants).forEach(([id, data]) => {
+    if(data && data.info){
+      const info = data.info;
+      list.push({
+        id: id,
+        type: '商家',
+        name: info.name || id,
+        phone: info.phone || '',
+        address: info.address || '',
+        raw: info,
+        refPath: 'restaurants/' + id + '/info'
+      });
+    }
+  });
+  Object.entries(allUsers).forEach(([phone, data]) => {
+    if(data){
+      list.push({
+        id: phone,
+        type: '顾客',
+        name: data.name || phone,
+        phone: phone,
+        address: data.address || '',
+        raw: data,
+        refPath: 'users/' + phone
+      });
+    }
+  });
+  const riderSet = new Set();
+  Object.values(allOrders).forEach(o => {
+    if(o.riderId) riderSet.add(o.riderId);
+  });
+  riderSet.forEach(id => {
+    let name = id;
+    for(const o of Object.values(allOrders)){
+      if(o.riderId === id && o.riderName){ name = o.riderName; break; }
+    }
+    if(!list.find(u => u.id === id && u.type === '骑手')){
+      list.push({
+        id: id,
+        type: '骑手',
+        name: name,
+        phone: '',
+        address: '',
+        raw: { riderId: id },
+        refPath: null
+      });
+    }
+  });
+  return list;
+}
+
+function renderStats(){
+  const totalOrders = Object.keys(allOrders).length;
+  const delivered = Object.values(allOrders).filter(o => o.status === 'delivered' || o.status === 'done').length;
+  const pending = Object.values(allOrders).filter(o => o.status === 'pending').length;
+  let totalRevenue = 0;
+  Object.values(allOrders).forEach(o => { if(o.status === 'delivered' || o.status === 'done') totalRevenue += (o.total || 0); });
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="num">${totalOrders}</div><div class="label">总订单</div></div>
+    <div class="stat-card"><div class="num">${delivered}</div><div class="label">已完成</div></div>
+    <div class="stat-card"><div class="num">${pending}</div><div class="label">待处理</div></div>
+    <div class="stat-card"><div class="num">$${totalRevenue.toFixed(1)}</div><div class="label">总营收</div></div>
+  `;
+  document.getElementById('orderCount').textContent = totalOrders;
+}
+
+function renderOrders(filter = {}){
+  const tbody = document.getElementById('orderBody');
+  let list = Object.entries(allOrders);
+  if(filter.dateFrom){
+    const from = new Date(filter.dateFrom); from.setHours(0,0,0,0);
+    list = list.filter(([id,o]) => o.createdAt && o.createdAt >= from.getTime());
+  }
+  if(filter.dateTo){
+    const to = new Date(filter.dateTo); to.setHours(23,59,59,999);
+    list = list.filter(([id,o]) => o.createdAt && o.createdAt <= to.getTime());
+  }
+  if(filter.status){
+    list = list.filter(([id,o]) => o.status === filter.status);
+  }
+  list.sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+  if(list.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--ink-soft);">暂无订单</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(([id, o]) => {
+    const statusLabel = orderStatusMap[o.status] || o.status;
+    const statusClass = o.status === 'delivered' ? 'tag-delivered' : 
+                        o.status === 'pending' ? 'tag-pending' :
+                        o.status === 'ready' ? 'tag-ready' : 'tag-assigned';
+    return `<tr>
+      <td><strong>#${id.slice(-6).toUpperCase()}</strong></td>
+      <td><span class="tag ${statusClass}">${statusLabel}</span></td>
+      <td>${o.customerName || '—'}</td>
+      <td>$${(o.total||0).toFixed(1)}</td>
+      <td>$${(o.deliveryFee||0).toFixed(1)}</td>
+      <td class="small">${o.createdAt ? new Date(o.createdAt).toLocaleString() : '—'}</td>
+      <td>
+        <button class="action-btn" data-action="deleteOrder" data-id="${id}" title="删除订单">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.querySelectorAll('[data-action="deleteOrder"]').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const id = this.dataset.id;
+      if(confirm(`确定要删除订单 #${id.slice(-6).toUpperCase()} 吗？此操作不可恢复！`)){
+        ordersRef.child(id).remove().then(() => { loadAllData().then(refreshUI); });
+      }
+    });
+  });
+}
+
+function renderUsers(type = 'restaurants'){
+  const tbody = document.getElementById('userBody');
+  const list = userList.filter(u => {
+    if(type === 'restaurants') return u.type === '商家';
+    if(type === 'riders') return u.type === '骑手';
+    if(type === 'customers') return u.type === '顾客';
+    return true;
+  });
+  if(list.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--ink-soft);">暂无用户</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(u => `<tr>
+    <td><strong>${u.name}</strong></td>
+    <td>${u.phone || '—'}</td>
+    <td class="small">${u.address || '—'}</td>
+    <td><span class="tag" style="background:var(--cream-2);">${u.type}</span></td>
+    <td>
+      ${u.type !== '骑手' ? `<button class="action-btn" data-action="resetPwd" data-id="${u.id}" data-type="${u.type}" data-phone="${u.phone}">🔑 重置密码</button>` : ''}
+      ${u.type !== '骑手' ? `<button class="action-btn danger" data-action="deleteUser" data-id="${u.id}" data-type="${u.type}" data-phone="${u.phone}">🗑 注销</button>` : ''}
+    </td>
+  </tr>`).join('');
+
+  document.querySelectorAll('[data-action="resetPwd"]').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const id = this.dataset.id;
+      const type = this.dataset.type;
+      const phone = this.dataset.phone;
+      openModal('重置密码', `为 ${type}「${id}」重置密码`, phone, type, 'reset');
+    });
+  });
+  document.querySelectorAll('[data-action="deleteUser"]').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const id = this.dataset.id;
+      const type = this.dataset.type;
+      const phone = this.dataset.phone;
+      if(confirm(`确定要注销 ${type}「${id}」吗？此操作将删除该账户所有数据且不可恢复！`)){
+        if(type === '商家'){
+          db.ref('restaurants/' + id).remove().then(() => { loadAllData().then(refreshUI); });
+        } else if(type === '顾客'){
+          db.ref('users/' + phone).remove().then(() => { loadAllData().then(refreshUI); });
+        }
+      }
+    });
+  });
+}
+
+// ===== 模态框 =====
+function openModal(title, sub, phone, type, action){
+  const overlay = document.getElementById('modalOverlay');
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSub').textContent = sub;
+  document.getElementById('modalMsg').textContent = '';
+  document.getElementById('modalPassword').value = '';
+  document.getElementById('modalPasswordGroup').style.display = (action === 'reset') ? 'flex' : 'none';
+  overlay.classList.add('open');
+
+  const confirmBtn = document.getElementById('modalConfirmBtn');
+  confirmBtn.onclick = function(){
+    const pwd = document.getElementById('modalPassword').value.trim();
+    const msg = document.getElementById('modalMsg');
+    if(action === 'reset'){
+      if(!pwd || pwd.length < 4){
+        msg.textContent = '密码至少4个字符';
+        return;
+      }
+      if(type === '商家'){
+        db.ref('restaurants/' + phone + '/info/password').set(pwd).then(() => {
+          msg.textContent = '✅ 密码重置成功';
+          setTimeout(() => { closeModal(); loadAllData().then(refreshUI); }, 600);
+        }).catch(() => { msg.textContent = '❌ 重置失败，请重试'; });
+      } else if(type === '顾客'){
+        db.ref('users/' + phone + '/password').set(pwd).then(() => {
+          msg.textContent = '✅ 密码重置成功';
+          setTimeout(() => { closeModal(); loadAllData().then(refreshUI); }, 600);
+        }).catch(() => { msg.textContent = '❌ 重置失败，请重试'; });
+      }
+    }
+  };
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', function(e){
+  if(e.target === this) closeModal();
+});
+
+// ===== 导出 =====
+function exportOrdersToExcel(){
+  if(!allOrders || Object.keys(allOrders).length === 0){ alert('暂无订单数据'); return; }
+  const rows = Object.entries(allOrders).map(([id, o]) => ({
+    '订单号': '#' + id.slice(-6).toUpperCase(),
+    '状态': orderStatusMap[o.status] || o.status,
+    '顾客': o.customerName || '',
+    '电话': o.customerPhone || '',
+    '地址': o.customerAddress || '',
+    '菜品': (o.items||[]).map(i => `${i.name}×${i.qty}`).join('; '),
+    '小计': o.subtotal || 0,
+    '配送费': o.deliveryFee || 0,
+    '总计': o.total || 0,
+    '下单时间': o.createdAt ? new Date(o.createdAt).toLocaleString() : '',
+    '骑手': o.riderName || '',
+    '商家': o.restaurantName || '',
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = Object.keys(rows[0]).map(() => ({ wch: 14 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '订单');
+  XLSX.writeFile(wb, `铜锅记_订单_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+function exportUsersToExcel(){
+  const rows = userList.map(u => ({
+    '类型': u.type,
+    '名称': u.name,
+    '手机': u.phone || '',
+    '地址': u.address || '',
+    'ID': u.id,
+  }));
+  if(rows.length === 0){ alert('暂无用户数据'); return; }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = Object.keys(rows[0]).map(() => ({ wch: 16 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '用户');
+  XLSX.writeFile(wb, `铜锅记_用户_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+function exportAllExcel(){
+  if(!allOrders || Object.keys(allOrders).length === 0){ alert('暂无数据可导出'); return; }
+  const orderRows = Object.entries(allOrders).map(([id, o]) => ({
+    '订单号': '#' + id.slice(-6).toUpperCase(),
+    '状态': orderStatusMap[o.status] || o.status,
+    '顾客': o.customerName || '',
+    '电话': o.customerPhone || '',
+    '地址': o.customerAddress || '',
+    '菜品': (o.items||[]).map(i => `${i.name}×${i.qty}`).join('; '),
+    '小计': o.subtotal || 0,
+    '配送费': o.deliveryFee || 0,
+    '总计': o.total || 0,
+    '下单时间': o.createdAt ? new Date(o.createdAt).toLocaleString() : '',
+    '骑手': o.riderName || '',
+    '商家': o.restaurantName || '',
+  }));
+  const ws1 = XLSX.utils.json_to_sheet(orderRows);
+  const userRows = userList.map(u => ({
+    '类型': u.type, '名称': u.name, '手机': u.phone || '', '地址': u.address || ''
+  }));
+  const ws2 = XLSX.utils.json_to_sheet(userRows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws1, '订单');
+  XLSX.utils.book_append_sheet(wb, ws2, '用户');
+  XLSX.writeFile(wb, `铜锅记_全量数据_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// ===== 刷新UI =====
+function refreshUI(){
+  userList = buildUserList();
+  renderStats();
+  renderOrders();
+  renderUsers(currentUserTab || 'restaurants');
+}
+
+let currentUserTab = 'restaurants';
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentUserTab = this.dataset.tab;
+    renderUsers(currentUserTab);
+  });
+});
+
+document.getElementById('filterOrdersBtn').addEventListener('click', function(){
+  const dateFrom = document.getElementById('orderDateFrom').value;
+  const dateTo = document.getElementById('orderDateTo').value;
+  const status = document.getElementById('orderStatusFilter').value;
+  renderOrders({ dateFrom, dateTo, status });
+});
+document.getElementById('resetOrderFilter').addEventListener('click', function(){
+  document.getElementById('orderDateFrom').value = '';
+  document.getElementById('orderDateTo').value = '';
+  document.getElementById('orderStatusFilter').value = '';
+  renderOrders({});
+});
+
+document.getElementById('exportOrdersExcel').addEventListener('click', exportOrdersToExcel);
+document.getElementById('exportUsersExcel').addEventListener('click', exportUsersToExcel);
+document.getElementById('exportAllExcel').addEventListener('click', exportAllExcel);
+document.getElementById('refreshBtn').addEventListener('click', function(){
+  this.textContent = '⏳ 加载中...';
+  loadAllData().then(() => { refreshUI(); this.textContent = '🔄 刷新数据'; });
+});
+
+// ===== 初始化 =====
+if(isLoggedIn){
+  checkLogin();
+  loadAllData().then(() => { refreshUI(); });
+} else {
+  checkLogin();
+}
+</script>
+</body>
+</html>
