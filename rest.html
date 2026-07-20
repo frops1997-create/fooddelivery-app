@@ -1,135 +1,163 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>铜锅记 · 商家接单</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --cream:#FBF3E7; --cream-2:#F3E6D2; --broth:#B7371F; --broth-dark:#8E2A17;
-    --copper:#C4894A; --copper-light:#E3B876; --ink:#2B2118; --ink-soft:#6B5D4F;
-    --line:#E9DCC7; --veg:#4C7A52; --card:#FFFDF9; --amber:#B7871F;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{ background:var(--cream); color:var(--ink); font-family:'Noto Sans SC',sans-serif; padding-bottom:30px; }
-  h1,h2,.display{ font-family:'Noto Serif SC', serif; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>铜锅记 · 商家接单</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --cream:#FBF3E7; --cream-2:#F3E6D2; --broth:#B7371F; --broth-dark:#8E2A17;
+      --copper:#C4894A; --copper-light:#E3B876; --ink:#2B2118; --ink-soft:#6B5D4F;
+      --line:#E9DCC7; --veg:#4C7A52; --card:#FFFDF9; --amber:#B7871F;
+    }
+    *{box-sizing:border-box; margin:0; padding:0;}
+    body{ background:var(--cream); color:var(--ink); font-family:'Noto Sans SC',sans-serif; padding-bottom:30px; }
+    h1,h2,.display{ font-family:'Noto Serif SC', serif; }
 
-  .topbar{
-    position:sticky; top:0; z-index:40; background:var(--broth); color:#fff;
-    padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
-    box-shadow:0 4px 14px rgba(43,33,24,.15);
-    flex-wrap:wrap;
-  }
-  .brand{ display:flex; align-items:center; gap:10px; }
-  .brand-name{ font-weight:800; font-size:17px; letter-spacing:.5px; }
-  .brand-sub{ font-size:11px; color:#F1D9C2; }
-  .topbar-actions{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-  .topbar-actions button{
-    background:rgba(255,255,255,.12); border:none; color:#fff; padding:6px 12px;
-    border-radius:999px; font-weight:600; font-size:12px; cursor:pointer;
-    display:flex; align-items:center; gap:4px;
-  }
-  .topbar-actions button:active{ transform:scale(.96); }
+    .topbar{
+      position:sticky; top:0; z-index:40; background:var(--broth); color:#fff;
+      padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:0 4px 14px rgba(43,33,24,.15);
+    }
+    .brand{ display:flex; align-items:center; gap:10px; }
+    .brand-name{ font-weight:800; font-size:17px; letter-spacing:.5px; }
+    .brand-sub{ font-size:11px; color:#F1D9C2; }
+    .top-actions{ display:flex; align-items:center; gap:12px; }
+    .auth-btn{
+      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff;
+      padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer;
+      transition:all .2s;
+    }
+    .auth-btn:hover{ background:rgba(255,255,255,.25); }
+    .logout-btn{ background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); color:#fff; padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; display:none; }
+    .logout-btn:hover{ background:rgba(255,255,255,.25); }
+    .online-toggle{
+      display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.12);
+      padding:6px 12px; border-radius:999px; cursor:pointer; font-size:12.5px; font-weight:600;
+    }
+    .dot{ width:9px; height:9px; border-radius:50%; background:#8A8A8A; }
+    .dot.on{ background:#5FCB6E; box-shadow:0 0 6px #5FCB6E; }
 
-  .online-toggle{
-    display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.12);
-    padding:6px 12px; border-radius:999px; cursor:pointer; font-size:12.5px; font-weight:600;
-  }
-  .dot{ width:9px; height:9px; border-radius:50%; background:#8A8A8A; }
-  .dot.on{ background:#5FCB6E; box-shadow:0 0 6px #5FCB6E; }
+    .conn-banner{
+      text-align:center; font-size:12px; padding:6px; background:var(--cream-2); color:var(--ink-soft);
+      display:none;
+    }
+    .conn-banner.show{ display:block; }
 
-  .conn-banner{
-    text-align:center; font-size:12px; padding:6px; background:var(--cream-2); color:var(--ink-soft);
-    display:none;
-  }
-  .conn-banner.show{ display:block; }
+    /* modal overlay */
+    .modal-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(3px);
+      display:none; align-items:center; justify-content:center; z-index:1000;
+    }
+    .modal-overlay.open{ display:flex; }
+    .modal-box{
+      background:var(--card); max-width:420px; width:92%; border-radius:28px; padding:28px 24px;
+      box-shadow:0 20px 40px rgba(0,0,0,.3); position:relative;
+    }
+    .modal-close{
+      position:absolute; top:14px; right:18px; font-size:22px; cursor:pointer; color:var(--ink-soft);
+      background:transparent; border:0;
+    }
+    .modal-title{ font-size:20px; font-weight:900; margin-bottom:8px; font-family:'Noto Serif SC',serif; }
+    .modal-sub{ font-size:13px; color:var(--ink-soft); margin-bottom:20px; }
+    .tabs-auth{
+      display:flex; gap:4px; margin-bottom:22px; background:var(--cream-2); border-radius:999px; padding:4px;
+    }
+    .tab-auth{
+      flex:1; text-align:center; padding:8px 0; border-radius:999px; font-weight:700; font-size:14px;
+      cursor:pointer; transition:all .2s; background:transparent; color:var(--ink-soft);
+    }
+    .tab-auth.active{ background:var(--card); color:var(--broth); box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .auth-form{ display:flex; flex-direction:column; gap:14px; }
+    .auth-form.hide{ display:none; }
+    .form-group{ display:flex; flex-direction:column; gap:4px; }
+    .form-group label{ font-size:12.5px; font-weight:600; color:var(--ink-soft); }
+    .form-group input{
+      padding:12px 14px; border-radius:14px; border:1px solid var(--line); font-size:14px;
+      background:#fff; transition:border .2s; outline:none;
+    }
+    .form-group input:focus{ border-color:var(--broth); }
+    .form-btn{
+      margin-top:6px; background:var(--broth); color:#fff; border:none; padding:14px;
+      border-radius:999px; font-weight:700; font-size:16px; cursor:pointer;
+    }
+    .form-error{ color:#B7371F; font-size:12px; margin-top:-6px; min-height:18px; }
+    .auth-success{ display:none; text-align:center; padding:20px 0; color:var(--veg); font-weight:700; }
 
-  /* 统计卡片 */
-  .stats-bar{
-    display:flex; gap:12px; padding:12px 18px; background:var(--cream-2); border-bottom:1px solid var(--line);
-    flex-wrap:wrap; font-size:13px; font-weight:600;
-  }
-  .stats-bar span{ background:var(--card); padding:4px 12px; border-radius:999px; border:1px solid var(--line); }
-  .stats-bar .num{ color:var(--broth); margin-left:4px; }
+    .tabs{
+      display:flex; gap:8px; padding:14px 18px 8px; overflow-x:auto; scrollbar-width:none;
+      background:var(--cream); position:sticky; top:60px; z-index:35; border-bottom:1px solid var(--line);
+    }
+    .tabs::-webkit-scrollbar{ display:none; }
+    .tab{
+      flex-shrink:0; padding:9px 15px; border-radius:999px; font-size:13.5px; font-weight:700;
+      background:var(--card); border:1px solid var(--line); color:var(--ink-soft); cursor:pointer; position:relative;
+      display:flex; align-items:center; gap:6px; white-space:nowrap;
+    }
+    .tab.active{ background:var(--broth); color:#fff; border-color:var(--broth); }
+    .badge{
+      background:var(--broth); color:#fff; font-size:11px; font-weight:800; border-radius:999px;
+      padding:1px 7px; min-width:16px; text-align:center;
+    }
+    .tab.active .badge{ background:#fff; color:var(--broth); }
 
-  .tabs{
-    display:flex; gap:8px; padding:14px 18px 8px; overflow-x:auto; scrollbar-width:none;
-    background:var(--cream); position:sticky; top:60px; z-index:35; border-bottom:1px solid var(--line);
-  }
-  .tabs::-webkit-scrollbar{ display:none; }
-  .tab{
-    flex-shrink:0; padding:9px 15px; border-radius:999px; font-size:13.5px; font-weight:700;
-    background:var(--card); border:1px solid var(--line); color:var(--ink-soft); cursor:pointer; position:relative;
-    display:flex; align-items:center; gap:6px; white-space:nowrap;
-  }
-  .tab.active{ background:var(--broth); color:#fff; border-color:var(--broth); }
-  .badge{
-    background:var(--broth); color:#fff; font-size:11px; font-weight:800; border-radius:999px;
-    padding:1px 7px; min-width:16px; text-align:center;
-  }
-  .tab.active .badge{ background:#fff; color:var(--broth); }
+    .list{ padding:16px 18px; display:flex; flex-direction:column; gap:12px; }
+    .empty{ text-align:center; padding:50px 20px; color:var(--ink-soft); font-size:14px; }
+    .empty .em{ font-size:34px; display:block; margin-bottom:10px; }
 
-  .list{ padding:16px 18px; display:flex; flex-direction:column; gap:12px; }
-  .empty{ text-align:center; padding:50px 20px; color:var(--ink-soft); font-size:14px; }
-  .empty .em{ font-size:34px; display:block; margin-bottom:10px; }
+    .order-card{
+      background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px;
+      animation:pop .25s ease;
+    }
+    @keyframes pop{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+    .order-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+    .order-id{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+    .order-time{ font-size:11.5px; color:var(--ink-soft); }
+    .status-pill{
+      font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px;
+    }
+    .status-pending{ background:#FCE7E1; color:var(--broth); }
+    .status-preparing{ background:#FBEFD9; color:var(--amber); }
+    .status-ready{ background:#E4EFE3; color:var(--veg); }
+    .status-assigned, .status-picked_up{ background:#E4EAF2; color:#4A5F8A; }
+    .status-delivered{ background:#EAEAEA; color:#7A7A7A; }
+    .status-rejected{ background:#F2E0E0; color:#9A4A4A; }
 
-  .order-card{
-    background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px;
-    animation:pop .25s ease;
-  }
-  @keyframes pop{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-  .order-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; }
-  .order-id{ font-size:13px; font-weight:700; color:var(--ink-soft); }
-  .order-time{ font-size:11.5px; color:var(--ink-soft); }
-  .status-pill{
-    font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px;
-  }
-  .status-pending{ background:#FCE7E1; color:var(--broth); }
-  .status-preparing{ background:#FBEFD9; color:var(--amber); }
-  .status-ready{ background:#E4EFE3; color:var(--veg); }
-  .status-assigned, .status-picked_up{ background:#E4EAF2; color:#4A5F8A; }
-  .status-delivered{ background:#EAEAEA; color:#7A7A7A; }
-  .status-rejected{ background:#F2E0E0; color:#9A4A4A; }
+    .items-list{ font-size:13.5px; margin:8px 0; color:var(--ink); }
+    .items-list div{ display:flex; justify-content:space-between; padding:2px 0; }
+    .items-list .n{ color:var(--ink-soft); }
 
-  .items-list{ font-size:13.5px; margin:8px 0; color:var(--ink); }
-  .items-list div{ display:flex; justify-content:space-between; padding:2px 0; }
-  .items-list .n{ color:var(--ink-soft); }
+    .addr-row{ display:flex; gap:6px; font-size:12.5px; color:var(--ink-soft); margin-top:6px; }
+    .divider{ height:1px; background:var(--line); margin:10px 0; }
+    .total-row{ display:flex; justify-content:space-between; font-weight:700; font-size:15px; margin-top:2px; }
 
-  .addr-row{ display:flex; gap:6px; font-size:12.5px; color:var(--ink-soft); margin-top:6px; }
-  .divider{ height:1px; background:var(--line); margin:10px 0; }
-  .total-row{ display:flex; justify-content:space-between; font-weight:700; font-size:15px; margin-top:2px; }
+    .rider-tag{
+      margin-top:8px; font-size:12px; background:var(--cream-2); color:var(--ink-soft);
+      padding:6px 10px; border-radius:10px;
+    }
 
-  .rider-tag{
-    margin-top:8px; font-size:12px; background:var(--cream-2); color:var(--ink-soft);
-    padding:6px 10px; border-radius:10px;
-  }
+    .btn-row{ display:flex; gap:8px; margin-top:12px; }
+    .btn{
+      flex:1; border:none; padding:11px; border-radius:12px; font-weight:700; font-size:13.5px; cursor:pointer;
+    }
+    .btn-primary{ background:var(--broth); color:#fff; }
+    .btn-ghost{ background:var(--cream-2); color:var(--ink-soft); }
+    .btn-amber{ background:var(--amber); color:#fff; }
+    .btn-veg{ background:var(--veg); color:#fff; }
+    .btn:active{ transform:scale(.97); }
 
-  .btn-row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
-  .btn{
-    flex:1; border:none; padding:11px; border-radius:12px; font-weight:700; font-size:13.5px; cursor:pointer;
-    min-width:70px;
-  }
-  .btn-primary{ background:var(--broth); color:#fff; }
-  .btn-ghost{ background:var(--cream-2); color:var(--ink-soft); }
-  .btn-amber{ background:var(--amber); color:#fff; }
-  .btn-veg{ background:var(--veg); color:#fff; }
-  .btn-danger{ background:#B7371F; color:#fff; }
-  .btn:active{ transform:scale(.97); }
-
-  .test-order-btn{
-    position:fixed; right:16px; bottom:16px; background:var(--ink); color:#fff;
-    border:none; padding:12px 16px; border-radius:14px; font-size:12.5px; font-weight:700;
-    box-shadow:0 8px 20px rgba(43,33,24,.3); cursor:pointer; z-index:45;
-  }
-  /* 全屏模式 */
-  .fullscreen .topbar{ position:static; }
-  .fullscreen .tabs{ position:static; }
-  /* 删除按钮确认样式 */
-  .delete-btn{ background:#9A4A4A; color:#fff; border:none; padding:4px 12px; border-radius:999px; font-size:11px; font-weight:600; cursor:pointer; }
-  .delete-btn:active{ transform:scale(.95); }
-</style>
+    .test-order-btn{
+      position:fixed; right:16px; bottom:16px; background:var(--ink); color:#fff;
+      border:none; padding:12px 16px; border-radius:14px; font-size:12.5px; font-weight:700;
+      box-shadow:0 8px 20px rgba(43,33,24,.3); cursor:pointer; z-index:45;
+    }
+    .restaurant-addr-tag{
+      font-size:11px; background:rgba(255,255,255,.1); padding:3px 12px; border-radius:999px; color:#F1D9C2;
+      max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+  </style>
 </head>
 <body>
 
@@ -140,29 +168,67 @@
       <div class="brand-sub" id="restaurantSub">接单管理</div>
     </div>
   </div>
-  <div class="topbar-actions">
-    <button id="fullscreenBtn">⛶ 全屏</button>
-    <button id="historyBtn">📋 历史</button>
-    <button id="todayStatsBtn">📊 今日</button>
+  <div class="top-actions">
+    <span class="restaurant-addr-tag" id="headerAddrTag">📍 未设置地址</span>
     <div class="online-toggle" id="onlineToggle">
       <div class="dot" id="onlineDot"></div>
       <span id="onlineLabel">营业中</span>
     </div>
+    <button class="auth-btn" id="authLoginBtn">登录</button>
+    <button class="logout-btn" id="logoutBtn">登出</button>
   </div>
 </div>
 
 <div class="conn-banner" id="connBanner">与服务器连接中断，正在重新连接…</div>
 
-<!-- 统计栏 -->
-<div class="stats-bar" id="statsBar">
-  <span>📦 今日订单 <span class="num" id="todayCount">0</span></span>
-  <span>💰 今日销售额 <span class="num" id="todaySales">$0.0</span></span>
-</div>
-
 <div class="tabs" id="tabs"></div>
 <div class="list" id="list"></div>
 
 <button class="test-order-btn" id="testOrderBtn">＋ 生成测试订单</button>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" id="modalCloseBtn">✕</button>
+    <div class="modal-title">档口登录</div>
+    <div class="modal-sub">使用注册的手机号与姓名登录，地址将自动同步</div>
+    <div class="tabs-auth" id="authTabs">
+      <div class="tab-auth active" data-tab="login">登录</div>
+      <div class="tab-auth" data-tab="register">注册</div>
+    </div>
+    <!-- login form -->
+    <div class="auth-form" id="loginForm">
+      <div class="form-group">
+        <label>📱 手机号</label>
+        <input type="tel" id="loginPhone" placeholder="例如 91234567">
+      </div>
+      <div class="form-group">
+        <label>👤 姓名</label>
+        <input type="text" id="loginName" placeholder="档口联系人姓名">
+      </div>
+      <div class="form-error" id="loginError"></div>
+      <button class="form-btn" id="loginBtn">登录</button>
+    </div>
+    <!-- register form -->
+    <div class="auth-form hide" id="registerForm">
+      <div class="form-group">
+        <label>📱 手机号</label>
+        <input type="tel" id="registerPhone" placeholder="例如 91234567">
+      </div>
+      <div class="form-group">
+        <label>👤 姓名</label>
+        <input type="text" id="registerName" placeholder="档口联系人姓名">
+      </div>
+      <div class="form-group">
+        <label>📍 档口地址 (永久保存，骑手按此导航)</label>
+        <input type="text" id="registerAddress" placeholder="例如 新加坡实龙岗路 88 号">
+      </div>
+      <div class="form-error" id="registerError"></div>
+      <button class="form-btn" id="registerBtn">注册</button>
+    </div>
+    <div class="auth-success" id="authSuccess">✅ 认证成功，即将刷新</div>
+  </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -182,26 +248,182 @@ const db = firebase.database();
 const RESTAURANT_ID = "tongguoji";
 const ordersRef = db.ref('orders');
 const onlineRef = db.ref('restaurants/' + RESTAURANT_ID + '/online');
+// 商家信息节点 (用于存储注册信息)
+const restaurantInfoRef = db.ref('restaurants/' + RESTAURANT_ID + '/info');
 
 let orders = {};
 let activeTab = 'pending';
 let knownPendingIds = new Set();
 let audioCtx = null;
 
-// 定义标签：加入 'history' 和 'today' 视图
+// ---- 认证状态 ----
+let currentUser = null; // { phone, name, address }
+let isLoggedIn = false;
+
+// DOM refs
+const authModal = document.getElementById('authModal');
+const authLoginBtn = document.getElementById('authLoginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+const authTabs = document.getElementById('authTabs');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const loginPhone = document.getElementById('loginPhone');
+const loginName = document.getElementById('loginName');
+const loginError = document.getElementById('loginError');
+const registerPhone = document.getElementById('registerPhone');
+const registerName = document.getElementById('registerName');
+const registerAddress = document.getElementById('registerAddress');
+const registerError = document.getElementById('registerError');
+const loginBtn = document.getElementById('loginBtn');
+const registerBtn = document.getElementById('registerBtn');
+const authSuccess = document.getElementById('authSuccess');
+const headerAddrTag = document.getElementById('headerAddrTag');
+const restaurantSub = document.getElementById('restaurantSub');
+
+// ---- 辅助 ----
+function showModal(){ authModal.classList.add('open'); }
+function hideModal(){ authModal.classList.remove('open'); authSuccess.style.display='none'; loginError.textContent=''; registerError.textContent=''; }
+
+// 切换登录/注册tab
+document.querySelectorAll('.tab-auth').forEach(tab => {
+  tab.addEventListener('click', function(){
+    document.querySelectorAll('.tab-auth').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+    const target = this.dataset.tab;
+    if(target==='login'){
+      loginForm.classList.remove('hide');
+      registerForm.classList.add('hide');
+    }else{
+      loginForm.classList.add('hide');
+      registerForm.classList.remove('hide');
+    }
+    loginError.textContent=''; registerError.textContent='';
+  });
+});
+
+// 登录逻辑
+loginBtn.addEventListener('click', ()=>{
+  const phone = loginPhone.value.trim();
+  const name = loginName.value.trim();
+  if(!phone || !name){ loginError.textContent = '请填写手机号和姓名'; return; }
+  // 验证：从Firebase读取restaurant info
+  restaurantInfoRef.once('value').then(snap => {
+    const info = snap.val();
+    if(!info){
+      loginError.textContent = '未找到注册信息，请先注册';
+      return;
+    }
+    if(info.phone === phone && info.name === name){
+      // 登录成功
+      currentUser = { phone, name, address: info.address || '' };
+      isLoggedIn = true;
+      applyAuthUI();
+      hideModal();
+      // 更新restaurant子节点
+      restaurantInfoRef.update({ phone, name, address: info.address || '' });
+      // 更新header地址
+      updateHeaderAddress(info.address || '');
+      restaurantSub.textContent = '👋 ' + name + ' · 接单管理';
+    }else{
+      loginError.textContent = '手机号或姓名不匹配';
+    }
+  }).catch(()=>{ loginError.textContent = '网络错误，请重试'; });
+});
+
+// 注册逻辑
+registerBtn.addEventListener('click', ()=>{
+  const phone = registerPhone.value.trim();
+  const name = registerName.value.trim();
+  const address = registerAddress.value.trim();
+  if(!phone || !name || !address){ registerError.textContent = '请完整填写所有字段'; return; }
+  // 检查是否已存在
+  restaurantInfoRef.once('value').then(snap => {
+    const info = snap.val();
+    if(info && info.phone === phone){
+      registerError.textContent = '该手机号已注册，请直接登录';
+      return;
+    }
+    // 永久保存
+    restaurantInfoRef.set({ phone, name, address }).then(()=>{
+      currentUser = { phone, name, address };
+      isLoggedIn = true;
+      applyAuthUI();
+      hideModal();
+      updateHeaderAddress(address);
+      restaurantSub.textContent = '👋 ' + name + ' · 接单管理';
+    }).catch(()=>{ registerError.textContent = '保存失败，请重试'; });
+  }).catch(()=>{ registerError.textContent = '网络错误'; });
+});
+
+// 登出
+logoutBtn.addEventListener('click', ()=>{
+  isLoggedIn = false;
+  currentUser = null;
+  applyAuthUI();
+  restaurantSub.textContent = '接单管理';
+  headerAddrTag.textContent = '📍 未设置地址';
+  // 不清除firebase数据
+});
+
+// 应用UI状态
+function applyAuthUI(){
+  if(isLoggedIn && currentUser){
+    authLoginBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    // 更新地址tag
+    updateHeaderAddress(currentUser.address || '');
+    restaurantSub.textContent = '👋 ' + currentUser.name + ' · 接单管理';
+  }else{
+    authLoginBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    headerAddrTag.textContent = '📍 未设置地址';
+    restaurantSub.textContent = '接单管理';
+  }
+}
+
+function updateHeaderAddress(addr){
+  if(addr) headerAddrTag.textContent = '📍 ' + addr;
+  else headerAddrTag.textContent = '📍 未设置地址';
+}
+
+// 点击登录按钮
+authLoginBtn.addEventListener('click', ()=>{
+  // 如果已登录，不弹出
+  if(isLoggedIn) return;
+  showModal();
+  // 重置tab
+  document.querySelector('.tab-auth[data-tab="login"]')?.click();
+  loginError.textContent=''; registerError.textContent='';
+});
+
+modalCloseBtn.addEventListener('click', hideModal);
+authModal.addEventListener('click', (e)=>{ if(e.target===authModal) hideModal(); });
+
+// 初始化时检查本地是否有已登录状态 (从firebase读取)
+function loadSession(){
+  restaurantInfoRef.once('value').then(snap => {
+    const info = snap.val();
+    if(info && info.phone && info.name){
+      // 自动登录
+      currentUser = { phone: info.phone, name: info.name, address: info.address || '' };
+      isLoggedIn = true;
+      applyAuthUI();
+      updateHeaderAddress(info.address || '');
+      restaurantSub.textContent = '👋 ' + info.name + ' · 接单管理';
+    }else{
+      applyAuthUI();
+    }
+  }).catch(()=>{ applyAuthUI(); });
+}
+loadSession();
+
+// ---- 订单相关 ----
 const TABS = [
   { id:'pending', label:'新订单', match:o => o.status === 'pending' },
   { id:'preparing', label:'制作中', match:o => o.status === 'preparing' },
   { id:'ready', label:'待取餐', match:o => ['ready','assigned','picked_up'].includes(o.status) },
   { id:'done', label:'已完成', match:o => ['delivered','rejected'].includes(o.status) },
-  { id:'history', label:'📜 全部历史', match:o => true },
-  { id:'today', label:'📆 今日', match:o => {
-      if(!o.createdAt) return false;
-      const d = new Date(o.createdAt);
-      const now = new Date();
-      return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
-    }
-  },
 ];
 
 function beep(){
@@ -232,33 +454,12 @@ function statusLabel(s){
     picked_up:'骑手已取餐', delivered:'已送达', rejected:'已拒绝' }[s] || s;
 }
 
-// 统计今日数据
-function updateStats(){
-  const now = new Date();
-  let count = 0, sales = 0;
-  Object.values(orders).forEach(o => {
-    if(!o.createdAt) return;
-    const d = new Date(o.createdAt);
-    if(d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate()){
-      if(o.status !== 'rejected' && o.status !== 'pending' && o.status !== 'preparing' && o.status !== 'ready' && o.status !== 'assigned' && o.status !== 'picked_up'){
-        // 只统计已完成或已送达的订单（实际收入）
-        if(o.status === 'delivered' || o.status === 'done') {
-          count++;
-          sales += (o.total || 0);
-        }
-      }
-    }
-  });
-  document.getElementById('todayCount').textContent = count;
-  document.getElementById('todaySales').textContent = '$' + sales.toFixed(1);
-}
-
 function renderTabs(){
   const el = document.getElementById('tabs');
   el.innerHTML = TABS.map(t => {
     const count = Object.values(orders).filter(t.match).length;
     return `<div class="tab ${activeTab===t.id?'active':''}" data-id="${t.id}">
-      ${t.label} ${(t.id!=='history' && t.id!=='today' && count>0) ? `<span class="badge">${count}</span>` : ''}
+      ${t.label} ${t.id!=='done' && count>0 ? `<span class="badge">${count}</span>` : ''}
     </div>`;
   }).join('');
   el.querySelectorAll('.tab').forEach(tab => {
@@ -282,13 +483,6 @@ function orderCard(id, o){
     actions = `
       <div class="btn-row">
         <button class="btn btn-amber" data-action="ready" data-id="${id}">餐品已备好</button>
-      </div>`;
-  }
-  // 历史记录或今日视图下，如果是已完成/已拒绝，显示删除按钮
-  if((activeTab === 'history' || activeTab === 'today') && (o.status === 'delivered' || o.status === 'rejected')){
-    actions += `
-      <div class="btn-row" style="margin-top:8px;">
-        <button class="btn btn-danger delete-btn" data-action="delete" data-id="${id}" style="flex:0 1 auto; padding:6px 16px;">🗑 删除此订单</button>
       </div>`;
   }
 
@@ -319,7 +513,6 @@ function orderCard(id, o){
 function renderList(){
   const el = document.getElementById('list');
   const tabDef = TABS.find(t => t.id === activeTab);
-  if(!tabDef) return;
   const filtered = Object.entries(orders)
     .filter(([id,o]) => tabDef.match(o))
     .sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
@@ -340,10 +533,6 @@ function renderList(){
         ordersRef.child(id).update({ status:'rejected', updatedAt: firebase.database.ServerValue.TIMESTAMP });
       } else if(action === 'ready'){
         ordersRef.child(id).update({ status:'ready', readyAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP });
-      } else if(action === 'delete'){
-        if(confirm('确定要永久删除此订单吗？')) {
-          ordersRef.child(id).remove();
-        }
       }
     });
   });
@@ -365,7 +554,6 @@ ordersRef.on('value', snap => {
 
   renderTabs();
   renderList();
-  updateStats();
 });
 
 ordersRef.on('value', () => {}, () => {
@@ -402,43 +590,12 @@ document.getElementById('testOrderBtn').addEventListener('click', () => {
     restaurantAddress: '新加坡实龙岗路 88 号',
     customerAddress: '客户测试地址 ' + Math.floor(Math.random()*100),
     customerPhone: '9' + Math.floor(10000000 + Math.random()*89999999),
-    items: SAMPLE_ITEMS.map(i => ({...i})),
+    items: SAMPLE_ITEMS,
     subtotal, deliveryFee, total: subtotal + deliveryFee,
     status: 'pending',
     createdAt: firebase.database.ServerValue.TIMESTAMP,
     updatedAt: firebase.database.ServerValue.TIMESTAMP,
   });
-});
-
-// ---------- 新功能：全屏 ----------
-document.getElementById('fullscreenBtn').addEventListener('click', () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.();
-  } else {
-    document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-  }
-});
-
-// ---------- 历史记录：切换到 history tab ----------
-document.getElementById('historyBtn').addEventListener('click', () => {
-  activeTab = 'history';
-  renderTabs();
-  renderList();
-});
-
-// ---------- 今日统计：切换到 today tab ----------
-document.getElementById('todayStatsBtn').addEventListener('click', () => {
-  activeTab = 'today';
-  renderTabs();
-  renderList();
-});
-
-// 全屏状态样式
-document.addEventListener('fullscreenchange', () => {
-  document.body.classList.toggle('fullscreen', !!document.fullscreenElement);
-});
-document.addEventListener('webkitfullscreenchange', () => {
-  document.body.classList.toggle('fullscreen', !!document.webkitFullscreenElement);
 });
 </script>
 </body>
