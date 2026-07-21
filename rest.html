@@ -630,68 +630,40 @@ function renderList(){
     return orderCard(id, orderWithUpdatedAddress);
   }).join('');
   
-  // ... 按钮事件绑定
-}
-
-ordersRef.on('value', snap => {
-  const val = snap.val() || {};
-  orders = val;
-
-  const currentPending = new Set(Object.entries(val).filter(([id,o]) => o.status==='pending').map(([id]) => id));
-  let hasNew = false;
-  currentPending.forEach(id => { if(!knownPendingIds.has(id)) hasNew = true; });
-  if(hasNew && knownPendingIds.size >= 0){
-    beep();
-    document.title = '🔔 新订单 · 铜锅记商家端';
-    setTimeout(() => { document.title = '铜锅记 · 商家接单'; }, 4000);
-  }
-  knownPendingIds = currentPending;
-
-  renderTabs();
-  renderList();
-});
-
-ordersRef.on('value', () => {}, () => {
-  document.getElementById('connBanner').classList.add('show');
-});
-db.ref('.info/connected').on('value', snap => {
-  document.getElementById('connBanner').classList.toggle('show', snap.val() === false);
-});
-
-// Online / offline toggle
-let isOnline = true;
-onlineRef.on('value', snap => {
-  isOnline = snap.val() !== false;
-  document.getElementById('onlineDot').classList.toggle('on', isOnline);
-  document.getElementById('onlineLabel').textContent = isOnline ? '营业中' : '已打烊';
-});
-document.getElementById('onlineToggle').addEventListener('click', () => {
-  onlineRef.set(!isOnline);
-});
-
-// Demo/test order generator
-const SAMPLE_ITEMS = [
-  { name:'麻酱鸡肉', qty:1, price:8.9 },
-  { name:'番茄肥牛', qty:2, price:9.9 },
-  { name:'酸梅汤', qty:1, price:2.9 },
-];
-document.getElementById('testOrderBtn').addEventListener('click', () => {
-  const subtotal = SAMPLE_ITEMS.reduce((s,i)=>s+i.qty*i.price,0);
-  const deliveryFee = 2.9;
-  const newRef = ordersRef.push();
-  newRef.set({
-    restaurantId: RESTAURANT_ID,
-    restaurantName: '铜锅记',
-    restaurantAddress: '新加坡实龙岗路 88 号',
-    customerAddress: '客户测试地址 ' + Math.floor(Math.random()*100),
-    customerPhone: '9' + Math.floor(10000000 + Math.random()*89999999),
-    items: SAMPLE_ITEMS,
-    subtotal, deliveryFee, total: subtotal + deliveryFee,
-    status: 'pending',
-    createdAt: firebase.database.ServerValue.TIMESTAMP,
-    updatedAt: firebase.database.ServerValue.TIMESTAMP,
+  // ⬇️⬇️⬇️ 关键：绑定按钮事件 ⬇️⬇️⬇️
+  el.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      
+      // 检查是否登录
+      if (!isLoggedIn) {
+        alert('⚠️ 请先登录才能操作订单');
+        showModal();
+        return;
+      }
+      
+      if(action === 'accept'){
+        ordersRef.child(id).update({ 
+          status:'preparing', 
+          acceptedAt: firebase.database.ServerValue.TIMESTAMP, 
+          updatedAt: firebase.database.ServerValue.TIMESTAMP 
+        }).catch(err => console.error('接单失败:', err));
+      } else if(action === 'reject'){
+        ordersRef.child(id).update({ 
+          status:'rejected', 
+          updatedAt: firebase.database.ServerValue.TIMESTAMP 
+        }).catch(err => console.error('拒绝订单失败:', err));
+      } else if(action === 'ready'){
+        ordersRef.child(id).update({ 
+          status:'ready', 
+          readyAt: firebase.database.ServerValue.TIMESTAMP, 
+          updatedAt: firebase.database.ServerValue.TIMESTAMP 
+        }).catch(err => console.error('标记备好失败:', err));
+      }
+    });
   });
-});
+}
 </script>
 </body>
 </html>
