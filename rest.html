@@ -248,7 +248,7 @@
       </div>
       <div class="form-group">
         <label>📍 档口地址 (永久保存，骑手按此导航)</label>
-        <input type="text" id="registerAddress" placeholder="304 Anchorvale Link, Singapore 540304">
+        <input type="text" id="registerAddress" placeholder="例如 新加坡实龙岗路 88 号">
       </div>
       <div class="form-error" id="registerError"></div>
       <button class="form-btn" id="registerBtn">注册</button>
@@ -265,7 +265,7 @@
     <div class="modal-sub">骑手将根据此地址导航取餐，请填写详细地址</div>
     <div class="form-group">
       <label>档口地址</label>
-      <textarea id="addressInput" placeholder="请输入详细地址，例如：304 Anchorvale Link, Singapore 540304"></textarea>
+      <textarea id="addressInput" placeholder="请输入详细地址，例如：新加坡实龙岗路 88 号 #01-01"></textarea>
     </div>
     <div class="form-error" id="addressError"></div>
     <button class="form-btn" id="saveAddressBtn">保存地址</button>
@@ -589,6 +589,10 @@ function orderCard(id, o){
     ? `<div class="rider-tag">🛵 骑手 ${o.riderName} · ${statusLabel(o.status)}</div>`
     : '';
 
+  // 显示取餐地址（商家地址），如果订单中没有则使用传入的最新地址
+  const pickupAddress = o.restaurantAddress || '未设置地址';
+  const restaurantName = o.restaurantName || '铜锅记';
+
   return `
     <div class="order-card">
       <div class="order-head">
@@ -599,7 +603,8 @@ function orderCard(id, o){
         <div class="status-pill status-${o.status}">${statusLabel(o.status)}</div>
       </div>
       <div class="items-list">${itemsHtml}</div>
-      <div class="addr-row">📍 ${o.customerAddress || '—'}</div>
+      <div class="addr-row">📍 取餐·${restaurantName} ${pickupAddress}</div>
+      <div class="addr-row">📦 送达 ${o.customerAddress || '—'}</div>
       <div class="addr-row">📞 ${o.customerPhone || '—'}</div>
       <div class="divider"></div>
       <div class="total-row"><span>合计</span><span>$${(o.total||0).toFixed(1)}</span></div>
@@ -630,7 +635,7 @@ function renderList(){
     return orderCard(id, orderWithUpdatedAddress);
   }).join('');
   
-  // ⬇️⬇️⬇️ 关键：绑定按钮事件 ⬇️⬇️⬇️
+  // 绑定按钮事件
   el.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
@@ -664,6 +669,66 @@ function renderList(){
     });
   });
 }
+
+ordersRef.on('value', snap => {
+  const val = snap.val() || {};
+  orders = val;
+
+  const currentPending = new Set(Object.entries(val).filter(([id,o]) => o.status==='pending').map(([id]) => id));
+  let hasNew = false;
+  currentPending.forEach(id => { if(!knownPendingIds.has(id)) hasNew = true; });
+  if(hasNew && knownPendingIds.size >= 0){
+    beep();
+    document.title = '🔔 新订单 · 铜锅记商家端';
+    setTimeout(() => { document.title = '铜锅记 · 商家接单'; }, 4000);
+  }
+  knownPendingIds = currentPending;
+
+  renderTabs();
+  renderList();
+});
+
+ordersRef.on('value', () => {}, () => {
+  document.getElementById('connBanner').classList.add('show');
+});
+db.ref('.info/connected').on('value', snap => {
+  document.getElementById('connBanner').classList.toggle('show', snap.val() === false);
+});
+
+// Online / offline toggle
+let isOnline = true;
+onlineRef.on('value', snap => {
+  isOnline = snap.val() !== false;
+  document.getElementById('onlineDot').classList.toggle('on', isOnline);
+  document.getElementById('onlineLabel').textContent = isOnline ? '营业中' : '已打烊';
+});
+document.getElementById('onlineToggle').addEventListener('click', () => {
+  onlineRef.set(!isOnline);
+});
+
+// Demo/test order generator
+const SAMPLE_ITEMS = [
+  { name:'麻酱鸡肉', qty:1, price:8.9 },
+  { name:'番茄肥牛', qty:2, price:9.9 },
+  { name:'酸梅汤', qty:1, price:2.9 },
+];
+document.getElementById('testOrderBtn').addEventListener('click', () => {
+  const subtotal = SAMPLE_ITEMS.reduce((s,i)=>s+i.qty*i.price,0);
+  const deliveryFee = 2.9;
+  const newRef = ordersRef.push();
+  newRef.set({
+    restaurantId: RESTAURANT_ID,
+    restaurantName: '铜锅记',
+    restaurantAddress: currentUser?.address || '新加坡实龙岗路 88 号',
+    customerAddress: '客户测试地址 ' + Math.floor(Math.random()*100),
+    customerPhone: '9' + Math.floor(10000000 + Math.random()*89999999),
+    items: SAMPLE_ITEMS,
+    subtotal, deliveryFee, total: subtotal + deliveryFee,
+    status: 'pending',
+    createdAt: firebase.database.ServerValue.TIMESTAMP,
+    updatedAt: firebase.database.ServerValue.TIMESTAMP,
+  });
+});
 </script>
 </body>
 </html>
