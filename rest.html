@@ -156,7 +156,34 @@
     .restaurant-addr-tag{
       font-size:11px; background:rgba(255,255,255,.1); padding:3px 12px; border-radius:999px; color:#F1D9C2;
       max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      cursor:pointer;
+      transition:all .2s;
     }
+    .restaurant-addr-tag:hover{
+      background:rgba(255,255,255,.2);
+    }
+    .restaurant-addr-tag.editable{
+      cursor:pointer;
+    }
+    .restaurant-addr-tag.editable::after{
+      content: ' ✏️';
+      font-size:10px;
+    }
+    
+    /* 地址修改弹窗 */
+    .address-modal .modal-box{
+      max-width:480px;
+    }
+    .address-modal .modal-sub{
+      margin-bottom:16px;
+    }
+    .address-modal .form-group textarea{
+      padding:12px 14px; border-radius:14px; border:1px solid var(--line); font-size:14px;
+      background:#fff; transition:border .2s; outline:none;
+      width:100%; min-height:60px; resize:vertical;
+      font-family:'Noto Sans SC',sans-serif;
+    }
+    .address-modal .form-group textarea:focus{ border-color:var(--broth); }
   </style>
 </head>
 <body>
@@ -169,7 +196,7 @@
     </div>
   </div>
   <div class="top-actions">
-    <span class="restaurant-addr-tag" id="headerAddrTag">📍 未设置地址</span>
+    <span class="restaurant-addr-tag" id="headerAddrTag" title="点击修改地址">📍 未设置地址</span>
     <div class="online-toggle" id="onlineToggle">
       <div class="dot" id="onlineDot"></div>
       <span id="onlineLabel">营业中</span>
@@ -230,6 +257,21 @@
   </div>
 </div>
 
+<!-- Address Edit Modal -->
+<div class="modal-overlay address-modal" id="addressModal">
+  <div class="modal-box">
+    <button class="modal-close" id="addressModalClose">✕</button>
+    <div class="modal-title">📍 修改档口地址</div>
+    <div class="modal-sub">骑手将根据此地址导航取餐，请填写详细地址</div>
+    <div class="form-group">
+      <label>档口地址</label>
+      <textarea id="addressInput" placeholder="请输入详细地址，例如：新加坡实龙岗路 88 号 #01-01"></textarea>
+    </div>
+    <div class="form-error" id="addressError"></div>
+    <button class="form-btn" id="saveAddressBtn">保存地址</button>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
@@ -281,9 +323,27 @@ const authSuccess = document.getElementById('authSuccess');
 const headerAddrTag = document.getElementById('headerAddrTag');
 const restaurantSub = document.getElementById('restaurantSub');
 
+// Address modal refs
+const addressModal = document.getElementById('addressModal');
+const addressInput = document.getElementById('addressInput');
+const addressError = document.getElementById('addressError');
+const saveAddressBtn = document.getElementById('saveAddressBtn');
+const addressModalClose = document.getElementById('addressModalClose');
+
 // ---- 辅助 ----
 function showModal(){ authModal.classList.add('open'); }
 function hideModal(){ authModal.classList.remove('open'); authSuccess.style.display='none'; loginError.textContent=''; registerError.textContent=''; }
+
+function showAddressModal(){
+  if(!isLoggedIn){
+    showModal();
+    return;
+  }
+  addressInput.value = currentUser?.address || '';
+  addressError.textContent = '';
+  addressModal.classList.add('open');
+}
+function hideAddressModal(){ addressModal.classList.remove('open'); addressError.textContent=''; }
 
 // 切换登录/注册tab
 document.querySelectorAll('.tab-auth').forEach(tab => {
@@ -344,8 +404,8 @@ registerBtn.addEventListener('click', ()=>{
       registerError.textContent = '该手机号已注册，请直接登录';
       return;
     }
-    // 永久保存
-    restaurantInfoRef.set({ phone, name, address }).then(()=>{
+    // 永久保存 - 使用 update 而不是 set 避免覆盖
+    restaurantInfoRef.update({ phone, name, address }).then(()=>{
       currentUser = { phone, name, address };
       isLoggedIn = true;
       applyAuthUI();
@@ -363,6 +423,7 @@ logoutBtn.addEventListener('click', ()=>{
   applyAuthUI();
   restaurantSub.textContent = '接单管理';
   headerAddrTag.textContent = '📍 未设置地址';
+  headerAddrTag.classList.remove('editable');
   // 不清除firebase数据
 });
 
@@ -373,11 +434,13 @@ function applyAuthUI(){
     logoutBtn.style.display = 'inline-block';
     // 更新地址tag
     updateHeaderAddress(currentUser.address || '');
+    headerAddrTag.classList.add('editable');
     restaurantSub.textContent = '👋 ' + currentUser.name + ' · 接单管理';
   }else{
     authLoginBtn.style.display = 'inline-block';
     logoutBtn.style.display = 'none';
     headerAddrTag.textContent = '📍 未设置地址';
+    headerAddrTag.classList.remove('editable');
     restaurantSub.textContent = '接单管理';
   }
 }
@@ -399,6 +462,42 @@ authLoginBtn.addEventListener('click', ()=>{
 
 modalCloseBtn.addEventListener('click', hideModal);
 authModal.addEventListener('click', (e)=>{ if(e.target===authModal) hideModal(); });
+
+// 点击地址标签修改地址
+headerAddrTag.addEventListener('click', showAddressModal);
+
+// 地址弹窗关闭
+addressModalClose.addEventListener('click', hideAddressModal);
+addressModal.addEventListener('click', (e)=>{ if(e.target===addressModal) hideAddressModal(); });
+
+// 保存地址
+saveAddressBtn.addEventListener('click', ()=>{
+  const newAddress = addressInput.value.trim();
+  if(!newAddress){
+    addressError.textContent = '请填写档口地址';
+    return;
+  }
+  if(newAddress.length < 3){
+    addressError.textContent = '地址至少3个字符';
+    return;
+  }
+  
+  // 更新 Firebase
+  restaurantInfoRef.update({ address: newAddress }).then(() => {
+    // 更新本地状态
+    if(currentUser) currentUser.address = newAddress;
+    updateHeaderAddress(newAddress);
+    hideAddressModal();
+    // 显示成功提示
+    const originalText = headerAddrTag.textContent;
+    headerAddrTag.textContent = '✅ ' + newAddress;
+    setTimeout(() => {
+      updateHeaderAddress(newAddress);
+    }, 2000);
+  }).catch((err) => {
+    addressError.textContent = '保存失败: ' + err.message;
+  });
+});
 
 // 初始化时检查本地是否有已登录状态 (从firebase读取)
 function loadSession(){
@@ -527,12 +626,23 @@ function renderList(){
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
       const action = btn.dataset.action;
+      
+      // 检查是否登录
+      if (!isLoggedIn) {
+        alert('⚠️ 请先登录才能操作订单');
+        showModal();
+        return;
+      }
+      
       if(action === 'accept'){
-        ordersRef.child(id).update({ status:'preparing', acceptedAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP });
+        ordersRef.child(id).update({ status:'preparing', acceptedAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP })
+          .catch(err => console.error('接单失败:', err));
       } else if(action === 'reject'){
-        ordersRef.child(id).update({ status:'rejected', updatedAt: firebase.database.ServerValue.TIMESTAMP });
+        ordersRef.child(id).update({ status:'rejected', updatedAt: firebase.database.ServerValue.TIMESTAMP })
+          .catch(err => console.error('拒绝订单失败:', err));
       } else if(action === 'ready'){
-        ordersRef.child(id).update({ status:'ready', readyAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP });
+        ordersRef.child(id).update({ status:'ready', readyAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP })
+          .catch(err => console.error('标记备好失败:', err));
       }
     });
   });
