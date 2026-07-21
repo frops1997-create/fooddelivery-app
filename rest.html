@@ -620,32 +620,17 @@ function renderList(){
     el.innerHTML = `<div class="empty"><span class="em">🍲</span>暂时没有相关订单</div>`;
     return;
   }
-  el.innerHTML = filtered.map(([id,o]) => orderCard(id,o)).join('');
-
-  el.querySelectorAll('[data-action]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      const action = btn.dataset.action;
-      
-      // 检查是否登录
-      if (!isLoggedIn) {
-        alert('⚠️ 请先登录才能操作订单');
-        showModal();
-        return;
-      }
-      
-      if(action === 'accept'){
-        ordersRef.child(id).update({ status:'preparing', acceptedAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP })
-          .catch(err => console.error('接单失败:', err));
-      } else if(action === 'reject'){
-        ordersRef.child(id).update({ status:'rejected', updatedAt: firebase.database.ServerValue.TIMESTAMP })
-          .catch(err => console.error('拒绝订单失败:', err));
-      } else if(action === 'ready'){
-        ordersRef.child(id).update({ status:'ready', readyAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP })
-          .catch(err => console.error('标记备好失败:', err));
-      }
-    });
-  });
+  
+  // 获取最新商家地址
+  const restaurantAddress = currentUser?.address || '未设置地址';
+  
+  el.innerHTML = filtered.map(([id,o]) => {
+    // 使用最新地址覆盖订单中的旧地址
+    const orderWithUpdatedAddress = { ...o, restaurantAddress: restaurantAddress };
+    return orderCard(id, orderWithUpdatedAddress);
+  }).join('');
+  
+  // ... 按钮事件绑定
 }
 
 ordersRef.on('value', snap => {
