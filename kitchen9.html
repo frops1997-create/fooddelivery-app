@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>可领取订单 · 取餐屏</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-database-compat.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #0b141c;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .container {
+      max-width: 1400px;
+      width: 100%;
+    }
+
+    /* 头部 */
+    .header {
+      background: #1e2d3a;
+      padding: 20px 28px;
+      border-radius: 32px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      color: #ffd54f;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header h1 small {
+      font-size: 1rem;
+      color: #90caf9;
+      font-weight: 400;
+      margin-left: 8px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 28px;
+      font-size: 1rem;
+      color: #cfd8dc;
+      background: #0f202b;
+      padding: 10px 22px;
+      border-radius: 60px;
+    }
+
+    .stats span {
+      color: #66bb6a;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-left: 6px;
+    }
+
+    .stats .ready-count {
+      color: #ffb74d;
+    }
+
+    /* 网格 */
+    .orders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+    }
+
+    /* 卡片 */
+    .order-card {
+      background: #1a2a36;
+      border-radius: 28px;
+      padding: 22px 20px 18px;
+      border-left: 8px solid #ffb74d;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      transition: transform 0.15s, box-shadow 0.2s;
+      animation: fadeSlide 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .order-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.7);
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .order-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .order-number {
+      background: #ffb74d;
+      color: #0b141c;
+      padding: 6px 20px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: 0.5px;
+    }
+
+    .table-number {
+      background: #2a4b5c;
+      color: #e3f2fd;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .order-time {
+      color: #b0bec5;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .items-list {
+      margin: 6px 0 10px;
+      background: #0f1e29;
+      padding: 8px 12px;
+      border-radius: 20px;
+    }
+
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #2b4050;
+    }
+
+    .item-row:last-child {
+      border-bottom: none;
+    }
+
+    .item-name {
+      font-size: 1rem;
+      color: #eceff1;
+    }
+
+    .item-qty {
+      color: #ffd54f;
+      font-weight: 700;
+    }
+
+    .payment {
+      color: #81d4fa;
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .total {
+      margin-top: 12px;
+      font-size: 1.3rem;
+      text-align: right;
+      color: #69c78b;
+      font-weight: 700;
+      border-top: 1px dashed #2f4a5a;
+      padding-top: 12px;
+    }
+
+    .claim-btn {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px 10px;
+      border: none;
+      border-radius: 60px;
+      background: #ffb74d;
+      color: #0b141c;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      letter-spacing: 0.3px;
+    }
+
+    .claim-btn:hover {
+      background: #ffa726;
+      transform: scale(1.01);
+      box-shadow: 0 6px 14px rgba(255, 183, 77, 0.3);
+    }
+
+    .claim-btn:active {
+      transform: scale(0.96);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 80px 20px;
+      background: #1a2a36;
+      border-radius: 40px;
+      color: #7899aa;
+      font-size: 1.5rem;
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .empty span {
+      font-size: 3rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px;
+      font-size: 1.3rem;
+      color: #ffd54f;
+      grid-column: 1 / -1;
+    }
+
+    /* 小屏 */
+    @media (max-width: 700px) {
+      body { padding: 12px; }
+      .header { flex-direction: column; align-items: stretch; text-align: center; }
+      .stats { justify-content: center; flex-wrap: wrap; }
+      .orders-grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.6rem; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- 头部 -->
+  <div class="header">
+    <h1>
+      🛎️ 可领取订单
+      <small>· 厨房已完成</small>
+    </h1>
+    <div class="stats">
+      <div>📦 待领取 <span class="ready-count" id="readyCount">0</span></div>
+      <div>🕒 刷新 <span id="updateTime">--:--</span></div>
+    </div>
+  </div>
+
+  <!-- 订单网格 -->
+  <div id="ordersGrid" class="orders-grid">
+    <div class="loading">⏳ 加载订单中...</div>
+  </div>
+</div>
+
+<script>
+  // ---------- Firebase 配置 ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyARFD8Zdb7D22XCUJctKM8E-4nVznhqYDc",
+    authDomain: "create-for-payment.firebaseapp.com",
+    databaseURL: "https://create-for-payment-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "create-for-payment",
+    storageBucket: "create-for-payment.firebasestorage.app",
+    messagingSenderId: "505063429802",
+    appId: "1:505063429802:web:8ec8cca8c788610bad62d3",
+    measurementId: "G-SHP91WNP0H"
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const database = firebase.database();
+  const ordersRef = database.ref('orders');
+
+  // DOM 元素
+  const grid = document.getElementById('ordersGrid');
+  const readyCountSpan = document.getElementById('readyCount');
+  const updateTimeSpan = document.getElementById('updateTime');
+
+  // ---------- 辅助函数 ----------
+  function updateClock() {
+    updateTimeSpan.textContent = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function formatTime(time) {
+    if (!time) return '--:--';
+    try {
+      return new Date(time).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return '--:--';
+    }
+  }
+
+  // ---------- 核心：领取订单 ----------
+  function claimOrder(orderId) {
+    // 把 completed 标记为 false (回到制作中? 但更合理是移除此订单或标记为已领取)
+    // 根据需求："按完成键后，这个软件显示可领取" -> kitchen6 完成 => completed=true
+    // 此屏显示 completed=true 且 claimed !== true 的订单
+    // 点击领取 => 设置 claimed = true (或者直接移除，但为了保留记录，标记 claimed)
+    database.ref('orders/' + orderId).update({
+      claimed: true,
+      claimedAt: Date.now()
+    }).then(() => {
+      console.log('✅ 订单已领取:', orderId);
+    }).catch(err => {
+      console.error('领取失败:', err);
+      alert('领取失败，请重试');
+    });
+  }
+
+  // ---------- 创建卡片 (仅显示 completed=true 且 claimed !== true) ----------
+  function createClaimCard(orderId, data) {
+    const card = document.createElement('div');
+    card.className = 'order-card';
+
+    let itemsHtml = '';
+    if (data.items && Array.isArray(data.items)) {
+      data.items.forEach(item => {
+        itemsHtml += `
+          <div class="item-row">
+            <div class="item-name">🍽️ ${escapeHtml(item.name)}</div>
+            <div class="item-qty">×${item.qty || 1}</div>
+          </div>
+        `;
+      });
+    }
+
+    card.innerHTML = `
+      <div class="order-top">
+        <div class="order-number">#${data.orderNumber || '---'}</div>
+        <div class="table-number">${escapeHtml(data.table || '外带')}</div>
+      </div>
+      <div class="order-time">🕒 完成 ${formatTime(data.completedAt || data.time)}</div>
+      <div class="items-list">${itemsHtml}</div>
+      <div class="payment">💳 ${escapeHtml(data.paymentMethod || 'Cash')}</div>
+      <div class="total">💰 $${Number(data.total || 0).toFixed(2)}</div>
+      <button class="claim-btn" data-orderid="${orderId}">
+        🛒 领取订单
+      </button>
+    `;
+
+    // 事件绑定 (避免内联onclick)
+    const btn = card.querySelector('.claim-btn');
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const id = this.dataset.orderid;
+      if (id) claimOrder(id);
+    });
+
+    return card;
+  }
+
+  // ---------- 渲染：只显示 completed=true 且 claimed !== true ----------
+  function renderReadyOrders(allData) {
+    grid.innerHTML = '';
+
+    if (!allData) {
+      grid.innerHTML = `<div class="empty"><span>📭</span> 暂无已完成订单</div>`;
+      readyCountSpan.textContent = 0;
+      return;
+    }
+
+    const entries = Object.entries(allData);
+    // 按完成时间倒序 (最新的在前)
+    entries.sort((a, b) => {
+      const timeA = a[1].completedAt || a[1].time || 0;
+      const timeB = b[1].completedAt || b[1].time || 0;
+      return timeB - timeA;
+    });
+
+    let readyCount = 0;
+
+    entries.forEach(([key, data]) => {
+      // 条件：completed === true 且 未被领取 (claimed !== true)
+      if (data.completed === true && data.claimed !== true) {
+        readyCount++;
+        const card = createClaimCard(key, data);
+        grid.appendChild(card);
+      }
+    });
+
+    readyCountSpan.textContent = readyCount;
+
+    if (readyCount === 0) {
+      grid.innerHTML = `
+        <div class="empty">
+          <span>🎉</span> 所有订单已领取<br>
+          <span style="font-size:1rem; color:#90a4ae;">厨房完成的新订单将自动显示</span>
+        </div>
+      `;
+    }
+
+    updateClock();
+  }
+
+  // ---------- 实时监听 Firebase ----------
+  ordersRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    renderReadyOrders(data);
+  });
+
+  // 时钟更新
+  setInterval(updateClock, 15000);
+  updateClock();
+
+  // 额外的：如果希望点击领取后自动刷新（Firebase 实时更新，无需手动）
+  console.log('✅ 可领取订单屏已启动，等待厨房完成订单...');
+</script>
+</body>
+</html>
