@@ -250,6 +250,7 @@
             <p id="authSub">登录后即可接单配送</p>
             <input id="authName" placeholder="姓名 *" />
             <input id="authPhone" placeholder="手机号 *" type="tel" />
+            <input id="authPwd" placeholder="密码 *" type="password" />
             <input id="authAddr" placeholder="常驻地址（注册时必填）*" />
             <div class="error" id="authError"></div>
             <button class="primary-btn" id="authSubmitBtn">登录</button>
@@ -382,7 +383,10 @@
             const title = document.getElementById('authTitle');
             const sub = document.getElementById('authSub');
             const btn = document.getElementById('authSubmitBtn');
+            const nameInput = document.getElementById('authName');
             const addrInput = document.getElementById('authAddr');
+            const phoneInput = document.getElementById('authPhone');
+            const pwdInput = document.getElementById('authPwd');
             const tabs = document.querySelectorAll('.auth-tab');
             const errorEl = document.getElementById('authError');
             errorEl.textContent = '';
@@ -390,18 +394,42 @@
                 title.textContent = '骑手登录';
                 sub.textContent = '登录后即可接单配送';
                 btn.textContent = '登录';
-                addrInput.style.display = 'block';
-                addrInput.placeholder = '常驻地址（注册时填写）';
+                nameInput.style.display = 'none';
+                addrInput.style.display = 'none';
+                phoneInput.style.display = 'block';
+                pwdInput.style.display = 'block';
+                phoneInput.placeholder = '手机号 *';
+                pwdInput.placeholder = '密码 *';
             } else {
                 title.textContent = '骑手注册';
                 sub.textContent = '注册信息永久保存，随时登录';
                 btn.textContent = '注册';
+                nameInput.style.display = 'block';
                 addrInput.style.display = 'block';
-                addrInput.placeholder = '常驻地址（必填）*';
+                phoneInput.style.display = 'block';
+                pwdInput.style.display = 'block';
+                nameInput.placeholder = '姓名 *';
+                phoneInput.placeholder = '手机号 *';
+                addrInput.placeholder = '常驻地址 *';
+                pwdInput.placeholder = '密码 *';
             }
             tabs.forEach(tab => {
                 tab.classList.toggle('active', tab.dataset.mode === authMode);
             });
+        }
+
+        // ---------- 密码哈希辅助函数 ----------
+        async function hashPassword(pwd) {
+            try {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(pwd);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (e) {
+                // 后备方案
+                return btoa(pwd);
+            }
         }
 
         // ---------- 认证提交 ----------
@@ -409,26 +437,35 @@
             const name = document.getElementById('authName').value.trim();
             const phone = document.getElementById('authPhone').value.trim();
             const address = document.getElementById('authAddr').value.trim();
+            const password = document.getElementById('authPwd').value;
             const errorEl = document.getElementById('authError');
             const btn = document.getElementById('authSubmitBtn');
 
             errorEl.textContent = '';
-            if (!name || !phone) {
-                errorEl.textContent = '姓名和手机号为必填项';
+            if (!phone) {
+                errorEl.textContent = '手机号为必填项';
                 return;
             }
             if (!/^[\d\-+ ]{7,15}$/.test(phone)) {
                 errorEl.textContent = '请输入有效的手机号（7-15位数字）';
                 return;
             }
-            if (authMode === 'register' && !address) {
-                errorEl.textContent = '注册时地址为必填项';
+            if (!password) {
+                errorEl.textContent = '密码为必填项';
                 return;
+            }
+            if (authMode === 'register') {
+                if (!name || !address) {
+                    errorEl.textContent = '姓名和地址为必填项';
+                    return;
+                }
             }
 
             btn.disabled = true;
             const originalText = btn.textContent;
             btn.innerHTML = '<span class="spinner"></span> 处理中...';
+
+            const hashedPwd = await hashPassword(password);
 
             try {
                 const riderId = 'rider_' + phone.replace(/\D/g, '');
@@ -439,6 +476,7 @@
                         name,
                         phone,
                         address,
+                        password: hashedPwd,
                         registerTime: firebase.database.ServerValue.TIMESTAMP
                     });
                     currentRider = { id: riderId, name, phone, address };
@@ -452,7 +490,14 @@
                     const snap = await ridersRef.child(riderId).once('value');
                     if (!snap.exists()) throw new Error('该手机号未注册，请先注册');
                     const data = snap.val();
-                    if (data.name !== name) throw new Error('姓名与预留信息不匹配');
+                    
+                    // 兼容旧账号（如果旧数据没有密码字段）
+                    if (!data.password) {
+                         throw new Error('该账号为旧版本注册，请重新注册或联系管理员重置密码');
+                    }
+                    
+                    if (data.password !== hashedPwd) throw new Error('密码错误，请重试');
+                    
                     currentRider = { id: riderId, name: data.name, phone: data.phone, address: data.address };
                     localStorage.setItem('riderSession', JSON.stringify(currentRider));
                     hideAuthModal();
@@ -497,8 +542,7 @@
                     if (snap.exists()) {
                         const data = snap.val();
                         if (data.name === saved.name) {
-                            currentRider = { id: riderId, name: data.name, phone: data.phone, address: data
-                                    .address };
+                            currentRider = { id: riderId, name: data.name, phone: data.phone, address: data.address };
                             localStorage.setItem('riderSession', JSON.stringify(currentRider));
                             hideAuthModal();
                             updateRiderUI();
@@ -524,7 +568,7 @@
         });
         document.getElementById('authSubmitBtn').addEventListener('click', handleAuthSubmit);
         document.getElementById('logoutBtn').addEventListener('click', logout);
-        document.querySelectorAll('#authName, #authPhone, #authAddr').forEach(input => {
+        document.querySelectorAll('#authName, #authPhone, #authAddr, #authPwd').forEach(input => {
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') handleAuthSubmit();
             });
