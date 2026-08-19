@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>铜锅记 · 骑手端</title>
+    <title> 骑手端</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -650,25 +650,51 @@
         // ============================================================
         // ✅ 修复点 4：页面初始化时，检查并恢复未完成的订单状态
         // ============================================================
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedOrderStr = localStorage.getItem('current_active_order');
-            if (savedOrderStr) {
-                try {
-                    const savedOrder = JSON.parse(savedOrderStr);
-                    // 如果当前已登录，且该订单属于当前骑手，且未完成
-                    if (currentRider && savedOrder.riderId === currentRider.id && savedOrder.status !== 'delivered') {
-                        console.log("发现未完成的订单，自动切换到进行中标签", savedOrder.id);
-                        activeTab = 'active'; // 自动切换到“进行中”Tab，防止骑手以为订单丢了
-                    }
-                } catch (e) {
-                    localStorage.removeItem('current_active_order');
-                }
+function restoreActiveOrder() {
+    const savedOrderStr = localStorage.getItem('current_active_order');
+    if (savedOrderStr && currentRider) {
+        try {
+            const savedOrder = JSON.parse(savedOrderStr);
+            // 验证订单是否属于当前骑手且未完成
+            if (savedOrder.riderId === currentRider.id && savedOrder.status !== 'delivered') {
+                console.log("🔍 发现未完成的订单，自动切换到进行中标签:", savedOrder.id);
+                activeTab = 'active';
+                renderTabs();
+                renderList();
+                return true;
+            } else if (savedOrder.status === 'delivered') {
+                // 订单已完成，清除本地缓存
+                localStorage.removeItem('current_active_order');
             }
-        });
+        } catch (e) {
+            console.error("恢复订单失败:", e);
+            localStorage.removeItem('current_active_order');
+        }
+    }
+    return false;
+}
 
-        // 初始化
-        checkAuth();
-        updateRiderUI();
-    </script>
+// 在骑手登录成功后调用
+window.addEventListener('DOMContentLoaded', () => {
+    // 首次检查
+    setTimeout(() => {
+        restoreActiveOrder();
+    }, 500); // 等待 500ms 确保 Firebase 数据加载
+});
+
+// 在 checkAuth 函数中，登录成功后也调用
+// 找到 checkAuth 函数中的这段：
+/*
+if (snap.exists() && snap.val().name === saved.name) {
+    currentRider = { id: riderId, name: snap.val().name, phone: snap.val().phone, address: snap.val().address };
+    hideAuthModal();
+    updateRiderUI();
+    renderList();
+    updateEarnings();
+    return;
+}
+*/
+// 在 renderList(); 后面添加一行：
+// restoreActiveOrder();    </script>
 </body>
 </html>
