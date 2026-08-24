@@ -1,192 +1,1407 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>铜锅记 · 火锅外卖</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-            color: #333;
-            padding-bottom: 80px; /* 为底部结算栏留出空间 */
-        }
-        .header {
-            background: linear-gradient(135deg, #ff4b2b, #ff416c);
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .header h2 { margin: 0; font-size: 18px; }
-        .nav-icons { font-size: 20px; letter-spacing: 10px; margin-top: 5px; }
-        .lang-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid white;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .lang-btn:active { background: rgba(255,255,255,0.4); }
-        
-        .container { padding: 15px; }
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .subtitle { color: #888; font-size: 14px; margin-bottom: 10px; }
-        .store-name { font-size: 18px; font-weight: bold; margin: 0 0 10px 0; }
-        .info-row { font-size: 14px; color: #555; line-height: 1.8; }
-        .highlight { color: #ff4b2b; font-weight: bold; }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            text-align: center;
-        }
-        .stat-item { background: #fafafa; padding: 10px; border-radius: 8px; }
-        .stat-value { font-size: 20px; font-weight: bold; color: #333; display: block; margin-top: 5px;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>铜锅记 · 火锅外卖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF3E7;
+    --cream-2:#F3E6D2;
+    --broth:#B7371F;
+    --broth-dark:#8E2A17;
+    --copper:#C4894A;
+    --copper-light:#E3B876;
+    --ink:#2B2118;
+    --ink-soft:#6B5D4F;
+    --line:#E9DCC7;
+    --veg:#4C7A52;
+    --card:#FFFDF9;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Noto Sans SC', sans-serif;
+    padding-bottom:96px;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{ font-family:'Noto Serif SC', serif; }
 
-        .footer-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #2a2a2a;
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        }
-        .cart-info { font-size: 14px; }
-        .cart-info .fee { font-size: 12px; color: #aaa; }
-        .checkout-btn {
-            background: #00c853;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-    </style>
+  /* ---------- Header ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:40;
+    background:var(--cream);
+    border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{ width:34px; height:34px; }
+  .brand-name{ font-size:19px; font-weight:700; letter-spacing:.5px; }
+  .brand-name span{ color:var(--broth); }
+  .top-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .icon-btn{
+    width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--card); border:1px solid var(--line);
+    cursor:pointer; position:relative;
+    font-size:14px; font-weight:700; color:var(--ink);
+    transition:0.2s;
+  }
+  .icon-btn:hover{ background:var(--cream-2); }
+  .icon-btn.small{ width:34px; height:34px; font-size:12px; }
+  .icon-btn.logged-in{ background:var(--broth); color:#fff; border-color:var(--broth); font-weight:800; }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    padding:26px 20px 22px;
+    background:
+      radial-gradient(120% 140% at 50% -10%, #D9552F 0%, var(--broth) 46%, var(--broth-dark) 100%);
+    color:#FBF3E7;
+    overflow:hidden;
+    border-radius:0 0 28px 28px;
+  }
+  .hero-top{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .hero-eyebrow{
+    font-size:12px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--copper-light); font-weight:600;
+  }
+  .hero-title{ font-size:30px; font-weight:900; margin-top:6px; }
+  .hero-meta{
+    display:flex; gap:14px; margin-top:12px; font-size:13px; color:#F1D9C2;
+    flex-wrap:wrap;
+  }
+  .hero-meta b{ color:#fff; }
+  .pot-wrap{ width:78px; height:78px; flex-shrink:0; }
+
+  .steam{
+    position:absolute; bottom:-10px; opacity:.55;
+    filter:blur(1px);
+    animation:rise 4.5s ease-in infinite;
+  }
+  @keyframes rise{
+    0%{ transform:translateY(0) scaleX(1); opacity:0; }
+    15%{ opacity:.5; }
+    100%{ transform:translateY(-70px) scaleX(1.4); opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){ .steam{ animation:none; opacity:0; } }
+
+  /* ---------- stats bar ---------- */
+  .stats-bar{
+    display:flex; gap:12px; padding:10px 20px; background:var(--cream-2);
+    border-bottom:1px solid var(--line); flex-wrap:wrap; font-size:13px; font-weight:600;
+  }
+  .stats-bar span{ background:var(--card); padding:4px 12px; border-radius:999px; border:1px solid var(--line); }
+  .stats-bar .num{ color:var(--broth); margin-left:4px; }
+
+  /* ---------- Category tabs ---------- */
+  .tabs{
+    position:sticky; top:65px; z-index:35;
+    background:var(--cream);
+    display:flex; gap:8px; padding:14px 20px 10px;
+    overflow-x:auto; border-bottom:1px solid var(--line);
+    scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{ display:none; }
+  .tab{
+    flex-shrink:0; padding:9px 16px; border-radius:999px;
+    font-size:13.5px; font-weight:600; color:var(--ink-soft);
+    background:var(--card); border:1px solid var(--line);
+    cursor:pointer; white-space:nowrap; transition:.2s;
+  }
+  .tab.active{
+    background:var(--broth); color:#fff; border-color:var(--broth);
+  }
+
+  /* ---------- Menu ---------- */
+  .menu-section{ padding:22px 20px 6px; }
+  .section-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; }
+  .section-head h2{ font-size:20px; font-weight:700; }
+  .section-head .count{ font-size:12.5px; color:var(--ink-soft); }
+  .rule{
+    height:1px; flex:1;
+    background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px);
+  }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; }
+  .dish{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:16px; display:flex; flex-direction:column; gap:10px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .dish:hover{ transform:translateY(-2px); box-shadow:0 8px 20px rgba(43,33,24,.08); }
+  .dish-top{ display:flex; align-items:center; gap:10px; }
+  .bowl{ width:30px; height:30px; flex-shrink:0; }
+  .dish-name{ font-size:15px; font-weight:600; line-height:1.3; }
+  .dish-tag{ font-size:11px; color:var(--veg); font-weight:600; }
+  .dish-bottom{ display:flex; align-items:center; justify-content:space-between; margin-top:2px; }
+  .price{ font-size:16.5px; font-weight:700; color:var(--broth); }
+  .price::before{ content:"$"; font-size:12px; font-weight:600; margin-right:1px; }
+
+  .stepper{ display:flex; align-items:center; gap:10px; }
+  .stepper button{
+    width:28px; height:28px; border-radius:50%; border:none; cursor:pointer;
+    background:var(--broth); color:#fff; font-size:16px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; line-height:0;
+  }
+  .stepper button.minus{ background:var(--cream-2); color:var(--broth); }
+  .stepper .qty{ min-width:16px; text-align:center; font-weight:700; font-size:14px; }
+  .add-btn{
+    border:none; background:var(--broth); color:#fff; font-weight:700; font-size:13px;
+    padding:7px 16px; border-radius:999px; cursor:pointer;
+  }
+  .add-btn:active{ transform:scale(.96); }
+
+  /* ---------- Cart bar ---------- */
+  .cart-bar{
+    position:fixed; left:16px; right:16px; bottom:16px; z-index:50;
+    background:var(--ink); color:#fff; border-radius:18px;
+    padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+    box-shadow:0 12px 30px rgba(43,33,24,.35);
+    transform:translateY(140px); opacity:0; transition:.28s ease;
+  }
+  .cart-bar.show{ transform:translateY(0); opacity:1; }
+  .cart-bar-left{ display:flex; align-items:center; gap:12px; }
+  .cart-badge{
+    width:34px; height:34px; border-radius:50%; background:var(--copper);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;
+  }
+  .cart-total{ font-weight:700; font-size:15px; }
+  .cart-sub{ font-size:11.5px; color:#D8CBBA; }
+  .checkout-btn{
+    background:var(--copper); color:var(--ink); border:none; font-weight:700;
+    padding:10px 18px; border-radius:12px; cursor:pointer; font-size:13.5px;
+  }
+
+  /* ---------- Overlay / Modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(43,33,24,.45); z-index:60;
+    display:flex; align-items:flex-end; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .sheet{
+    background:var(--cream); width:100%; max-width:480px; border-radius:22px 22px 0 0;
+    max-height:88vh; overflow-y:auto; padding:20px 20px 26px;
+    transform:translateY(30px); transition:transform .28s ease;
+  }
+  .overlay.show .sheet{ transform:translateY(0); }
+  .sheet-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .sheet-head h3{ font-size:18px; }
+  .close-x{
+    width:30px; height:30px; border-radius:50%; border:none; background:var(--cream-2);
+    cursor:pointer; font-size:16px; color:var(--ink-soft);
+  }
+
+  .cart-line{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 0; border-bottom:1px solid var(--line); gap:10px;
+  }
+  .cart-line-name{ font-size:14px; font-weight:600; }
+  .cart-line-price{ font-size:12.5px; color:var(--ink-soft); }
+  .empty-cart{ text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:13.5px; }
+
+  .summary-row{ display:flex; justify-content:space-between; font-size:13.5px; margin-top:8px; color:var(--ink-soft); }
+  .summary-row.total{ font-size:16px; font-weight:700; color:var(--ink); margin-top:12px; }
+
+  .field-label{ font-size:12.5px; font-weight:600; color:var(--ink-soft); margin:16px 0 6px; }
+  .field-input{
+    width:100%; padding:11px 14px; border-radius:12px; border:1px solid var(--line);
+    background:var(--card); font-size:14px; font-family:inherit; color:var(--ink);
+  }
+  .field-input:focus{ outline:2px solid var(--copper); outline-offset:1px; }
+
+  .primary-btn{
+    width:100%; margin-top:20px; background:var(--broth); color:#fff; border:none;
+    padding:14px; border-radius:14px; font-weight:700; font-size:15px; cursor:pointer;
+  }
+  .primary-btn:disabled{ background:var(--line); color:var(--ink-soft); cursor:not-allowed; }
+
+  .success{ text-align:center; padding:20px 10px 6px; }
+  .success .pot-wrap{ width:64px; height:64px; margin:0 auto 14px; }
+  .success h3{ font-size:19px; margin-bottom:6px; }
+  .success p{ font-size:13.5px; color:var(--ink-soft); }
+
+  /* ---------- 历史订单样式 ---------- */
+  .order-history-item{
+    border-bottom:1px solid var(--line);
+    padding:10px 0;
+    font-size:13px;
+  }
+  .order-history-item:last-child{ border-bottom:none; }
+  .order-history-item .order-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:4px;
+  }
+  .order-history-item .order-id{
+    font-weight:700;
+    color:var(--broth);
+  }
+  .order-history-item .order-status{
+    font-size:12px;
+    padding:2px 10px;
+    border-radius:999px;
+    font-weight:600;
+  }
+  .order-history-item .order-status.delivered{
+    background:#E4EFE3;
+    color:var(--veg);
+  }
+  .order-history-item .order-status.rejected{
+    background:#F2E0E0;
+    color:#9A4A4A;
+  }
+  .order-history-item .order-status.pending{
+    background:#FCE7E1;
+    color:var(--broth);
+  }
+  .order-history-item .order-status.preparing{
+    background:#FBEFD9;
+    color:#B7871F;
+  }
+  .order-history-item .order-status.ready{
+    background:#E4EAF2;
+    color:#4A5F8A;
+  }
+  .order-history-item .order-items{
+    color:var(--ink-soft);
+    font-size:12.5px;
+    margin:4px 0;
+  }
+  .order-history-item .order-meta{
+    font-size:11px;
+    color:var(--ink-soft);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:4px;
+  }
+  .delete-order-btn{
+    background:#9A4A4A;
+    color:#fff;
+    border:none;
+    padding:4px 14px;
+    border-radius:999px;
+    font-size:11px;
+    cursor:pointer;
+    transition:0.2s;
+  }
+  .delete-order-btn:hover{
+    background:#7A3A3A;
+  }
+
+  @media (max-width:420px){
+    .hero-title{ font-size:26px; }
+    .grid{ grid-template-columns:1fr 1fr; }
+  }
+  /* fullscreen */
+  .fullscreen .topbar{ position:static; }
+  .fullscreen .tabs{ position:static; }
+</style>
 </head>
 <body>
 
-    <!-- 顶部导航与语言切换 -->
-    <div class="header">
+<!-- ============ HEADER ============ -->
+<div class="topbar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 40 40"><use href="#pot-icon"/></svg>
+    <div class="brand-name">铜锅<span>记</span></div>
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn small" id="fullscreenBtn" title="全屏">⛶</button>
+    <button class="icon-btn small" id="historyBtn" title="已完成订单">📋</button>
+    <button class="icon-btn small" id="todayStatsBtn" title="今日销售">📊</button>
+    <button class="icon-btn small" id="accountBtn" title="登入 / 注册">👤</button>
+    <button class="icon-btn small" id="langToggleBtn" title="切换语言">🌐</button>
+    <div class="icon-btn" id="cartIconBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B2118" stroke-width="2"><path d="M3 3h2l2.4 12.4a2 2 0 0 0 2 1.6h7.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <div class="steam" style="left:30%; animation-delay:0s;">
+    <svg width="26" height="60" viewBox="0 0 26 60"><path d="M13 60 C 4 46, 22 40, 13 26 C 4 12, 22 6, 13 0" stroke="#F1D9C2" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+  </div>
+  <div class="steam" style="left:55%; animation-delay:1.6s;">
+    <svg width="22" height="54" viewBox="0 0 26 60"><path d="M13 60 C 4 46, 22 40, 13 26 C 4 12, 22 6, 13 0" stroke="#F1D9C2" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+  </div>
+  <div class="steam" style="left:74%; animation-delay:3s;">
+    <svg width="20" height="48" viewBox="0 0 26 60"><path d="M13 60 C 4 46, 22 40, 13 26 C 4 12, 22 6, 13 0" stroke="#F1D9C2" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <div class="hero-top">
+    <div>
+      <div class="hero-eyebrow" data-i18n="heroEyebrow">铜锅现涮 · 一人一锅</div>
+      <h1 class="hero-title" data-i18n="heroTitle">铜锅记火锅外卖</h1>
+      <div class="hero-meta">
+        <span>★ <b>4.8</b> (2,309)</span>
+        <span>🚴 <b>28</b> <span data-i18n="minutes">分钟</span> <span data-i18n="delivery">送达</span></span>
+        <span><span data-i18n="distance">距您</span> <b>1.2</b> km</span>
+      </div>
+    </div>
+    <svg class="pot-wrap" viewBox="0 0 80 80"><use href="#pot-icon-big"/></svg>
+  </div>
+</div>
+
+<!-- stats bar -->
+<div class="stats-bar" id="statsBar">
+  <span>📦 <span data-i18n="todayOrders">今日订单</span> <span class="num" id="todayCount">0</span></span>
+  <span>💰 <span data-i18n="todaySales">今日销售额</span> <span class="num" id="todaySales">$0.0</span></span>
+</div>
+
+<!-- Hidden SVG symbols -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="pot-icon" viewBox="0 0 40 40">
+    <circle cx="20" cy="22" r="14" fill="#B7371F"/>
+    <rect x="4" y="19" width="6" height="4" rx="2" fill="#C4894A"/>
+    <rect x="30" y="19" width="6" height="4" rx="2" fill="#C4894A"/>
+    <ellipse cx="20" cy="14" rx="14" ry="4" fill="#C4894A"/>
+  </symbol>
+  <symbol id="pot-icon-big" viewBox="0 0 80 80">
+    <ellipse cx="40" cy="44" rx="30" ry="24" fill="#E3B876"/>
+    <ellipse cx="40" cy="40" rx="27" ry="21" fill="#8E2A17"/>
+    <ellipse cx="40" cy="30" rx="27" ry="8" fill="#C4894A"/>
+    <rect x="4" y="36" width="12" height="7" rx="3.5" fill="#E3B876"/>
+    <rect x="64" y="36" width="12" height="7" rx="3.5" fill="#E3B876"/>
+  </symbol>
+  <symbol id="bowl-red" viewBox="0 0 30 30">
+    <path d="M4 14h22a11 11 0 0 1-22 0Z" fill="#B7371F"/>
+    <rect x="12" y="4" width="6" height="8" rx="2" fill="#C4894A"/>
+  </symbol>
+  <symbol id="bowl-green" viewBox="0 0 30 30">
+    <path d="M4 14h22a11 11 0 0 1-22 0Z" fill="#4C7A52"/>
+    <rect x="12" y="4" width="6" height="8" rx="2" fill="#8FA88C"/>
+  </symbol>
+  <symbol id="bowl-copper" viewBox="0 0 30 30">
+    <path d="M4 14h22a11 11 0 0 1-22 0Z" fill="#C4894A"/>
+    <rect x="12" y="4" width="6" height="8" rx="2" fill="#B7371F"/>
+  </symbol>
+</svg>
+
+<!-- ============ CATEGORY TABS ============ -->
+<div class="tabs" id="tabs"></div>
+
+<!-- ============ MENU ============ -->
+<div id="menuRoot"></div>
+
+<!-- ============ CART BAR ============ -->
+<div class="cart-bar" id="cartBar">
+  <div class="cart-bar-left">
+    <div class="cart-badge" id="cartCount">0</div>
+    <div>
+      <div class="cart-total" id="cartTotal">$0.0</div>
+      <div class="cart-sub" data-i18n="deliveryFeeNote">配送费另计</div>
+    </div>
+  </div>
+  <button class="checkout-btn" id="openCartBtn" data-i18n="checkout">去结算</button>
+</div>
+
+<!-- ============ CART / CHECKOUT OVERLAY ============ -->
+<div class="overlay" id="overlay">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDrrk3exoaA4PjYVlNnlIr1-qZcHYfXZtk",
+  authDomain: "restaurants-cs.firebaseapp.com",
+  databaseURL: "https://restaurants-cs-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "restaurants-cs",
+  storageBucket: "restaurants-cs.firebasestorage.app",
+  messagingSenderId: "209872919844",
+  appId: "1:209872919844:web:c1730801cd51d615e867b1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ordersRef = db.ref('orders');
+const usersRef = db.ref('users');
+let currentUser = null;
+const RESTAURANT_ID = "tongguoji";
+const RESTAURANT_NAME = "铜锅记";
+const RESTAURANT_ADDRESS = "273c,Punggol Place,823273 Singapore.#15-878";
+
+// ==================== 国际化资源 ====================
+const i18n = {
+  zh: {
+    heroEyebrow: '铜锅现涮 · 一人一锅',
+    heroTitle: '铜锅记火锅外卖',
+    minutes: '分钟',
+    delivery: '送达',
+    distance: '距您',
+    todayOrders: '今日订单',
+    todaySales: '今日销售额',
+    deliveryFeeNote: '配送费另计',
+    checkout: '去结算',
+    myOrder: '我的订单',
+    emptyCart: '购物车还是空的，去挑几道菜吧 🍲',
+    subtotal: '菜品小计',
+    deliveryFee: '配送费',
+    total: '合计',
+    address: '配送地址',
+    phone: '联系电话',
+    placeOrder: '提交订单',
+    fillAddressPhone: '请填写地址和电话',
+    submitting: '正在提交订单…',
+    orderSuccess: '下单成功，商家已收到订单 🍲',
+    orderNote: '订单号',
+    confirm: '好的',
+    loginPrompt: '💡 登入账户可自动填入地址和电话',
+    login: '登入',
+    register: '注册',
+    loginTitle: '登入账户',
+    phonePlaceholder: '请输入手机号码',
+    passwordPlaceholder: '请输入密码',
+    loginBtn: '登入',
+    noAccount: '还没有账号？',
+    registerNow: '立即注册',
+    registerTitle: '注册新账户',
+    namePlaceholder: '请输入姓名',
+    addressPlaceholder: '请输入收货地址',
+    phonePlaceholderReg: '请输入手机号码',
+    passwordPlaceholderReg: '请设置密码',
+    registerAndLogin: '注册并登入',
+    hasAccount: '已有账号？',
+    loginNow: '立即登入',
+    myAccount: '我的账户',
+    logout: '退出登入',
+    loggedInHint: '💡 登入后下单会自动带入您的地址和电话',
+    historyTitle: '已完成订单',
+    noHistory: '暂无已完成订单',
+    delete: '删除',
+    deleteAll: '一键删除所有已完成订单',
+    downloadExcel: '下载历史订单 Excel',
+    confirmDelete: '确定要永久删除订单 #',
+    confirmDeleteAll: '此操作将永久删除全部 ',
+    confirmDeleteAllEnd: ' 笔已完成订单，且无法恢复！\n如确认删除，请输入：确认删除',
+    deleteFailed: '删除失败，请重试',
+    noCompleted: '目前没有已完成订单',
+    todayStats: '今日销售',
+    completedOrders: '已完成订单',
+    totalSales: '总销售额',
+    noTodayOrders: '今日暂无已完成订单',
+    downloadTodayExcel: '下载今日销售 Excel',
+    resetSales: '♻️ 重启所有销售数据',
+    resetConfirm: '此操作将永久删除所有订单与销售记录（含历史订单），且无法恢复！\n如确认重启，请输入：确认重启',
+    resetSuccess: '所有销售数据已重启',
+    resetFailed: '操作失败，请重试',
+    loginFailed: '手机号码或密码不正确',
+    loginError: '登入失败，请重试',
+    registerFailed: '注册失败，请重试',
+    phoneExists: '该手机号码已被注册，请直接登入',
+    fillAll: '请完整填写姓名、地址、手机号码和密码',
+    loginMsg: '请输入手机号码和密码',
+    orderId: '订单号',
+    statusDelivered: '✅ 已送达',
+    statusDone: '✅ 已完成',
+    statusRejected: '❌ 已拒绝',
+    timeUnknown: '未知时间',
+    noDishes: '（无菜品）',
+    summary: '汇总',
+    totalOrders: '共 ',
+    orders: ' 单',
+    deleteHistoryBtn: '🗑 删除',
+    confirmDeleteAllInput: '确认删除',
+    cancelOperation: '输入内容不匹配，已取消操作',
+    deleteAllConfirm: '确认重启',
+    signIn: '登入账户',
+    signUp: '注册新账户',
+    loginNowText: '立即登入',
+    registerNowText: '立即注册',
+  },
+  en: {
+    heroEyebrow: 'Hot Pot · One Pot Per Person',
+    heroTitle: 'Tongguoji Hot Pot Delivery',
+    minutes: 'min',
+    delivery: 'delivery',
+    distance: 'Distance',
+    todayOrders: "Today's Orders",
+    todaySales: "Today's Sales",
+    deliveryFeeNote: 'Delivery fee extra',
+    checkout: 'Checkout',
+    myOrder: 'My Order',
+    emptyCart: 'Your cart is empty, add some dishes 🍲',
+    subtotal: 'Subtotal',
+    deliveryFee: 'Delivery Fee',
+    total: 'Total',
+    address: 'Delivery Address',
+    phone: 'Phone',
+    placeOrder: 'Place Order · $',
+    fillAddressPhone: 'Please fill in address and phone',
+    submitting: 'Submitting order…',
+    orderSuccess: 'Order placed! Restaurant received it 🍲',
+    orderNote: 'Order #',
+    confirm: 'OK',
+    loginPrompt: '💡 Sign in to auto-fill address and phone',
+    login: 'Sign in',
+    register: 'Sign up',
+    loginTitle: 'Sign in',
+    phonePlaceholder: 'Enter phone number',
+    passwordPlaceholder: 'Enter password',
+    loginBtn: 'Sign in',
+    noAccount: "Don't have an account?",
+    registerNow: 'Sign up now',
+    registerTitle: 'Create Account',
+    namePlaceholder: 'Enter name',
+    addressPlaceholder: 'Enter delivery address',
+    phonePlaceholderReg: 'Enter phone number',
+    passwordPlaceholderReg: 'Set password',
+    registerAndLogin: 'Sign up & login',
+    hasAccount: 'Already have an account?',
+    loginNow: 'Sign in now',
+    myAccount: 'My Account',
+    logout: 'Logout',
+    loggedInHint: '💡 Your address and phone will be used for checkout',
+    historyTitle: 'Completed Orders',
+    noHistory: 'No completed orders yet',
+    delete: 'Delete',
+    deleteAll: 'Delete All Completed Orders',
+    downloadExcel: 'Download History Excel',
+    confirmDelete: 'Permanently delete order #',
+    confirmDeleteAll: 'This will permanently delete all ',
+    confirmDeleteAllEnd: ' completed orders, cannot be undone!\nType "confirm delete" to proceed:',
+    deleteFailed: 'Delete failed, please retry',
+    noCompleted: 'No completed orders',
+    todayStats: "Today's Stats",
+    completedOrders: 'Completed Orders',
+    totalSales: 'Total Sales',
+    noTodayOrders: 'No completed orders today',
+    downloadTodayExcel: 'Download Today\'s Excel',
+    resetSales: '♻️ Reset All Sales Data',
+    resetConfirm: 'This will permanently delete ALL orders and sales data (including history), cannot be undone!\nType "confirm reset" to proceed:',
+    resetSuccess: 'All sales data reset',
+    resetFailed: 'Operation failed, please retry',
+    loginFailed: 'Phone or password incorrect',
+    loginError: 'Login failed, please retry',
+    registerFailed: 'Sign up failed, please retry',
+    phoneExists: 'Phone already registered, please sign in',
+    fillAll: 'Please fill in name, address, phone and password',
+    loginMsg: 'Please enter phone and password',
+    orderId: 'Order #',
+    statusDelivered: '✅ Delivered',
+    statusDone: '✅ Done',
+    statusRejected: '❌ Rejected',
+    timeUnknown: 'Unknown time',
+    noDishes: '(No dishes)',
+    summary: 'Summary',
+    totalOrders: 'Total ',
+    orders: ' orders',
+    deleteHistoryBtn: '🗑 Delete',
+    confirmDeleteAllInput: 'confirm delete',
+    cancelOperation: 'Input mismatch, operation cancelled',
+    deleteAllConfirm: 'confirm reset',
+    signIn: 'Sign in',
+    signUp: 'Sign up',
+    loginNowText: 'Sign in now',
+    registerNowText: 'Sign up now',
+  }
+};
+
+let currentLang = 'zh';
+
+function t(key) {
+  return i18n[currentLang]?.[key] || key;
+}
+
+function updateI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const val = t(key);
+    if (val) el.textContent = val;
+  });
+  // 更新动态内容 (如菜单、按钮等)
+  renderMenu();
+  updateCartBar();
+  // 如果购物车弹窗开着，刷新
+  if (document.getElementById('overlay').classList.contains('show')) {
+    renderCartSheet();
+  }
+}
+
+document.getElementById('langToggleBtn').addEventListener('click', () => {
+  currentLang = (currentLang === 'zh') ? 'en' : 'zh';
+  updateI18n();
+});
+
+// ==================== 业务逻辑 ====================
+const DATA = {
+  categories: [
+    {
+      id: "signature",
+      name: { zh: "招牌铜锅", en: "Signature Pot" },
+      items: [
+        { id:1, name:{ zh:"麻酱鸡肉", en:"Sesame Chicken" }, price:8.9, icon:"bowl-red" },
+        { id:2, name:{ zh:"水果酸汤鱼片", en:"Fruit Sour Fish" }, price:8.9, icon:"bowl-red" },
+        { id:3, name:{ zh:"甘榜鸡丝", en:"Kampung Chicken" }, price:8.9, icon:"bowl-red" },
+        { id:4, name:{ zh:"香港甜汁", en:"Hong Kong Sweet Sauce" }, price:8.9, icon:"bowl-red" },
+        { id:5, name:{ zh:"番茄肥牛", en:"Tomato Beef" }, price:9.9, icon:"bowl-red" },
+        { id:6, name:{ zh:"生豉牛肉", en:"Fermented Soy Beef" }, price:9.9, icon:"bowl-red" },
+        { id:7, name:{ zh:"招牌肉糜", en:"Signature Meat Paste" }, price:6.9, icon:"bowl-red" },
+        { id:8, name:{ zh:"海鲜姜汁", en:"Seafood Ginger" }, price:7.9, icon:"bowl-red" },
+      ]
+    },
+    {
+      id: "base",
+      name: { zh: "锅底任选", en: "Soup Base" },
+      items: [
+        { id:9, name:{ zh:"番茄锅底", en:"Tomato Soup" }, price:5.9, icon:"bowl-copper" },
+        { id:10, name:{ zh:"麻辣牛油锅底", en:"Spicy Beef Tallow Soup" }, price:6.9, icon:"bowl-copper" },
+        { id:11, name:{ zh:"菌菇清汤锅底", en:"Mushroom Broth" }, price:6.9, icon:"bowl-copper" },
+        { id:12, name:{ zh:"酸菜白肉锅底", en:"Sauerkraut Pork Soup" }, price:5.9, icon:"bowl-copper" },
+      ]
+    },
+    {
+      id: "veg",
+      name: { zh: "涮菜拼盘", en: "Veggie Platter" },
+      items: [
+        { id:13, name:{ zh:"娃娃菜拼盘", en:"Baby Cabbage" }, price:3.9, tag:{ zh:"素", en:"Veg" }, icon:"bowl-green" },
+        { id:14, name:{ zh:"金针菇拼盘", en:"Enoki Mushroom" }, price:3.9, tag:{ zh:"素", en:"Veg" }, icon:"bowl-green" },
+        { id:15, name:{ zh:"手打虾滑", en:"Handmade Shrimp Paste" }, price:7.9, icon:"bowl-green" },
+        { id:16, name:{ zh:"宽粉拼盘", en:"Wide Noodle" }, price:2.9, tag:{ zh:"素", en:"Veg" }, icon:"bowl-green" },
+      ]
+    },
+    {
+      id: "drinks",
+      name: { zh: "饮品糖水", en: "Drinks & Desserts" },
+      items: [
+        { id:17, name:{ zh:"酸梅汤", en:"Sour Plum Drink" }, price:2.9, icon:"bowl-copper" },
+        { id:18, name:{ zh:"杨枝甘露", en:"Mango Sago" }, price:4.9, icon:"bowl-copper" },
+        { id:19, name:{ zh:"冰镇酸奶", en:"Iced Yogurt" }, price:3.5, icon:"bowl-copper" },
+      ]
+    }
+  ]
+};
+
+const cart = {};
+let allOrders = {};
+
+function fmt(n){ return n.toFixed(1); }
+
+function allItems(){
+  return DATA.categories.flatMap(c => c.items);
+}
+
+function cartCountTotal(){
+  let count = 0, total = 0;
+  const items = allItems();
+  for(const id in cart){
+    const qty = cart[id];
+    if(qty > 0){
+      const item = items.find(i => i.id == id);
+      count += qty;
+      total += qty * item.price;
+    }
+  }
+  return { count, total };
+}
+
+function updateStats(){
+  const now = new Date();
+  let count = 0, sales = 0;
+  Object.values(allOrders).forEach(o => {
+    if(!o.createdAt) return;
+    const d = new Date(o.createdAt);
+    if(d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate()){
+      if(o.status === 'delivered' || o.status === 'done') {
+        count++;
+        sales += (o.total || 0);
+      }
+    }
+  });
+  document.getElementById('todayCount').textContent = count;
+  document.getElementById('todaySales').textContent = '$' + sales.toFixed(1);
+}
+
+ordersRef.on('value', snap => {
+  allOrders = snap.val() || {};
+  updateStats();
+});
+
+function renderTabs(){
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = DATA.categories.map((c, i) =>
+    `<div class="tab ${i===0?'active':''}" data-target="cat-${c.id}">${c.name[currentLang]}</div>`
+  ).join('');
+  tabsEl.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabsEl.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.target).scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+}
+
+function dishCard(item){
+  const qty = cart[item.id] || 0;
+  const name = item.name[currentLang] || item.name.zh;
+  const tag = item.tag ? (item.tag[currentLang] || item.tag.zh) : '';
+  return `
+    <div class="dish" data-id="${item.id}">
+      <div class="dish-top">
+        <svg class="bowl" viewBox="0 0 30 30"><use href="#${item.icon}"/></svg>
         <div>
-            <h2 id="title">铜锅记 · 火锅外卖</h2>
-            <div class="nav-icons">⛶ 📋 📊 👤</div>
+          <div class="dish-name">${name}</div>
+          ${tag ? `<div class="dish-tag">${tag}</div>` : ''}
         </div>
-        <button class="lang-btn" onclick="toggleLanguage()">🌐 <span id="langText">English</span></button>
+      </div>
+      <div class="dish-bottom">
+        <div class="price">${fmt(item.price)}</div>
+        <div class="stepper-slot">
+          ${qty === 0
+            ? `<button class="add-btn" data-action="add" data-id="${item.id}">${currentLang === 'zh' ? '加入' : 'Add'}</button>`
+            : `<div class="stepper">
+                 <button class="minus" data-action="minus" data-id="${item.id}">−</button>
+                 <div class="qty">${qty}</div>
+                 <button data-action="plus" data-id="${item.id}">+</button>
+               </div>`
+          }
+        </div>
+      </div>
     </div>
+  `;
+}
 
-    <div class="container">
-        <!-- 店铺信息卡片 -->
-        <div class="card">
-            <div class="subtitle" id="subtitle">铜锅现涮 · 一人一锅</div>
-            <h3 class="store-name" id="storeName">铜锅记火锅外卖</h3>
-            <div class="info-row">
-                <span class="highlight" id="rating">★ 4.8 (2,309)</span> &nbsp;|&nbsp; 
-                 <span id="deliveryTime">28 分钟送达</span> &nbsp;|&nbsp; 
-                📍 <span id="distance">距您 1.2 km</span>
-            </div>
-        </div>
-
-        <!-- 商家数据看板 -->
-        <div class="card">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    📦 <span id="todayOrders">今日订单</span>
-                    <span class="stat-value">0</span>
-                </div>
-                <div class="stat-item">
-                    💰 <span id="todaySales">今日销售额</span>
-                    <span class="stat-value">$0.0</span>
-                </div>
-            </div>
-        </div>
+function renderMenu(){
+  const root = document.getElementById('menuRoot');
+  root.innerHTML = DATA.categories.map(cat => `
+    <div class="menu-section" id="cat-${cat.id}">
+      <div class="section-head">
+        <h2>${cat.name[currentLang]}</h2>
+        <div class="rule"></div>
+        <div class="count">${cat.items.length} ${currentLang === 'zh' ? '道' : 'items'}</div>
+      </div>
+      <div class="grid">
+        ${cat.items.map(dishCard).join('')}
+      </div>
     </div>
+  `).join('');
 
-    <!-- 底部结算栏 -->
-    <div class="footer-bar">
-        <div class="cart-info">
-            <div> 0 | <strong>$0.0</strong></div>
-            <div class="fee" id="deliveryFee">配送费另计</div>
+  root.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      if(action === 'add' || action === 'plus'){
+        cart[id] = (cart[id] || 0) + 1;
+      } else if(action === 'minus'){
+        cart[id] = Math.max(0, (cart[id] || 0) - 1);
+      }
+      renderMenu();
+      updateCartBar();
+      if(document.getElementById('overlay').classList.contains('show')){
+        renderCartSheet();
+      }
+    });
+  });
+}
+
+function updateCartBar(){
+  const { count, total } = cartCountTotal();
+  const bar = document.getElementById('cartBar');
+  document.getElementById('cartCount').textContent = count;
+  document.getElementById('cartTotal').textContent = '$' + fmt(total);
+  bar.classList.toggle('show', count > 0);
+}
+
+function renderCartSheet(){
+  const items = allItems();
+  const lines = Object.keys(cart).filter(id => cart[id] > 0).map(id => {
+    const item = items.find(i => i.id == id);
+    const qty = cart[id];
+    const name = item.name[currentLang] || item.name.zh;
+    return `
+      <div class="cart-line">
+        <div>
+          <div class="cart-line-name">${name} × ${qty}</div>
+          <div class="cart-line-price">$${fmt(item.price)} / ${currentLang === 'zh' ? '份' : 'unit'}</div>
         </div>
-        <button class="checkout-btn" id="checkout">去结算</button>
+        <div class="stepper">
+          <button class="minus" data-action="minus" data-id="${item.id}">−</button>
+          <div class="qty">${qty}</div>
+          <button data-action="plus" data-id="${item.id}">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const { total } = cartCountTotal();
+  const delivery = total > 0 ? 2.9 : 0;
+  const grand = total + delivery;
+
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <h3 class="display">${t('myOrder')}</h3>
+      <button class="close-x" id="closeSheet">✕</button>
     </div>
+    ${lines || `<div class="empty-cart">${t('emptyCart')}</div>`}
+    ${total > 0 ? `
+      <div class="summary-row"><span>${t('subtotal')}</span><span>$${fmt(total)}</span></div>
+      <div class="summary-row"><span>${t('deliveryFee')}</span><span>$${fmt(delivery)}</span></div>
+      <div class="summary-row total"><span>${t('total')}</span><span>$${fmt(grand)}</span></div>
 
-    <script>
-        // 多语言字典
-        const i18n = {
-            zh: {
-                title: "铜锅记 · 火锅外卖",
-                subtitle: "铜锅现涮 · 一人一锅",
-                storeName: "铜锅记火锅外卖",
-                rating: "★ 4.8 (2,309)",
-                deliveryTime: "28 分钟送达",
-                distance: "距您 1.2 km",
-                todayOrders: "今日订单",
-                todaySales: "今日销售额",
-                deliveryFee: "配送费另计",
-                checkout: "去结算",
-                langToggle: "English"
-            },
-            en: {
-                title: "Tong Guo Ji · Hotpot Delivery",
-                subtitle: "Fresh Copper Pot · Individual Pot",
-                storeName: "Tong Guo Ji Hotpot Delivery",
-                rating: "★ 4.8 (2,309)",
-                deliveryTime: "28 min delivery",
-                distance: "1.2 km away",
-                todayOrders: "Today's Orders",
-                todaySales: "Today's Sales",
-                deliveryFee: "Extra delivery fee",
-                checkout: "Checkout",
-                langToggle: "华语"
-            }
-        };
+      ${currentUser ? `<div style="font-size:12px; color:var(--veg); margin-top:14px;">✅ ${t('loggedInHint')}</div>` : `<div style="font-size:12px; color:var(--ink-soft); margin-top:14px;">${t('loginPrompt')}</div>`}
 
-        let currentLang = 'zh'; // 默认语言为华语
+      <div class="field-label">${t('address')}</div>
+      <input class="field-input" id="addrInput" placeholder="${t('address')}" value="${currentUser ? currentUser.address : ''}" />
 
-        // 切换语言函数
-        function toggleLanguage() {
-            currentLang = (currentLang === 'zh') ? 'en' : 'zh';
-            applyLanguage(currentLang);
-        }
+      <div class="field-label">${t('phone')}</div>
+      <input class="field-input" id="phoneInput" placeholder="${t('phone')}" value="${currentUser ? currentUser.phone : ''}" />
 
-        // 应用语言到页面
-        function applyLanguage(lang) {
-            const texts = i18n[lang];
-            // 遍历字典并更新对应的DOM元素
-            for (let key in texts) {
-                const element = document.getElementById(key);
-                if (element) {
-                    element.innerText = texts[key];
-                }
-            }
-            // 更新网页的 lang 属性
-            document.documentElement.lang = (lang === 'zh') ? 'zh' : 'en';
-        }
+      <button class="primary-btn" id="placeOrderBtn">${t('placeOrder')} · $${fmt(grand)}</button>
+    ` : ''}
+  `;
 
-        // 页面加载时初始化默认语言
-        applyLanguage(currentLang);
-    </script>
+  sheet.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      if(action === 'plus') cart[id] = (cart[id] || 0) + 1;
+      if(action === 'minus') cart[id] = Math.max(0, (cart[id] || 0) - 1);
+      renderMenu();
+      updateCartBar();
+      renderCartSheet();
+    });
+  });
+
+  document.getElementById('closeSheet').addEventListener('click', closeOverlay);
+
+  const orderBtn = document.getElementById('placeOrderBtn');
+  if(orderBtn){
+    orderBtn.addEventListener('click', () => {
+      const addr = document.getElementById('addrInput').value.trim();
+      const phone = document.getElementById('phoneInput').value.trim();
+      if(!addr || !phone){
+        orderBtn.textContent = t('fillAddressPhone');
+        orderBtn.style.background = '#C4894A';
+        setTimeout(() => { renderCartSheet(); }, 1400);
+        return;
+      }
+
+      orderBtn.disabled = true;
+      orderBtn.textContent = t('submitting');
+
+      const items = allItems()
+        .filter(i => cart[i.id] > 0)
+        .map(i => ({ name: i.name[currentLang] || i.name.zh, qty: cart[i.id], price: i.price }));
+      const { total: subtotal } = cartCountTotal();
+      const deliveryFee = 2.9;
+
+      const newOrderRef = ordersRef.push();
+      newOrderRef.set({
+        restaurantId: RESTAURANT_ID,
+        restaurantName: RESTAURANT_NAME,
+        restaurantAddress: RESTAURANT_ADDRESS,
+        customerName: currentUser ? currentUser.name : '',
+        customerAddress: addr,
+        customerPhone: phone,
+        items,
+        subtotal,
+        deliveryFee,
+        total: subtotal + deliveryFee,
+        status: 'pending',
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP,
+      }).then(() => {
+        showSuccess(newOrderRef.key);
+        for(const id in cart) cart[id] = 0;
+        updateCartBar();
+        renderMenu();
+      }).catch(err => {
+        orderBtn.disabled = false;
+        orderBtn.textContent = t('placeOrder');
+        console.error('下单失败:', err);
+      });
+    });
+  }
+}
+
+function showSuccess(orderId){
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = `
+    <div class="success">
+      <svg class="pot-wrap" viewBox="0 0 80 80"><use href="#pot-icon-big"/></svg>
+      <h3 class="display">${t('orderSuccess')}</h3>
+      <p>${t('orderNote')} #${(orderId||'').slice(-5).toUpperCase()}</p>
+      <button class="primary-btn" id="doneBtn">${t('confirm')}</button>
+    </div>
+  `;
+  document.getElementById('doneBtn').addEventListener('click', closeOverlay);
+}
+
+function showOverlay(){
+  document.getElementById('overlay').classList.add('show');
+}
+function openOverlay(){
+  showOverlay();
+  renderCartSheet();
+}
+function closeOverlay(){
+  document.getElementById('overlay').classList.remove('show');
+}
+
+document.getElementById('openCartBtn').addEventListener('click', openOverlay);
+document.getElementById('cartIconBtn').addEventListener('click', openOverlay);
+document.getElementById('overlay').addEventListener('click', (e) => {
+  if(e.target.id === 'overlay') closeOverlay();
+});
+
+// ============ 全屏 ============
+document.getElementById('fullscreenBtn').addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.();
+  } else {
+    document.exitFullscreen?.() || document.webkitExitFullscreen?.();
+  }
+});
+document.addEventListener('fullscreenchange', () => {
+  document.body.classList.toggle('fullscreen', !!document.fullscreenElement);
+});
+document.addEventListener('webkitfullscreenchange', () => {
+  document.body.classList.toggle('fullscreen', !!document.webkitFullscreenElement);
+});
+
+// ============ 历史订单 ============
+function showHistoryOrders(){
+  const completedOrders = Object.entries(allOrders)
+    .filter(([id, o]) => o.status === 'delivered' || o.status === 'done')
+    .sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+
+  if(completedOrders.length === 0){
+    const sheet = document.getElementById('sheet');
+    sheet.innerHTML = `
+      <div class="sheet-head">
+        <h3 class="display">${t('historyTitle')}</h3>
+        <button class="close-x" id="closeSheet">✕</button>
+      </div>
+      <div style="padding:40px 20px; text-align:center; color:var(--ink-soft);">
+        <div style="font-size:40px; margin-bottom:12px;">📭</div>
+        <p>${t('noHistory')}</p>
+      </div>
+    `;
+    document.getElementById('closeSheet').addEventListener('click', closeOverlay);
+    showOverlay();
+    return;
+  }
+
+  const statusMap = {
+    delivered: t('statusDelivered'),
+    done: t('statusDone'),
+    rejected: t('statusRejected')
+  };
+
+  let html = completedOrders.map(([id, o]) => {
+    const status = statusMap[o.status] || o.status;
+    const itemsStr = (o.items||[]).map(i => `${i.name}×${i.qty}`).join('、');
+    const time = o.createdAt ? new Date(o.createdAt).toLocaleString() : t('timeUnknown');
+    return `
+      <div class="order-history-item" data-order-id="${id}">
+        <div class="order-header">
+          <span class="order-id">${t('orderId')}${id.slice(-6).toUpperCase()}</span>
+          <span class="order-status delivered">${status}</span>
+        </div>
+        <div class="order-items">${itemsStr || t('noDishes')}</div>
+        <div class="order-meta">
+          <span>🕐 ${time}</span>
+          <span style="font-weight:700; color:var(--broth);">$${(o.total||0).toFixed(1)}</span>
+        </div>
+        <div class="order-meta" style="margin-top:6px;">
+          <span style="font-size:11px; color:var(--ink-soft);">📞 ${o.customerPhone || '—'}</span>
+          <button class="delete-order-btn" data-id="${id}">${t('deleteHistoryBtn')}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <h3 class="display">${t('historyTitle')} (${completedOrders.length})</h3>
+      <button class="close-x" id="closeSheet">✕</button>
+    </div>
+    <div style="max-height:55vh; overflow-y:auto; padding-right:4px;">
+      ${html}
+    </div>
+    <div style="margin-top:12px; text-align:center; font-size:12px; color:var(--ink-soft);">
+      💡 ${currentLang === 'zh' ? '点击「删除」可永久移除该订单' : 'Click "Delete" to permanently remove this order'}
+    </div>
+    <button class="primary-btn" id="downloadHistoryExcelBtn">📥 ${t('downloadExcel')}</button>
+    <button class="primary-btn" id="deleteAllHistoryBtn" style="background:#9A4A4A;">${t('deleteAll')}</button>
+  `;
+
+  document.getElementById('closeSheet').addEventListener('click', closeOverlay);
+  document.getElementById('downloadHistoryExcelBtn').addEventListener('click', () => {
+    downloadHistoryOrdersExcel(completedOrders);
+  });
+  document.getElementById('deleteAllHistoryBtn').addEventListener('click', () => {
+    deleteAllCompletedOrders(completedOrders);
+  });
+
+  sheet.querySelectorAll('.delete-order-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const orderId = btn.dataset.id;
+      if(confirm(`${t('confirmDelete')}${orderId.slice(-6).toUpperCase()}？`)) {
+        ordersRef.child(orderId).remove()
+          .then(() => showHistoryOrders())
+          .catch(err => { alert(t('deleteFailed')); console.error(err); });
+      }
+    });
+  });
+
+  showOverlay();
+}
+
+function downloadHistoryOrdersExcel(completedOrders){
+  if(typeof XLSX === 'undefined'){ alert('Excel 组件加载失败'); return; }
+  if(completedOrders.length === 0){ alert(t('noCompleted')); return; }
+  const statusMap = { delivered:'已送达', done:'已完成', rejected:'已拒绝' };
+  const rows = completedOrders.map(([id, o]) => ({
+    '订单编号': '#' + id.slice(-6).toUpperCase(),
+    '状态': statusMap[o.status] || o.status,
+    '下单时间': o.createdAt ? new Date(o.createdAt).toLocaleString() : '',
+    '顾客姓名': o.customerName || '',
+    '联系电话': o.customerPhone || '',
+    '收货地址': o.customerAddress || '',
+    '菜品明细': (o.items||[]).map(i => `${i.name}×${i.qty}`).join('、'),
+    '小计': o.subtotal || 0,
+    '配送费': o.deliveryFee || 0,
+    '合计': o.total || 0,
+  }));
+  const totalSales = completedOrders.reduce((sum, [, o]) => sum + (o.total || 0), 0);
+  rows.push({});
+  rows.push({ '订单编号': t('summary'), '菜品明细': `${t('totalOrders')}${completedOrders.length}${t('orders')}`, '合计': totalSales });
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [
+    { wch: 12 }, { wch: 10 }, { wch: 20 }, { wch: 10 },
+    { wch: 14 }, { wch: 26 }, { wch: 34 }, { wch: 9 }, { wch: 9 }, { wch: 9 },
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '已完成订单');
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  XLSX.writeFile(wb, `铜锅记_历史订单_${dateStr}.xlsx`);
+}
+
+function deleteAllCompletedOrders(completedOrders){
+  if(completedOrders.length === 0){ alert(t('noCompleted')); return; }
+  const input = prompt(`${t('confirmDeleteAll')}${completedOrders.length}${t('confirmDeleteAllEnd')}`);
+  if(input === null) return;
+  if(input.trim() !== t('confirmDeleteAllInput')){
+    alert(t('cancelOperation'));
+    return;
+  }
+  const updates = {};
+  completedOrders.forEach(([id]) => { updates[id] = null; });
+  ordersRef.update(updates).then(() => showHistoryOrders())
+    .catch(err => { alert(t('deleteFailed')); console.error(err); });
+}
+document.getElementById('historyBtn').addEventListener('click', showHistoryOrders);
+
+// ============ 今日销售 ============
+function getTodaySalesData(){
+  const now = new Date();
+  let list = [], count = 0, sales = 0;
+  Object.entries(allOrders).forEach(([id, o]) => {
+    if(!o.createdAt) return;
+    const d = new Date(o.createdAt);
+    if(d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate()){
+      if(o.status === 'delivered' || o.status === 'done') {
+        count++;
+        sales += (o.total || 0);
+        list.push({ id, ...o });
+      }
+    }
+  });
+  list.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+  return { list, count, sales };
+}
+
+function renderTodayStatsSheet(){
+  const { list, count, sales } = getTodaySalesData();
+  const listHtml = list.map(o => `
+    <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px;">
+      <div style="display:flex; justify-content:space-between;">
+        <strong style="color:var(--broth);">${t('orderId')}${o.id.slice(-6).toUpperCase()}</strong>
+        <span style="font-weight:700;">$${(o.total||0).toFixed(1)}</span>
+      </div>
+      <div style="color:var(--ink-soft); font-size:12px;">
+        ${(o.items||[]).map(i => `${i.name}×${i.qty}`).join('、')}
+      </div>
+      <div style="color:var(--ink-soft); font-size:11px; margin-top:2px;">
+        ${new Date(o.createdAt).toLocaleTimeString()}
+      </div>
+    </div>
+  `).join('');
+
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <h3 class="display">${t('todayStats')}</h3>
+      <button class="close-x" id="closeSheet">✕</button>
+    </div>
+    <div style="background:var(--card); padding:14px; border-radius:12px; margin-bottom:12px; border:1px solid var(--line);">
+      <div style="display:flex; justify-content:space-between; font-weight:600; font-size:14px; padding:4px 0;">
+        <span>📦 ${t('completedOrders')}</span>
+        <span style="color:var(--broth);">${count}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-weight:700; font-size:16px; padding:4px 0; border-top:1px solid var(--line); margin-top:4px; padding-top:8px;">
+        <span>💰 ${t('totalSales')}</span>
+        <span style="color:var(--broth);">$${sales.toFixed(1)}</span>
+      </div>
+    </div>
+    <div style="max-height:42vh; overflow-y:auto; padding-right:4px;">
+      ${listHtml || `<div style="padding:20px; text-align:center; color:var(--ink-soft);">${t('noTodayOrders')}</div>`}
+    </div>
+    <button class="primary-btn" id="downloadExcelBtn">📥 ${t('downloadTodayExcel')}</button>
+    <button class="primary-btn" id="resetSalesBtn" style="background:#9A4A4A;">${t('resetSales')}</button>
+  `;
+  document.getElementById('closeSheet').addEventListener('click', closeOverlay);
+  document.getElementById('downloadExcelBtn').addEventListener('click', () => {
+    downloadTodaySalesExcel(list, count, sales);
+  });
+  document.getElementById('resetSalesBtn').addEventListener('click', resetAllSalesData);
+  showOverlay();
+}
+
+function downloadTodaySalesExcel(list, count, sales){
+  if(typeof XLSX === 'undefined'){ alert('Excel 组件加载失败'); return; }
+  const rows = list.map(o => ({
+    '订单编号': '#' + o.id.slice(-6).toUpperCase(),
+    '下单时间': o.createdAt ? new Date(o.createdAt).toLocaleString() : '',
+    '顾客姓名': o.customerName || '',
+    '联系电话': o.customerPhone || '',
+    '收货地址': o.customerAddress || '',
+    '菜品明细': (o.items||[]).map(i => `${i.name}×${i.qty}`).join('、'),
+    '小计': o.subtotal || 0,
+    '配送费': o.deliveryFee || 0,
+    '合计': o.total || 0,
+  }));
+  rows.push({});
+  rows.push({ '订单编号': t('summary'), '菜品明细': `${t('totalOrders')}${count}${t('orders')}`, '合计': sales });
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [
+    { wch: 12 }, { wch: 20 }, { wch: 10 }, { wch: 14 },
+    { wch: 26 }, { wch: 34 }, { wch: 9 }, { wch: 9 }, { wch: 9 },
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '今日销售');
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  XLSX.writeFile(wb, `铜锅记_今日销售_${dateStr}.xlsx`);
+}
+
+function resetAllSalesData(){
+  const input = prompt(t('resetConfirm'));
+  if(input === null) return;
+  if(input.trim() !== t('deleteAllConfirm')){
+    alert(t('cancelOperation'));
+    return;
+  }
+  ordersRef.remove().then(() => {
+    allOrders = {};
+    updateStats();
+    alert(t('resetSuccess'));
+    closeOverlay();
+  }).catch(err => {
+    alert(t('resetFailed'));
+    console.error(err);
+  });
+}
+document.getElementById('todayStatsBtn').addEventListener('click', renderTodayStatsSheet);
+
+// ============ 会员系统 ============
+function renderLoginSheet(){
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <h3 class="display">${t('loginTitle')}</h3>
+      <button class="close-x" id="closeSheet">✕</button>
+    </div>
+    <div class="field-label">${t('phone')}</div>
+    <input class="field-input" id="loginPhone" placeholder="${t('phonePlaceholder')}" />
+    <div class="field-label">${t('password')}</div>
+    <input class="field-input" id="loginPassword" type="password" placeholder="${t('passwordPlaceholder')}" />
+    <div id="loginMsg" style="color:#9A4A4A; font-size:12.5px; margin-top:8px;"></div>
+    <button class="primary-btn" id="loginBtn">${t('loginBtn')}</button>
+    <div style="text-align:center; margin-top:14px; font-size:13px; color:var(--ink-soft);">
+      ${t('noAccount')}<a href="#" id="showRegister" style="color:var(--broth); font-weight:600;">${t('registerNow')}</a>
+    </div>
+  `;
+  document.getElementById('closeSheet').addEventListener('click', closeOverlay);
+  document.getElementById('showRegister').addEventListener('click', (e) => {
+    e.preventDefault();
+    renderRegisterSheet();
+  });
+  document.getElementById('loginBtn').addEventListener('click', () => {
+    const phone = document.getElementById('loginPhone').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const msg = document.getElementById('loginMsg');
+    if(!phone || !password){ msg.textContent = t('loginMsg'); return; }
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.textContent = t('loginBtn')+'…';
+    usersRef.child(phone).once('value').then(snap => {
+      const user = snap.val();
+      if(!user || user.password !== password){
+        msg.textContent = t('loginFailed');
+        btn.disabled = false; btn.textContent = t('loginBtn');
+        return;
+      }
+      setCurrentUser(user);
+      renderAccountSheet();
+    }).catch(err => {
+      msg.textContent = t('loginError');
+      btn.disabled = false; btn.textContent = t('loginBtn');
+      console.error(err);
+    });
+  });
+}
+
+function renderRegisterSheet(){
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <h3 class="display">${t('registerTitle')}</h3>
+      <button class="close-x" id="closeSheet">✕</button>
+    </div>
+    <div class="field-label">${t('name')}</div>
+    <input class="field-input" id="regName" placeholder="${t('namePlaceholder')}" />
+    <div class="field-label">${t('address')}</div>
+    <input class="field-input" id="regAddress" placeholder="${t('addressPlaceholder')}" />
+    <div class="field-label">${t('phone')}</div>
+    <input class="field-input" id="regPhone" placeholder="${t('phonePlaceholderReg')}" />
+    <div class="field-label">${t('password')}</div>
+    <input class="field-input" id="regPassword" type="password" placeholder="${t('passwordPlaceholderReg')}" />
+    <div id="regMsg" style="color:#9A4A4A; font-size:12.5px; margin-top:8px;"></div>
+    <button class="primary-btn" id="registerBtn">${t('registerAndLogin')}</button>
+    <div style="text-align:center; margin-top:14px; font-size:13px; color:var(--ink-soft);">
+      ${t('hasAccount')}<a href="#" id="showLogin" style="color:var(--broth); font-weight:600;">${t('loginNow')}</a>
+    </div>
+  `;
+  document.getElementById('closeSheet').addEventListener('click', closeOverlay);
+  document.getElementById('showLogin').addEventListener('click', (e) => {
+    e.preventDefault();
+    renderLoginSheet();
+  });
+  document.getElementById('registerBtn').addEventListener('click', () => {
+    const name = document.getElementById('regName').value.trim();
+    const address = document.getElementById('regAddress').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const msg = document.getElementById('regMsg');
+    if(!name || !address || !phone || !password){ msg.textContent = t('fillAll'); return; }
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true; btn.textContent = t('registerAndLogin')+'…';
+    usersRef.child(phone).once('value').then(snap => {
+      if(snap.exists()){
+        msg.textContent = t('phoneExists');
+        btn.disabled = false; btn.textContent = t('registerAndLogin');
+        return;
+      }
+      const user = { name, address, phone, password, createdAt: firebase.database.ServerValue.TIMESTAMP };
+      return usersRef.child(phone).set(user).then(() => {
+        setCurrentUser(user);
+        renderAccountSheet();
+      });
+    }).catch(err => {
+      msg.textContent = t('registerFailed');
+      btn.disabled = false; btn.textContent = t('registerAndLogin');
+      console.error(err);
+    });
+  });
+}
+
+function renderAccountSheet(){
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <h3 class="display">${t('myAccount')}</h3>
+      <button class="close-x" id="closeSheet">✕</button>
+    </div>
+    <div style="background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px;">
+      <div style="font-size:16px; font-weight:700; margin-bottom:10px;">👤 ${currentUser.name}</div>
+      <div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:6px;">📍 ${currentUser.address}</div>
+      <div style="font-size:13.5px; color:var(--ink-soft);">📞 ${currentUser.phone}</div>
+    </div>
+    <div style="font-size:12px; color:var(--ink-soft); margin-top:10px;">${t('loggedInHint')}</div>
+    <button class="primary-btn" id="logoutBtn" style="background:#9A4A4A;">${t('logout')}</button>
+  `;
+  document.getElementById('closeSheet').addEventListener('click', closeOverlay);
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    logout();
+    closeOverlay();
+  });
+}
+
+function setCurrentUser(user){
+  currentUser = user;
+  try{ localStorage.setItem('tgj_user_phone', user.phone); }catch(e){}
+  updateAccountIcon();
+}
+
+function logout(){
+  currentUser = null;
+  try{ localStorage.removeItem('tgj_user_phone'); }catch(e){}
+  updateAccountIcon();
+}
+
+function updateAccountIcon(){
+  const btn = document.getElementById('accountBtn');
+  if(!btn) return;
+  if(currentUser){
+    btn.textContent = (currentUser.name || '?').charAt(0).toUpperCase();
+    btn.title = currentUser.name + ' · ' + (currentLang === 'zh' ? '点击查看账户' : 'View Account');
+    btn.classList.add('logged-in');
+  } else {
+    btn.textContent = '👤';
+    btn.title = currentLang === 'zh' ? '登入 / 注册' : 'Sign in / Sign up';
+    btn.classList.remove('logged-in');
+  }
+}
+
+function openAccountOverlay(){
+  document.getElementById('overlay').classList.add('show');
+  if(currentUser){ renderAccountSheet(); } else { renderLoginSheet(); }
+}
+document.getElementById('accountBtn').addEventListener('click', openAccountOverlay);
+
+(function restoreLogin(){
+  let savedPhone;
+  try{ savedPhone = localStorage.getItem('tgj_user_phone'); }catch(e){ savedPhone = null; }
+  if(savedPhone){
+    usersRef.child(savedPhone).once('value').then(snap => {
+      const user = snap.val();
+      if(user){ currentUser = user; updateAccountIcon(); }
+      else { try{ localStorage.removeItem('tgj_user_phone'); }catch(e){} }
+    }).catch(err => console.error('恢复登入失败:', err));
+  }
+})();
+
+// ============ 初始化 ============
+renderTabs();
+renderMenu();
+updateCartBar();
+updateI18n();
+setTimeout(() => {
+  ordersRef.once('value', snap => {
+    allOrders = snap.val() || {};
+    updateStats();
+  });
+}, 500);
+</script>
 </body>
 </html>
