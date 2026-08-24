@@ -282,11 +282,11 @@
             <span id="menuItem2">订单管理</span>
         </div>
         <div class="side-menu-item" onclick="showPage('menu')">
-            <span></span>
+            <span>🍲</span>
             <span id="menuItem3">菜单管理</span>
         </div>
         <div class="side-menu-item" onclick="showPage('settings')">
-            <span>️</span>
+            <span>⚙️</span>
             <span id="menuItem4">设置</span>
         </div>
     </div>
@@ -401,11 +401,9 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import Firebase functions from CDN
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, onValue, push, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, set, onValue, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDrrk3exoaA4PjYVlNnlIr1-qZcHYfXZtk",
             authDomain: "restaurants-cs.firebaseapp.com",
@@ -416,24 +414,19 @@
             appId: "1:209872919844:web:c1730801cd51d615e867b1"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Update connection status
         const connectedRef = ref(database, '.info/connected');
         onValue(connectedRef, (snapshot) => {
             const statusElement = document.getElementById('connectionStatus');
             if (snapshot.val() === true) {
                 statusElement.innerHTML = '<span style="color: green;">✓ 已连接到 Firebase</span>';
-                console.log('Firebase connected successfully');
             } else {
                 statusElement.innerHTML = '<span style="color: red;">✗ 未连接</span>';
-                console.log('Firebase disconnected');
             }
         });
 
-        // Example: Read orders from Firebase
         const ordersRef = ref(database, 'orders');
         onValue(ordersRef, (snapshot) => {
             const data = snapshot.val();
@@ -441,7 +434,6 @@
                 const orderCount = Object.keys(data).length;
                 document.getElementById('orderCount').textContent = orderCount;
                 
-                // Calculate total sales
                 let totalSales = 0;
                 Object.values(data).forEach(order => {
                     totalSales += order.amount || 0;
@@ -450,7 +442,6 @@
             }
         });
 
-        // Function to add order to Firebase
         window.addOrderToFirebase = function(orderData) {
             const newOrderRef = push(ordersRef);
             return set(newOrderRef, {
@@ -465,20 +456,17 @@
             });
         };
 
-        // Expose Firebase functions to window
         window.firebaseDB = {
             app,
             database,
             ref,
             set,
             onValue,
-            push,
-            update
+            push
         };
     </script>
 
     <script>
-        // Multi-language dictionary
         const i18n = {
             zh: {
                 title: "铜锅记 · 火锅外卖",
@@ -498,8 +486,6 @@
                 menuItem3: "菜单管理",
                 menuItem4: "设置",
                 firebaseStatus: "Firebase 状态",
-                cartCount: "购物车",
-                modalTitle: "提示",
                 orderSubtitle: "在线订餐",
                 labelName: "姓名",
                 labelPhone: "电话",
@@ -531,8 +517,6 @@
                 menuItem3: "Menu",
                 menuItem4: "Settings",
                 firebaseStatus: "Firebase Status",
-                cartCount: "Cart",
-                modalTitle: "Notice",
                 orderSubtitle: "Online Ordering",
                 labelName: "Name",
                 labelPhone: "Phone",
@@ -550,13 +534,11 @@
 
         let currentLang = 'zh';
 
-        // Toggle language
         function toggleLanguage() {
             currentLang = (currentLang === 'zh') ? 'en' : 'zh';
             applyLanguage(currentLang);
         }
 
-        // Apply language to page
         function applyLanguage(lang) {
             const texts = i18n[lang];
             for (let key in texts) {
@@ -566,7 +548,6 @@
                 }
             }
             
-            // Update placeholders
             const nameInput = document.getElementById('customerName');
             const phoneInput = document.getElementById('customerPhone');
             const addressInput = document.getElementById('customerAddress');
@@ -580,7 +561,6 @@
             document.documentElement.lang = (lang === 'zh') ? 'zh' : 'en';
         }
 
-        // Toggle side menu
         function toggleMenu() {
             const menu = document.getElementById('sideMenu');
             const overlay = document.getElementById('overlay');
@@ -588,29 +568,23 @@
             overlay.classList.toggle('show');
         }
 
-        // Show page
         function showPage(page) {
             toggleMenu();
             showModal('页面导航', `正在跳转到 ${page} 页面`);
-            console.log('Navigating to:', page);
         }
 
-        // Show documents
         function showDocuments() {
             showModal('文档', '查看文档内容');
         }
 
-        // Show analytics
         function showAnalytics() {
             showModal('统计分析', '查看数据分析报表');
         }
 
-        // Show profile
         function showProfile() {
             showModal('用户资料', '查看和编辑用户资料');
         }
 
-        // Show modal
         function showModal(title, content) {
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalContent').innerText = content;
@@ -618,13 +592,11 @@
             document.getElementById('modalOverlay').classList.add('show');
         }
 
-        // Close modal
         function closeModal() {
             document.getElementById('modal').classList.remove('show');
             document.getElementById('modalOverlay').classList.remove('show');
         }
 
-        // Submit order
         function submitOrder() {
             const name = document.getElementById('customerName').value;
             const phone = document.getElementById('customerPhone').value;
@@ -655,11 +627,9 @@
                 status: 'pending'
             };
             
-            // Add to Firebase
             if (window.addOrderToFirebase) {
                 window.addOrderToFirebase(orderData).then(() => {
                     showModal('成功', '订单已提交！');
-                    // Clear form
                     document.getElementById('customerName').value = '';
                     document.getElementById('customerPhone').value = '';
                     document.getElementById('customerAddress').value = '';
@@ -673,12 +643,10 @@
             }
         }
 
-        // Checkout
         function checkout() {
             showModal('结算', '正在处理结算...');
         }
 
-        // Initialize default language
         applyLanguage(currentLang);
     </script>
 </body>
