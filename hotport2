@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>铜锅记 · 火锅外卖</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            padding-bottom: 80px; /* 为底部结算栏留出空间 */
+        }
+        .header {
+            background: linear-gradient(135deg, #ff4b2b, #ff416c);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header h2 { margin: 0; font-size: 18px; }
+        .nav-icons { font-size: 20px; letter-spacing: 10px; }
+        .lang-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .lang-btn:active { background: rgba(255,255,255,0.4); }
+        
+        .container { padding: 15px; }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .subtitle { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .store-name { font-size: 18px; font-weight: bold; margin: 0 0 10px 0; }
+        .info-row { font-size: 14px; color: #555; line-height: 1.8; }
+        .highlight { color: #ff4b2b; font-weight: bold; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            text-align: center;
+        }
+        .stat-item { background: #fafafa; padding: 10px; border-radius: 8px; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #333; display: block; margin-top: 5px;}
+
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        .cart-info { font-size: 14px; }
+        .cart-info .fee { font-size: 12px; color: #aaa; }
+        .checkout-btn {
+            background: #00c853;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航与语言切换 -->
+    <div class="header">
+        <div>
+            <h2 id="title">铜锅记 · 火锅外卖</h2>
+            <div class="nav-icons">⛶ 📋 📊 👤</div>
+        </div>
+        <button class="lang-btn" onclick="toggleLanguage()">🌐 <span id="langText">English</span></button>
+    </div>
+
+    <div class="container">
+        <!-- 店铺信息卡片 -->
+        <div class="card">
+            <div class="subtitle" id="subtitle">铜锅现涮 · 一人一锅</div>
+            <h3 class="store-name" id="storeName">铜锅记火锅外卖</h3>
+            <div class="info-row">
+                <span class="highlight" id="rating">★ 4.8 (2,309)</span> &nbsp;|&nbsp; 
+                🚴 <span id="deliveryTime">28 分钟送达</span> &nbsp;|&nbsp; 
+                📍 <span id="distance">距您 1.2 km</span>
+            </div>
+        </div>
+
+        <!-- 商家数据看板 -->
+        <div class="card">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    📦 <span id="todayOrders">今日订单</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    💰 <span id="todaySales">今日销售额</span>
+                    <span class="stat-value">$0.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部结算栏 -->
+    <div class="footer-bar">
+        <div class="cart-info">
+            <div>🛒 0 | <strong>$0.0</strong></div>
+            <div class="fee" id="deliveryFee">配送费另计</div>
+        </div>
+        <button class="checkout-btn" id="checkout">去结算</button>
+    </div>
+
+    <script>
+        // 多语言字典
+        const i18n = {
+            zh: {
+                title: "铜锅记 · 火锅外卖",
+                subtitle: "铜锅现涮 · 一人一锅",
+                storeName: "铜锅记火锅外卖",
+                rating: "★ 4.8 (2,309)",
+                deliveryTime: "28 分钟送达",
+                distance: "距您 1.2 km",
+                todayOrders: "今日订单",
+                todaySales: "今日销售额",
+                deliveryFee: "配送费另计",
+                checkout: "去结算",
+                langToggle: "English"
+            },
+            en: {
+                title: "Tong Guo Ji · Hotpot Delivery",
+                subtitle: "Fresh Copper Pot · Individual Pot",
+                storeName: "Tong Guo Ji Hotpot Delivery",
+                rating: "★ 4.8 (2,309)",
+                deliveryTime: "28 min delivery",
+                distance: "1.2 km away",
+                todayOrders: "Today's Orders",
+                todaySales: "Today's Sales",
+                deliveryFee: "Extra delivery fee",
+                checkout: "Checkout",
+                langToggle: "华语"
+            }
+        };
+
+        let currentLang = 'zh'; // 默认语言为华语
+
+        // 切换语言函数
+        function toggleLanguage() {
+            currentLang = (currentLang === 'zh') ? 'en' : 'zh';
+            applyLanguage(currentLang);
+        }
+
+        // 应用语言到页面
+        function applyLanguage(lang) {
+            const texts = i18n[lang];
+            // 遍历字典并更新对应的DOM元素
+            for (let key in texts) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.innerText = texts[key];
+                }
+            }
+            // 更新网页的 lang 属性以利于SEO和无障碍阅读
+            document.documentElement.lang = (lang === 'zh') ? 'zh' : 'en';
+        }
+
+        // 页面加载时初始化默认语言
+        applyLanguage(currentLang);
+    </script>
+</body>
+</html>
