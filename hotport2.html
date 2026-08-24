@@ -11,7 +11,7 @@
             margin: 0;
             padding: 0;
             color: #333;
-            padding-bottom: 80px;
+            padding-bottom: 80px; /* 为底部结算栏留出空间 */
         }
         .header {
             background: linear-gradient(135deg, #ff4b2b, #ff416c);
@@ -22,53 +22,21 @@
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .menu-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 5px;
-        }
-        .nav-icons {
-            display: flex;
-            gap: 15px;
-            font-size: 20px;
-        }
-        .nav-icon {
-            cursor: pointer;
-            padding: 5px;
-            transition: transform 0.2s;
-        }
-        .nav-icon:hover {
-            transform: scale(1.1);
-        }
-        .header h2 {
-            margin: 0;
-            font-size: 18px;
-        }
+        .header h2 { margin: 0; font-size: 18px; }
+        .nav-icons { font-size: 20px; letter-spacing: 10px; margin-top: 5px; }
         .lang-btn {
             background: rgba(255,255,255,0.2);
             border: 1px solid white;
             color: white;
-            padding: 5px 10px;
+            padding: 5px 12px;
             border-radius: 15px;
             cursor: pointer;
             font-size: 14px;
             transition: 0.3s;
         }
-        .lang-btn:active {
-            background: rgba(255,255,255,0.4);
-        }
+        .lang-btn:active { background: rgba(255,255,255,0.4); }
         
-        .container {
-            padding: 15px;
-        }
+        .container { padding: 15px; }
         .card {
             background: white;
             border-radius: 10px;
@@ -76,25 +44,10 @@
             margin-bottom: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .subtitle {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        .store-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0 0 10px 0;
-        }
-        .info-row {
-            font-size: 14px;
-            color: #555;
-            line-height: 1.8;
-        }
-        .highlight {
-            color: #ff4b2b;
-            font-weight: bold;
-        }
+        .subtitle { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .store-name { font-size: 18px; font-weight: bold; margin: 0 0 10px 0; }
+        .info-row { font-size: 14px; color: #555; line-height: 1.8; }
+        .highlight { color: #ff4b2b; font-weight: bold; }
         
         .stats-grid {
             display: grid;
@@ -102,18 +55,8 @@
             gap: 15px;
             text-align: center;
         }
-        .stat-item {
-            background: #fafafa;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-            display: block;
-            margin-top: 5px;
-        }
+        .stat-item { background: #fafafa; padding: 10px; border-radius: 8px; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #333; display: block; margin-top: 5px;}
 
         .footer-bar {
             position: fixed;
@@ -128,13 +71,8 @@
             align-items: center;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
-        .cart-info {
-            font-size: 14px;
-        }
-        .cart-info .fee {
-            font-size: 12px;
-            color: #aaa;
-        }
+        .cart-info { font-size: 14px; }
+        .cart-info .fee { font-size: 12px; color: #aaa; }
         .checkout-btn {
             background: #00c853;
             color: white;
@@ -145,174 +83,15 @@
             font-weight: bold;
             cursor: pointer;
         }
-
-        /* Side Menu */
-        .side-menu {
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 280px;
-            height: 100%;
-            background: white;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
-            transition: left 0.3s;
-            z-index: 1000;
-        }
-        .side-menu.open {
-            left: 0;
-        }
-        .side-menu-header {
-            background: linear-gradient(135deg, #ff4b2b, #ff416c);
-            color: white;
-            padding: 20px;
-        }
-        .side-menu-header h3 {
-            margin: 0;
-        }
-        .side-menu-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .side-menu-item:hover {
-            background: #f5f5f5;
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            z-index: 999;
-        }
-        .overlay.show {
-            display: block;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            z-index: 1001;
-            min-width: 300px;
-        }
-        .modal.show {
-            display: block;
-        }
-        .modal-header {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        .modal-close {
-            float: right;
-            cursor: pointer;
-            font-size: 24px;
-        }
-
-        /* Order Form */
-        .order-form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        .submit-btn {
-            background: #ff4b2b;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        }
-        .submit-btn:hover {
-            background: #ff416c;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Side Menu -->
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-    <div class="side-menu" id="sideMenu">
-        <div class="side-menu-header">
-            <h3 id="menuTitle">铜锅记</h3>
-        </div>
-        <div class="side-menu-item" onclick="showPage('dashboard')">
-            <span>📊</span>
-            <span id="menuItem1">仪表盘</span>
-        </div>
-        <div class="side-menu-item" onclick="showPage('orders')">
-            <span>📋</span>
-            <span id="menuItem2">订单管理</span>
-        </div>
-        <div class="side-menu-item" onclick="showPage('menu')">
-            <span>🍲</span>
-            <span id="menuItem3">菜单管理</span>
-        </div>
-        <div class="side-menu-item" onclick="showPage('settings')">
-            <span>⚙️</span>
-            <span id="menuItem4">设置</span>
-        </div>
-    </div>
-
-    <!-- Modal -->
-    <div class="overlay" id="modalOverlay" onclick="closeModal()"></div>
-    <div class="modal" id="modal">
-        <div class="modal-header">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            <span id="modalTitle">标题</span>
-        </div>
-        <div id="modalContent">内容</div>
-    </div>
-
-    <!-- Header -->
+    <!-- 顶部导航与语言切换 -->
     <div class="header">
-        <div class="header-left">
-            <button class="menu-btn" onclick="toggleMenu()">☰</button>
-            <div>
-                <h2 id="title">铜锅记 · 火锅外卖</h2>
-                <div class="nav-icons">
-                    <span class="nav-icon" onclick="showDocuments()" title="文档">📄</span>
-                    <span class="nav-icon" onclick="showAnalytics()" title="统计">📊</span>
-                    <span class="nav-icon" onclick="showProfile()" title="用户">👤</span>
-                </div>
-            </div>
+        <div>
+            <h2 id="title">铜锅记 · 火锅外卖</h2>
+            <div class="nav-icons">⛶ 📋 📊 👤</div>
         </div>
         <button class="lang-btn" onclick="toggleLanguage()">🌐 <span id="langText">English</span></button>
     </div>
@@ -324,7 +103,7 @@
             <h3 class="store-name" id="storeName">铜锅记火锅外卖</h3>
             <div class="info-row">
                 <span class="highlight" id="rating">★ 4.8 (2,309)</span> &nbsp;|&nbsp; 
-                🚴 <span id="deliveryTime">28 分钟送达</span> &nbsp;|&nbsp; 
+                 <span id="deliveryTime">28 分钟送达</span> &nbsp;|&nbsp; 
                 📍 <span id="distance">距您 1.2 km</span>
             </div>
         </div>
@@ -333,59 +112,13 @@
         <div class="card">
             <div class="stats-grid">
                 <div class="stat-item">
-                     <span id="todayOrders">今日订单</span>
-                    <span class="stat-value" id="orderCount">0</span>
+                    📦 <span id="todayOrders">今日订单</span>
+                    <span class="stat-value">0</span>
                 </div>
                 <div class="stat-item">
                     💰 <span id="todaySales">今日销售额</span>
-                    <span class="stat-value" id="salesAmount">$0.0</span>
+                    <span class="stat-value">$0.0</span>
                 </div>
-            </div>
-        </div>
-
-        <!-- Firebase 连接状态 -->
-        <div class="card">
-            <div class="subtitle" id="firebaseStatus">Firebase 状态</div>
-            <div id="connectionStatus">连接中...</div>
-        </div>
-
-        <!-- 订餐表单 -->
-        <div class="card">
-            <div class="subtitle" id="orderSubtitle">在线订餐</div>
-            <div class="order-form">
-                <div class="form-group">
-                    <label id="labelName">姓名</label>
-                    <input type="text" id="customerName" placeholder="请输入您的姓名">
-                </div>
-                <div class="form-group">
-                    <label id="labelPhone">电话</label>
-                    <input type="tel" id="customerPhone" placeholder="请输入您的电话号码">
-                </div>
-                <div class="form-group">
-                    <label id="labelAddress">地址</label>
-                    <textarea id="customerAddress" placeholder="请输入送餐地址"></textarea>
-                </div>
-                <div class="form-group">
-                    <label id="labelItems">菜品选择</label>
-                    <select id="menuItems">
-                        <option value="0">请选择菜品</option>
-                        <option value="45">麻辣火锅 - $45</option>
-                        <option value="55">清汤火锅 - $55</option>
-                        <option value="65">鸳鸯火锅 - $65</option>
-                        <option value="35">肥牛卷 - $35</option>
-                        <option value="30">羊肉卷 - $30</option>
-                        <option value="25">蔬菜拼盘 - $25</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label id="labelQuantity">数量</label>
-                    <input type="number" id="quantity" value="1" min="1">
-                </div>
-                <div class="form-group">
-                    <label id="labelNotes">备注</label>
-                    <textarea id="orderNotes" placeholder="特殊要求或备注"></textarea>
-                </div>
-                <button class="submit-btn" id="submitOrder" onclick="submitOrder()">提交订单</button>
             </div>
         </div>
     </div>
@@ -393,80 +126,14 @@
     <!-- 底部结算栏 -->
     <div class="footer-bar">
         <div class="cart-info">
-            <div>🛒 <span id="cartCount">0</span> | <strong id="cartTotal">$0.0</strong></div>
+            <div> 0 | <strong>$0.0</strong></div>
             <div class="fee" id="deliveryFee">配送费另计</div>
         </div>
-        <button class="checkout-btn" id="checkout" onclick="checkout()">去结算</button>
+        <button class="checkout-btn" id="checkout">去结算</button>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, onValue, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDrrk3exoaA4PjYVlNnlIr1-qZcHYfXZtk",
-            authDomain: "restaurants-cs.firebaseapp.com",
-            databaseURL: "https://restaurants-cs-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "restaurants-cs",
-            storageBucket: "restaurants-cs.firebasestorage.app",
-            messagingSenderId: "209872919844",
-            appId: "1:209872919844:web:c1730801cd51d615e867b1"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        const connectedRef = ref(database, '.info/connected');
-        onValue(connectedRef, (snapshot) => {
-            const statusElement = document.getElementById('connectionStatus');
-            if (snapshot.val() === true) {
-                statusElement.innerHTML = '<span style="color: green;">✓ 已连接到 Firebase</span>';
-            } else {
-                statusElement.innerHTML = '<span style="color: red;">✗ 未连接</span>';
-            }
-        });
-
-        const ordersRef = ref(database, 'orders');
-        onValue(ordersRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                const orderCount = Object.keys(data).length;
-                document.getElementById('orderCount').textContent = orderCount;
-                
-                let totalSales = 0;
-                Object.values(data).forEach(order => {
-                    totalSales += order.amount || 0;
-                });
-                document.getElementById('salesAmount').textContent = '$' + totalSales.toFixed(1);
-            }
-        });
-
-        window.addOrderToFirebase = function(orderData) {
-            const newOrderRef = push(ordersRef);
-            return set(newOrderRef, {
-                ...orderData,
-                timestamp: Date.now()
-            }).then(() => {
-                console.log('Order added successfully');
-                return newOrderRef.key;
-            }).catch((error) => {
-                console.error('Error adding order:', error);
-                throw error;
-            });
-        };
-
-        window.firebaseDB = {
-            app,
-            database,
-            ref,
-            set,
-            onValue,
-            push
-        };
-    </script>
-
     <script>
+        // 多语言字典
         const i18n = {
             zh: {
                 title: "铜锅记 · 火锅外卖",
@@ -479,25 +146,7 @@
                 todaySales: "今日销售额",
                 deliveryFee: "配送费另计",
                 checkout: "去结算",
-                langToggle: "English",
-                menuTitle: "铜锅记",
-                menuItem1: "仪表盘",
-                menuItem2: "订单管理",
-                menuItem3: "菜单管理",
-                menuItem4: "设置",
-                firebaseStatus: "Firebase 状态",
-                orderSubtitle: "在线订餐",
-                labelName: "姓名",
-                labelPhone: "电话",
-                labelAddress: "地址",
-                labelItems: "菜品选择",
-                labelQuantity: "数量",
-                labelNotes: "备注",
-                submitOrder: "提交订单",
-                placeholderName: "请输入您的姓名",
-                placeholderPhone: "请输入您的电话号码",
-                placeholderAddress: "请输入送餐地址",
-                placeholderNotes: "特殊要求或备注"
+                langToggle: "English"
             },
             en: {
                 title: "Tong Guo Ji · Hotpot Delivery",
@@ -510,143 +159,33 @@
                 todaySales: "Today's Sales",
                 deliveryFee: "Extra delivery fee",
                 checkout: "Checkout",
-                langToggle: "华语",
-                menuTitle: "Tong Guo Ji",
-                menuItem1: "Dashboard",
-                menuItem2: "Orders",
-                menuItem3: "Menu",
-                menuItem4: "Settings",
-                firebaseStatus: "Firebase Status",
-                orderSubtitle: "Online Ordering",
-                labelName: "Name",
-                labelPhone: "Phone",
-                labelAddress: "Address",
-                labelItems: "Menu Items",
-                labelQuantity: "Quantity",
-                labelNotes: "Notes",
-                submitOrder: "Submit Order",
-                placeholderName: "Enter your name",
-                placeholderPhone: "Enter your phone number",
-                placeholderAddress: "Enter delivery address",
-                placeholderNotes: "Special requests or notes"
+                langToggle: "华语"
             }
         };
 
-        let currentLang = 'zh';
+        let currentLang = 'zh'; // 默认语言为华语
 
+        // 切换语言函数
         function toggleLanguage() {
             currentLang = (currentLang === 'zh') ? 'en' : 'zh';
             applyLanguage(currentLang);
         }
 
+        // 应用语言到页面
         function applyLanguage(lang) {
             const texts = i18n[lang];
+            // 遍历字典并更新对应的DOM元素
             for (let key in texts) {
                 const element = document.getElementById(key);
                 if (element) {
                     element.innerText = texts[key];
                 }
             }
-            
-            const nameInput = document.getElementById('customerName');
-            const phoneInput = document.getElementById('customerPhone');
-            const addressInput = document.getElementById('customerAddress');
-            const notesInput = document.getElementById('orderNotes');
-            
-            if (nameInput) nameInput.placeholder = texts.placeholderName;
-            if (phoneInput) phoneInput.placeholder = texts.placeholderPhone;
-            if (addressInput) addressInput.placeholder = texts.placeholderAddress;
-            if (notesInput) notesInput.placeholder = texts.placeholderNotes;
-            
+            // 更新网页的 lang 属性
             document.documentElement.lang = (lang === 'zh') ? 'zh' : 'en';
         }
 
-        function toggleMenu() {
-            const menu = document.getElementById('sideMenu');
-            const overlay = document.getElementById('overlay');
-            menu.classList.toggle('open');
-            overlay.classList.toggle('show');
-        }
-
-        function showPage(page) {
-            toggleMenu();
-            showModal('页面导航', `正在跳转到 ${page} 页面`);
-        }
-
-        function showDocuments() {
-            showModal('文档', '查看文档内容');
-        }
-
-        function showAnalytics() {
-            showModal('统计分析', '查看数据分析报表');
-        }
-
-        function showProfile() {
-            showModal('用户资料', '查看和编辑用户资料');
-        }
-
-        function showModal(title, content) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalContent').innerText = content;
-            document.getElementById('modal').classList.add('show');
-            document.getElementById('modalOverlay').classList.add('show');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.remove('show');
-            document.getElementById('modalOverlay').classList.remove('show');
-        }
-
-        function submitOrder() {
-            const name = document.getElementById('customerName').value;
-            const phone = document.getElementById('customerPhone').value;
-            const address = document.getElementById('customerAddress').value;
-            const items = document.getElementById('menuItems');
-            const quantity = parseInt(document.getElementById('quantity').value);
-            const notes = document.getElementById('orderNotes').value;
-            
-            if (!name || !phone || !address) {
-                showModal('错误', '请填写完整信息');
-                return;
-            }
-            
-            const selectedItem = items.options[items.selectedIndex];
-            const price = parseFloat(selectedItem.value);
-            const itemName = selectedItem.text.split(' - ')[0];
-            const amount = price * quantity;
-            
-            const orderData = {
-                name: name,
-                phone: phone,
-                address: address,
-                items: itemName,
-                quantity: quantity,
-                price: price,
-                amount: amount,
-                notes: notes,
-                status: 'pending'
-            };
-            
-            if (window.addOrderToFirebase) {
-                window.addOrderToFirebase(orderData).then(() => {
-                    showModal('成功', '订单已提交！');
-                    document.getElementById('customerName').value = '';
-                    document.getElementById('customerPhone').value = '';
-                    document.getElementById('customerAddress').value = '';
-                    document.getElementById('orderNotes').value = '';
-                    document.getElementById('quantity').value = '1';
-                }).catch((error) => {
-                    showModal('错误', '提交失败：' + error.message);
-                });
-            } else {
-                showModal('成功', '订单已提交！（演示模式）');
-            }
-        }
-
-        function checkout() {
-            showModal('结算', '正在处理结算...');
-        }
-
+        // 页面加载时初始化默认语言
         applyLanguage(currentLang);
     </script>
 </body>
