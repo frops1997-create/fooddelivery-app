@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>铜锅记 · 骑手端</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== 全局与原有样式保持一致 ===== */
+        :root {
+            --cream: #FBF3E7; --cream-2: #F3E6D2; --broth: #B7371F; --broth-dark: #8E2A17;
+            --copper: #C4894A; --copper-light: #E3B876; --ink: #2B2118; --ink-soft: #6B5D4F;
+            --line: #E9DCC7; --veg: #4C7A52; --card: #FFFDF9; --blue: #4A5F8A;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--cream); color: var(--ink); font-family: 'Noto Sans SC', sans-serif; padding-bottom: 30px; }
+        h1,h2,.display { font-family: 'Noto Serif SC', serif; }
+
+        .topbar { position: sticky; top: 0; z-index: 40; background: var(--ink); color: #fff; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 14px rgba(43,33,24,.15); flex-wrap: wrap; gap: 8px; }
+        .brand-name { font-weight: 800; font-size: 17px; }
+        .brand-sub { font-size: 11px; color: #D8CBBA; }
+        .top-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .top-actions button { background: rgba(255,255,255,.12); border: none; color: #fff; padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: .2s; }
+        .top-actions button:hover { background: rgba(255,255,255,.2); }
+        .top-actions .logout-btn { background: #9A4A4A; color: #fff; }
+        .online-toggle { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.12); padding: 6px 12px; border-radius: 999px; cursor: pointer; font-size: 12.5px; font-weight: 600; }
+        .dot { width: 9px; height: 9px; border-radius: 50%; background: #8A8A8A; }
+        .dot.on { background: #5FCB6E; box-shadow: 0 0 6px #5FCB6E; }
+
+        .earnings-strip { display: flex; gap: 10px; padding: 14px 18px; background: var(--cream-2); flex-wrap: wrap; }
+        .earn-card { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; text-align: center; min-width: 80px; }
+        .earn-num { font-size: 18px; font-weight: 800; color: var(--broth); }
+        .earn-label { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+
+        .conn-banner { text-align: center; font-size: 12px; padding: 6px; background: var(--cream-2); color: var(--ink-soft); display: none; }
+        .conn-banner.show { display: block; }
+
+        .tabs { display: flex; gap: 8px; padding: 14px 18px 8px; overflow-x: auto; scrollbar-width: none; background: var(--cream); position: sticky; top: 60px; z-index: 35; border-bottom: 1px solid var(--line); }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab { flex-shrink: 0; padding: 9px 15px; border-radius: 999px; font-size: 13.5px; font-weight: 700; background: var(--card); border: 1px solid var(--line); color: var(--ink-soft); cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .tab.active { background: var(--broth); color: #fff; border-color: var(--broth); }
+        .badge { background: var(--broth); color: #fff; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 1px 7px; min-width: 16px; text-align: center; }
+        .tab.active .badge { background: #fff; color: var(--broth); }
+
+        .list { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+        .empty { text-align: center; padding: 50px 20px; color: var(--ink-soft); font-size: 14px; }
+        .empty .em { font-size: 34px; display: block; margin-bottom: 10px; }
+
+        .order-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; animation: pop .25s ease; }
+        @keyframes pop { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+        .order-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; gap: 4px; }
+        .order-id { font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+        .order-time { font-size: 11.5px; color: var(--ink-soft); }
+        .status-pill { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+        .status-pending { background: #FCE7E1; color: var(--broth); }
+        .status-ready { background: #E4EFE3; color: var(--veg); }
+        .status-assigned { background: #E4EAF2; color: var(--blue); }
+        .status-picked_up { background: #FBEFD9; color: #9A6A1F; }
+        .status-delivered { background: #EAEAEA; color: #7A7A7A; }
+        .fee-pill { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #FBEFD9; color: #9A6A1F; }
+
+        .route { margin: 10px 0; font-size: 13px; }
+        .route-row { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; }
+        .route-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+        .route-dot.pickup { background: var(--copper); }
+        .route-dot.dropoff { background: var(--broth); }
+        .route-label { font-size: 11px; color: var(--ink-soft); }
+        .route-text { font-weight: 600; word-break: break-word; }
+
+        .divider { height: 1px; background: var(--line); margin: 10px 0; }
+        .total-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-soft); }
+
+        .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .btn { flex: 1; border: none; padding: 11px; border-radius: 12px; font-weight: 700; font-size: 13.5px; cursor: pointer; min-width: 70px; transition: all .15s ease; }
+        .btn:active { transform: scale(.97); }
+        .btn-primary { background: var(--broth); color: #fff; }
+        .btn-blue { background: var(--blue); color: #fff; }
+        .btn-veg { background: var(--veg); color: #fff; }
+        .btn-nav { background: #E8DCC8; color: var(--ink); flex: 0 1 auto; padding: 11px 18px; font-size: 12.5px; }
+        .btn-nav .icon { font-size: 16px; margin-right: 4px; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(43,33,24,.6); z-index: 90; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: var(--cream); border-radius: 24px; padding: 28px 24px; max-width: 400px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .modal-card .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .modal-card .auth-tab { flex: 1; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); cursor: pointer; text-align: center; font-weight: 600; font-size: 14px; transition: 0.2s; }
+        .modal-card .auth-tab.active { background: var(--broth); color: #fff; border-color: var(--broth); }
+        .modal-card h2 { font-size: 21px; margin-bottom: 4px; text-align: center; }
+        .modal-card p { font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; text-align: center; }
+        .modal-card input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); font-size: 14px; margin-bottom: 10px; font-family: inherit; }
+        .modal-card .primary-btn { width: 100%; background: var(--broth); color: #fff; border: none; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 14.5px; cursor: pointer; margin-top: 4px; transition: .15s; }
+        .modal-card .primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .modal-card .error { color: #B7371F; font-size: 12px; margin-top: 2px; display: block; text-align: center; }
+        .modal-card .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .overlay { position: fixed; inset: 0; background: rgba(43,33,24,.45); z-index: 60; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+        .overlay.show { opacity: 1; pointer-events: auto; }
+        .sheet { background: var(--cream); width: 100%; max-width: 480px; border-radius: 22px 22px 0 0; max-height: 88vh; overflow-y: auto; padding: 20px 20px 26px; transform: translateY(30px); transition: transform .28s ease; }
+        .overlay.show .sheet { transform: translateY(0); }
+        .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .close-x { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--cream-2); cursor: pointer; font-size: 16px; color: var(--ink-soft); }
+        .history-item { border-bottom: 1px solid var(--line); padding: 10px 0; font-size: 13px; }
+        .history-item .h-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 4px; }
+        .history-item .h-id { font-weight: 700; color: var(--broth); }
+        .history-item .h-status { font-size: 12px; padding: 2px 10px; border-radius: 999px; font-weight: 600; background: #E4EFE3; color: var(--veg); }
+        .history-item .h-items { color: var(--ink-soft); font-size: 12.5px; margin: 4px 0; }
+        .history-item .h-meta { font-size: 11px; color: var(--ink-soft); display: flex; justify-content: space-between; align-items: center; margin-top: 4px; flex-wrap: wrap; gap: 4px; }
+        .delete-btn { background: #9A4A4A; color: #fff; border: none; padding: 4px 14px; border-radius: 999px; font-size: 11px; cursor: pointer; transition: 0.2s; }
+
+        .map-overlay { position: fixed; inset: 0; background: rgba(43,33,24,.5); z-index: 80; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+        .map-overlay.show { opacity: 1; pointer-events: auto; }
+        .map-sheet { background: var(--cream); width: 100%; max-width: 480px; border-radius: 22px 22px 0 0; padding: 20px 20px 28px; transform: translateY(30px); transition: transform .28s ease; }
+        .map-overlay.show .map-sheet { transform: translateY(0); }
+        .map-sheet .handle { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 16px; }
+        .map-sheet .map-title { font-family: 'Noto Serif SC', serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .map-sheet .map-address { font-size: 13px; color: var(--ink-soft); background: var(--card); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); margin: 8px 0 14px; word-break: break-word; line-height: 1.5; }
+        .map-sheet .map-options { display: flex; flex-direction: column; gap: 8px; }
+        .map-sheet .map-opt { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); cursor: pointer; font-weight: 600; font-size: 15px; transition: all .15s ease; color: var(--ink); justify-content: center; }
+        .map-sheet .map-cancel { margin-top: 12px; padding: 13px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); cursor: pointer; font-weight: 600; font-size: 14px; text-align: center; color: var(--ink-soft); transition: all .15s ease; width: 100%; }
+        .fullscreen .topbar { position: static; }
+        .fullscreen .tabs { position: static; }
+    </style>
+</head>
+<body>
+
+    <!-- 登录/注册弹窗 -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-card">
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-mode="login" data-i18n="loginTab">登录</div>
+                <div class="auth-tab" data-mode="register" data-i18n="registerTab">注册</div>
+            </div>
+            <h2 class="display" id="authTitle" data-i18n="authTitleLogin">骑手登录</h2>
+            <p id="authSub" data-i18n="authSubLogin">登录后即可接单配送</p>
+            <input id="authName" data-i18n-placeholder="namePlaceholder" placeholder="姓名 *" />
+            <input id="authPhone" placeholder="手机号 *" type="tel" />
+            <input id="authPwd" placeholder="密码 *" type="password" />
+            <input id="authAddr" placeholder="常驻地址（注册时必填）*" />
+            <div class="error" id="authError"></div>
+            <button class="primary-btn" id="authSubmitBtn" data-i18n="loginBtn">登录</button>
+            <div style="margin-top:12px; text-align:center; font-size:12px; color:var(--ink-soft);" data-i18n="authHint">💡 注册后信息永久保存，可在任何设备登录</div>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div class="topbar">
+        <div>
+            <div class="brand-name" data-i18n="brandName">铜锅记 · 骑手端</div>
+            <div class="brand-sub" id="riderSub" data-i18n="notLoggedIn">未登录</div>
+        </div>
+        <div class="top-actions">
+            <button id="fullscreenBtn" data-i18n="fullscreen">⛶ 全屏</button>
+            <button id="historyBtn" data-i18n="history">📋 历史</button>
+            <button id="todayStatsBtn" data-i18n="todayStats">📊 今日</button>
+            <button id="exportExcelBtn" style="background:#2B6B3A;" data-i18n="exportExcel">📥 Excel</button>
+            <button id="resetTodayBtn" style="background:#9A4A4A;" data-i18n="resetToday">↻ 重置今日</button>
+            <button class="logout-btn" id="logoutBtn" data-i18n="logout">🚪 登出</button>
+            <button class="auth-btn" id="langToggleBtn" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;">🌐 EN</button>
+            <div class="online-toggle" id="onlineToggle">
+                <div class="dot" id="onlineDot"></div>
+                <span id="onlineLabel" data-i18n="offline">离线</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="earnings-strip">
+        <div class="earn-card"><div class="earn-num" id="earnToday">$0.0</div><div class="earn-label" data-i18n="todayEarn">今日收入</div></div>
+        <div class="earn-card"><div class="earn-num" id="deliveredToday">0</div><div class="earn-label" data-i18n="todayDeliveries">今日单量</div></div>
+    </div>
+
+    <div class="conn-banner" id="connBanner" data-i18n="connBanner">与服务器连接中断，正在重新连接…</div>
+    <div class="tabs" id="tabs"></div>
+    <div class="list" id="list"></div>
+
+    <!-- 历史/统计 Sheet -->
+    <div class="overlay" id="overlay">
+        <div class="sheet" id="sheet">
+            <div class="sheet-head">
+                <h3 class="display" id="sheetTitle" data-i18n="records">📋 记录</h3>
+                <button class="close-x" id="closeSheet">✕</button>
+            </div>
+            <div id="sheetBody"></div>
+        </div>
+    </div>
+
+    <!-- 地图导航弹窗 -->
+    <div class="map-overlay" id="mapOverlay">
+        <div class="map-sheet">
+            <div class="handle"></div>
+            <div class="map-title" data-i18n="navigation">🗺️ 导航</div>
+            <div class="map-address" id="mapAddressDisplay">📍 地址加载中…</div>
+            <div class="map-options">
+                <div class="map-opt" data-map="google"><span class="m-icon">🌍</span><span data-i18n="googleMaps">使用 Google Maps 导航</span></div>
+            </div>
+            <button class="map-cancel" id="mapCancelBtn" data-i18n="cancel">取消</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    
+    <script>
+        // ============================================================
+        // Firebase 配置
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrrk3exoaA4PjYVlNnlIr1-qZcHYfXZtk",
+            authDomain: "restaurants-cs.firebaseapp.com",
+            databaseURL: "https://restaurants-cs-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "restaurants-cs",
+            storageBucket: "restaurants-cs.firebasestorage.app",
+            messagingSenderId: "209872919844",
+            appId: "1:209872919844:web:c1730801cd51d615e867b1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const ordersRef = db.ref('orders');
+        const ridersRef = db.ref('riders');
+
+        // ============================================================
+        // 国际化 (i18n)
+        // ============================================================
+        const i18n = {
+            zh: {
+                brandName: '铜锅记 · 骑手端',
+                notLoggedIn: '未登录',
+                fullscreen: '⛶ 全屏',
+                history: '📋 历史',
+                todayStats: '📊 今日',
+                exportExcel: '📥 Excel',
+                resetToday: '↻ 重置今日',
+                logout: '🚪 登出',
+                offline: '离线',
+                online: '在线接单',
+                todayEarn: '今日收入',
+                todayDeliveries: '今日单量',
+                connBanner: '与服务器连接中断，正在重新连接…',
+                records: '📋 记录',
+                navigation: '🗺️ 导航',
+                googleMaps: '使用 Google Maps 导航',
+                cancel: '取消',
+                loginTab: '登录',
+                registerTab: '注册',
+                authTitleLogin: '骑手登录',
+                authSubLogin: '登录后即可接单配送',
+                authTitleRegister: '骑手注册',
+                authSubRegister: '注册信息永久保存，随时登录',
+                namePlaceholder: '姓名 *',
+                phonePlaceholder: '手机号 *',
+                pwdPlaceholder: '密码 *',
+                addrPlaceholder: '常驻地址（注册时必填）*',
+                loginBtn: '登录',
+                registerBtn: '注册',
+                authHint: '💡 注册后信息永久保存，可在任何设备登录',
+                loginError: '请输入有效的手机号',
+                pwdRequired: '密码为必填项',
+                nameAddrRequired: '姓名和地址为必填项',
+                processing: '处理中...',
+                loginSuccess: '✅ 操作成功！欢迎 ',
+                phoneRegistered: '该手机号已注册，请直接登录',
+                notRegistered: '该手机号未注册，请先注册',
+                wrongPassword: '密码错误，请重试',
+                confirmLogout: '确定要登出吗？',
+                noOrders: '暂无待配送订单 🛵',
+                noActive: '暂无进行中的配送 🚴',
+                noDone: '暂无已完成配送 ✅',
+                pleaseLogin: '请先登录',
+                orderId: '订单 #',
+                pickup: '取餐 · ',
+                deliverTo: '送达',
+                orderAmount: '订单金额',
+                deliveryFee: '配送费',
+                claimed: '该订单已被其他骑手接走 🛵',
+                confirmDelete: '确定要永久删除订单 #',
+                confirmReset: '⚠️ 确定要重置今天所有已完成订单吗？\n此操作将永久删除今日的配送记录！',
+                resetConfirmFinal: '找到 ',
+                resetConfirmEnd: ' 条今日订单，确认全部删除？',
+                resetSuccess: '已重置 ',
+                resetDone: ' 条今日订单',
+                noHistory: '暂无已完成订单',
+                noTodayOrders: '今日暂无已完成配送',
+                todayDelivered: '📦 完成单量',
+                todayEarnLabel: '💰 配送收入',
+                orderTime: '未知时间',
+                restaurant: '商家',
+                customer: '顾客',
+                available: '可接订单',
+                active: '进行中',
+                done: '已完成',
+                pending: '待商家接单',
+                ready: '待骑手取餐',
+                assigned: '已接单',
+                picked_up: '已取餐',
+                delivered: '已送达',
+                claim: '🛵 接单配送',
+                navPickup: '📍 导航取餐',
+                confirmPickup: '✅ 确认取餐',
+                navDropoff: '📍 导航送餐',
+                confirmDeliver: '✅ 确认送达',
+                deliveredLabel: '已送达',
+                loginFirst: '请先登录',
+                logoutSuccess: '已登出',
+                restoreSuccess: '恢复未完成订单',
+            },
+            en: {
+                brandName: 'Tongguoji · Rider',
+                notLoggedIn: 'Not logged in',
+                fullscreen: '⛶ Fullscreen',
+                history: '📋 History',
+                todayStats: '📊 Today',
+                exportExcel: '📥 Excel',
+                resetToday: '↻ Reset Today',
+                logout: '🚪 Sign out',
+                offline: 'Offline',
+                online: 'Online',
+                todayEarn: "Today's Earnings",
+                todayDeliveries: "Today's Deliveries",
+                connBanner: 'Connection lost, reconnecting…',
+                records: '📋 Records',
+                navigation: '🗺️ Navigation',
+                googleMaps: 'Navigate with Google Maps',
+                cancel: 'Cancel',
+                loginTab: 'Sign in',
+                registerTab: 'Sign up',
+                authTitleLogin: 'Rider Sign in',
+                authSubLogin: 'Sign in to start delivering',
+                authTitleRegister: 'Rider Sign up',
+                authSubRegister: 'Register once, use anywhere',
+                namePlaceholder: 'Name *',
+                phonePlaceholder: 'Phone *',
+                pwdPlaceholder: 'Password *',
+                addrPlaceholder: 'Resident address (required) *',
+                loginBtn: 'Sign in',
+                registerBtn: 'Sign up',
+                authHint: '💡 Register once, use on any device',
+                loginError: 'Please enter a valid phone number',
+                pwdRequired: 'Password is required',
+                nameAddrRequired: 'Name and address are required',
+                processing: 'Processing...',
+                loginSuccess: '✅ Welcome ',
+                phoneRegistered: 'Phone already registered, please sign in',
+                notRegistered: 'Phone not registered, please sign up',
+                wrongPassword: 'Wrong password, please retry',
+                confirmLogout: 'Are you sure you want to sign out?',
+                noOrders: 'No orders available 🛵',
+                noActive: 'No active deliveries 🚴',
+                noDone: 'No completed deliveries ✅',
+                pleaseLogin: 'Please sign in first',
+                orderId: 'Order #',
+                pickup: 'Pickup · ',
+                deliverTo: 'Deliver to',
+                orderAmount: 'Order Total',
+                deliveryFee: 'Delivery Fee',
+                claimed: 'This order has been claimed by another rider 🛵',
+                confirmDelete: 'Permanently delete order #',
+                confirmReset: '⚠️ Reset all completed orders today?\nThis will permanently delete today\'s delivery records!',
+                resetConfirmFinal: 'Found ',
+                resetConfirmEnd: ' orders today, confirm delete all?',
+                resetSuccess: 'Reset ',
+                resetDone: ' orders today',
+                noHistory: 'No completed orders',
+                noTodayOrders: 'No deliveries completed today',
+                todayDelivered: '📦 Completed',
+                todayEarnLabel: '💰 Earnings',
+                orderTime: 'Unknown time',
+                restaurant: 'Restaurant',
+                customer: 'Customer',
+                available: 'Available',
+                active: 'Active',
+                done: 'Completed',
+                pending: 'Pending restaurant',
+                ready: 'Ready for pickup',
+                assigned: 'Assigned',
+                picked_up: 'Picked up',
+                delivered: 'Delivered',
+                claim: '🛵 Claim',
+                navPickup: '📍 Navigate to pickup',
+                confirmPickup: '✅ Confirm pickup',
+                navDropoff: '📍 Navigate to dropoff',
+                confirmDeliver: '✅ Confirm delivery',
+                deliveredLabel: 'Delivered',
+                loginFirst: 'Please sign in first',
+                logoutSuccess: 'Signed out',
+                restoreSuccess: 'Restored active order',
+            }
+        };
+
+        let currentLang = 'zh';
+
+        function t(key) {
+            return i18n[currentLang]?.[key] || key;
+        }
+
+        function updateI18n() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                const val = t(key);
+                if (val) el.textContent = val;
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                const val = t(key);
+                if (val) el.placeholder = val;
+            });
+            // 动态更新标题
+            const authMode = document.querySelector('.auth-tab.active')?.dataset.mode || 'login';
+            updateAuthUIText(authMode);
+            // 重新渲染列表和标签
+            renderTabs();
+            renderList();
+            // 更新在线状态文字
+            document.getElementById('onlineLabel').textContent = isOnline ? t('online') : t('offline');
+        }
+
+        document.getElementById('langToggleBtn').addEventListener('click', () => {
+            currentLang = (currentLang === 'zh') ? 'en' : 'zh';
+            updateI18n();
+        });
+
+        // ============================================================
+        // 业务逻辑
+        // ============================================================
+        let currentRider = null;
+        let authMode = 'login';
+        let orders = {};
+        let activeTab = 'available';
+        let knownAvailableIds = new Set();
+        let audioCtx = null;
+        let isOnline = localStorage.getItem('riderOnline') !== 'false';
+        let mapPendingAddress = '';
+        let mapPendingLabel = '';
+
+        function loadRiderFromStorage() {
+            const saved = localStorage.getItem('riderSession');
+            if (saved) { try { return JSON.parse(saved); } catch (e) { return null; } }
+            return null;
+        }
+
+        function showAuthModal() { document.getElementById('authModal').style.display = 'flex'; updateAuthUIText(authMode); }
+        function hideAuthModal() { document.getElementById('authModal').style.display = 'none'; }
+
+        function updateAuthUIText(mode) {
+            const title = document.getElementById('authTitle');
+            const sub = document.getElementById('authSub');
+            const btn = document.getElementById('authSubmitBtn');
+            const nameInput = document.getElementById('authName');
+            const addrInput = document.getElementById('authAddr');
+            if (mode === 'login') {
+                title.textContent = t('authTitleLogin');
+                sub.textContent = t('authSubLogin');
+                btn.textContent = t('loginBtn');
+                nameInput.style.display = 'none';
+                addrInput.style.display = 'none';
+            } else {
+                title.textContent = t('authTitleRegister');
+                sub.textContent = t('authSubRegister');
+                btn.textContent = t('registerBtn');
+                nameInput.style.display = 'block';
+                addrInput.style.display = 'block';
+            }
+        }
+
+        function updateAuthUI() {
+            authMode = document.querySelector('.auth-tab.active')?.dataset.mode || 'login';
+            updateAuthUIText(authMode);
+            document.getElementById('authError').textContent = '';
+        }
+
+        async function hashPassword(pwd) {
+            try {
+                const encoder = new TextEncoder();
+                const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(pwd));
+                return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (e) { return btoa(pwd); }
+        }
+
+        async function handleAuthSubmit() {
+            const name = document.getElementById('authName').value.trim();
+            const phone = document.getElementById('authPhone').value.trim();
+            const address = document.getElementById('authAddr').value.trim();
+            const password = document.getElementById('authPwd').value;
+            const errorEl = document.getElementById('authError');
+            const btn = document.getElementById('authSubmitBtn');
+
+            errorEl.textContent = '';
+            if (!phone || !/^[\d\-+ ]{7,15}$/.test(phone)) { errorEl.textContent = t('loginError'); return; }
+            if (!password) { errorEl.textContent = t('pwdRequired'); return; }
+            if (authMode === 'register' && (!name || !address)) { errorEl.textContent = t('nameAddrRequired'); return; }
+
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.innerHTML = '<span class="spinner"></span> ' + t('processing');
+            const hashedPwd = await hashPassword(password);
+
+            try {
+                const riderId = 'rider_' + phone.replace(/\D/g, '');
+                if (authMode === 'register') {
+                    const snap = await ridersRef.child(riderId).once('value');
+                    if (snap.exists()) throw new Error(t('phoneRegistered'));
+                    await ridersRef.child(riderId).set({ name, phone, address, password: hashedPwd, registerTime: firebase.database.ServerValue.TIMESTAMP });
+                    currentRider = { id: riderId, name, phone, address };
+                } else {
+                    const snap = await ridersRef.child(riderId).once('value');
+                    if (!snap.exists()) throw new Error(t('notRegistered'));
+                    const data = snap.val();
+                    if (!data.password || data.password !== hashedPwd) throw new Error(t('wrongPassword'));
+                    currentRider = { id: riderId, name: data.name, phone: data.phone, address: data.address };
+                }
+                localStorage.setItem('riderSession', JSON.stringify(currentRider));
+                hideAuthModal();
+                updateRiderUI();
+                renderList();
+                updateEarnings();
+                alert(t('loginSuccess') + currentRider.name);
+                // 恢复未完成订单
+                setTimeout(() => restoreActiveOrder(), 300);
+            } catch (err) {
+                errorEl.textContent = err.message || '操作失败，请重试';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        function logout() {
+            if (!currentRider || !confirm(t('confirmLogout'))) return;
+            currentRider = null;
+            localStorage.removeItem('riderSession');
+            localStorage.removeItem('current_active_order');
+            updateRiderUI();
+            renderList();
+            showAuthModal();
+        }
+
+        function updateRiderUI() {
+            document.getElementById('riderSub').textContent = currentRider ? `🛵 ${currentRider.name} · ${currentRider.phone}` : t('notLoggedIn');
+            document.getElementById('logoutBtn').style.display = currentRider ? 'flex' : 'none';
+        }
+
+        function checkAuth() {
+            const saved = loadRiderFromStorage();
+            if (saved) {
+                const riderId = 'rider_' + saved.phone.replace(/\D/g, '');
+                ridersRef.child(riderId).once('value').then(snap => {
+                    if (snap.exists() && snap.val().name === saved.name) {
+                        currentRider = { id: riderId, name: snap.val().name, phone: snap.val().phone, address: snap.val().address };
+                        hideAuthModal();
+                        updateRiderUI();
+                        renderList();
+                        updateEarnings();
+                        setTimeout(() => restoreActiveOrder(), 300);
+                        return;
+                    }
+                    localStorage.removeItem('riderSession');
+                    localStorage.removeItem('current_active_order');
+                    showAuthModal();
+                }).catch(() => showAuthModal());
+            } else {
+                showAuthModal();
+            }
+        }
+
+        document.querySelectorAll('.auth-tab').forEach(tab => tab.addEventListener('click', () => { 
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            updateAuthUI();
+        }));
+        document.getElementById('authSubmitBtn').addEventListener('click', handleAuthSubmit);
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // ============================================================
+        // 核心业务逻辑
+        // ============================================================
+        function timeAgo(ts) {
+            if (!ts) return '刚刚';
+            const diff = Math.floor((Date.now() - ts) / 1000);
+            if (diff < 60) return '刚刚';
+            if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+            return new Date(ts).toLocaleString();
+        }
+
+        function googleLink(addr) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr || '')}`; }
+
+        function showMapChooser(address, label) {
+            if (!address) { alert('⚠️ 地址信息缺失，无法导航'); return; }
+            mapPendingAddress = address;
+            mapPendingLabel = label || '目的地';
+            document.getElementById('mapAddressDisplay').textContent = `📍 ${label || '目的地'}：${address}`;
+            document.getElementById('mapOverlay').classList.add('show');
+        }
+        function closeMapChooser() { document.getElementById('mapOverlay').classList.remove('show'); }
+
+        document.querySelector('.map-opt[data-map="google"]').addEventListener('click', () => {
+            if (mapPendingAddress) { window.open(googleLink(mapPendingAddress), '_blank'); closeMapChooser(); }
+        });
+        document.getElementById('mapCancelBtn').addEventListener('click', closeMapChooser);
+        document.getElementById('mapOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeMapChooser(); });
+
+        const TABS = [
+            { id: 'available', labelKey: 'available', match: o => o.status === 'ready' && !o.riderId },
+            { id: 'active', labelKey: 'active', match: o => o.riderId === currentRider?.id && ['assigned', 'picked_up'].includes(o.status) },
+            { id: 'done', labelKey: 'done', match: o => o.riderId === currentRider?.id && o.status === 'delivered' },
+        ];
+
+        function getStatusLabel(status) {
+            const map = { 'pending': t('pending'), 'ready': t('ready'), 'assigned': t('assigned'), 'picked_up': t('picked_up'), 'delivered': t('delivered') };
+            return map[status] || status;
+        }
+        function getStatusClass(status) {
+            const map = { 'pending': 'status-pending', 'ready': 'status-ready', 'assigned': 'status-assigned', 'picked_up': 'status-picked_up', 'delivered': 'status-delivered' };
+            return map[status] || '';
+        }
+
+        function renderTabs() {
+            const el = document.getElementById('tabs');
+            if (!currentRider) { el.innerHTML = ''; return; }
+            el.innerHTML = TABS.map(t => {
+                const count = Object.values(orders).filter(t.match).length;
+                const label = t(t.labelKey);
+                return `<div class="tab ${activeTab===t.id?'active':''}" data-id="${t.id}">${label} ${count>0 ? `<span class="badge">${count}</span>` : ''}</div>`;
+            }).join('');
+            el.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => { activeTab = tab.dataset.id; renderTabs(); renderList(); });
+            });
+        }
+
+        function orderCard(id, o) {
+            let actions = '';
+            if (activeTab === 'available' && o.status === 'ready' && !o.riderId) {
+                actions = `<div class="btn-row"><button class="btn btn-primary" data-action="claim" data-id="${id}">${t('claim')}</button></div>`;
+            } else if (o.status === 'assigned' && o.riderId === currentRider?.id) {
+                actions = `<div class="btn-row"><button class="btn btn-nav" data-action="nav-pickup" data-id="${id}"><span class="icon">📍</span> ${t('navPickup')}</button><button class="btn btn-blue" data-action="pickup" data-id="${id}">${t('confirmPickup')}</button></div>`;
+            } else if (o.status === 'picked_up' && o.riderId === currentRider?.id) {
+                actions = `<div class="btn-row"><button class="btn btn-nav" data-action="nav-dropoff" data-id="${id}"><span class="icon">📍</span> ${t('navDropoff')}</button><button class="btn btn-veg" data-action="deliver" data-id="${id}">${t('confirmDeliver')}</button></div>`;
+            } else if (o.status === 'delivered') {
+                actions = `<div style="text-align:center; color:var(--veg); font-weight:600; font-size:13px; margin-top:8px;">✅ ${t('deliveredLabel')}</div>`;
+            }
+            return `
+            <div class="order-card">
+              <div class="order-head">
+                <div><div class="order-id">${t('orderId')}${id.slice(-5).toUpperCase()}</div><div class="order-time">${timeAgo(o.createdAt)}</div></div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;"><div class="status-pill ${getStatusClass(o.status)}">${getStatusLabel(o.status)}</div><div class="fee-pill">${t('deliveryFee')} $${(o.deliveryFee||0).toFixed(1)}</div></div>
+              </div>
+              <div style="font-size:12px; color:var(--ink-soft); margin-bottom:6px;">${(o.items||[]).map(i => `${i.name}×${i.qty}`).join('、')}</div>
+              <div class="route">
+                <div class="route-row"><div class="route-dot pickup"></div><div><div class="route-label">${t('pickup')}${o.restaurantName||t('restaurant')}</div><div class="route-text">${o.restaurantAddress||'—'}</div></div></div>
+                <div class="route-row"><div class="route-dot dropoff"></div><div><div class="route-label">${t('deliverTo')}</div><div class="route-text">${o.customerAddress||'—'}</div></div></div>
+              </div>
+              <div class="divider"></div>
+              <div class="total-row"><span>${t('orderAmount')}</span><span>$${(o.total||0).toFixed(1)}</span></div>
+              ${actions}
+            </div>`;
+        }
+
+        function renderList() {
+            const el = document.getElementById('list');
+            if (!currentRider) { el.innerHTML = `<div class="empty"><span class="em">🔒</span>${t('loginFirst')}</div>`; return; }
+            const tabDef = TABS.find(t => t.id === activeTab);
+            const filtered = Object.entries(orders).filter(([id, o]) => tabDef.match(o)).sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
+            
+            if (!isOnline && activeTab === 'available') { el.innerHTML = `<div class="empty"><span class="em">😴</span>您已下线，上线后可查看可接订单</div>`; return; }
+            if (filtered.length === 0) {
+                let msg = activeTab === 'available' ? t('noOrders') : (activeTab === 'active' ? t('noActive') : t('noDone'));
+                el.innerHTML = `<div class="empty"><span class="em">📭</span>${msg}</div>`;
+                return;
+            }
+            el.innerHTML = filtered.map(([id, o]) => orderCard(id, o)).join('');
+            
+            el.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const action = btn.dataset.action;
+                    const order = orders[id];
+                    
+                    if (action === 'claim') {
+                        ordersRef.child(id).transaction(current => {
+                            if (current && current.status === 'ready' && !current.riderId) {
+                                current.status = 'assigned';
+                                current.riderId = currentRider.id;
+                                current.riderName = currentRider.name;
+                                current.assignedAt = firebase.database.ServerValue.TIMESTAMP;
+                                current.updatedAt = firebase.database.ServerValue.TIMESTAMP;
+                                return current;
+                            }
+                            return;
+                        }, (err, committed, snapshot) => {
+                            if (committed && snapshot) {
+                                localStorage.setItem('current_active_order', JSON.stringify(snapshot.val()));
+                                activeTab = 'active';
+                                renderTabs();
+                                renderList();
+                            } else {
+                                alert(t('claimed'));
+                            }
+                        });
+                    } else if (action === 'pickup') {
+                        ordersRef.child(id).update({ status: 'picked_up', pickedUpAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP });
+                        let activeOrder = JSON.parse(localStorage.getItem('current_active_order') || '{}');
+                        if(activeOrder.id === id) {
+                            activeOrder.status = 'picked_up';
+                            localStorage.setItem('current_active_order', JSON.stringify(activeOrder));
+                        }
+                    } else if (action === 'deliver') {
+                        ordersRef.child(id).update({ status: 'delivered', deliveredAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP });
+                        localStorage.removeItem('current_active_order');
+                    } else if (action === 'nav-pickup') {
+                        showMapChooser(order.restaurantAddress, `${t('pickup')}${order.restaurantName || t('restaurant')}`);
+                    } else if (action === 'nav-dropoff') {
+                        showMapChooser(order.customerAddress, t('deliverTo'));
+                    }
+                });
+            });
+        }
+
+        function updateEarnings() {
+            if (!currentRider) return;
+            const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+            let earned = 0, count = 0;
+            Object.values(orders).forEach(o => {
+                if (o.riderId === currentRider.id && o.status === 'delivered' && o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
+                    earned += (o.deliveryFee || 0); count += 1;
+                }
+            });
+            document.getElementById('earnToday').textContent = '$' + earned.toFixed(1);
+            document.getElementById('deliveredToday').textContent = count;
+        }
+
+        ordersRef.on('value', snap => {
+            const val = snap.val() || {};
+            orders = val;
+            const currentAvailable = new Set();
+            Object.entries(val).forEach(([id, o]) => { if (!o.riderId && o.status === 'ready') currentAvailable.add(id); });
+            let hasNew = false;
+            currentAvailable.forEach(id => { if (!knownAvailableIds.has(id)) hasNew = true; });
+            if (hasNew && isOnline && currentRider) {
+                try {
+                    if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.type = 'sine'; o.frequency.value = 660;
+                    g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+                    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.5);
+                } catch (e) {}
+                document.title = '🔔 新订单可接 · 骑手端';
+                setTimeout(() => { document.title = '铜锅记 · 骑手端'; }, 4000);
+            }
+            knownAvailableIds = currentAvailable;
+            renderTabs();
+            renderList();
+            updateEarnings();
+        });
+
+        db.ref('.info/connected').on('value', snap => {
+            document.getElementById('connBanner').classList.toggle('show', snap.val() === false);
+        });
+
+        function refreshOnlineUI() {
+            document.getElementById('onlineDot').classList.toggle('on', isOnline);
+            document.getElementById('onlineLabel').textContent = isOnline ? t('online') : t('offline');
+        }
+        document.getElementById('onlineToggle').addEventListener('click', () => {
+            isOnline = !isOnline;
+            localStorage.setItem('riderOnline', isOnline);
+            refreshOnlineUI();
+            renderList();
+        });
+        refreshOnlineUI();
+
+        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.(); } 
+            else { document.exitFullscreen?.() || document.webkitExitFullscreen?.(); }
+        });
+
+        function showHistoryOrders() {
+            if (!currentRider) return alert(t('loginFirst'));
+            const historyOrders = Object.entries(orders).filter(([id, o]) => o.riderId === currentRider.id && o.status === 'delivered').sort((a, b) => (b[1].deliveredAt || 0) - (a[1].deliveredAt || 0));
+            document.getElementById('sheetTitle').textContent = t('history') + ' (' + historyOrders.length + ')';
+            let html = historyOrders.length === 0 ? `<div style="padding:40px 20px; text-align:center; color:var(--ink-soft);"><div style="font-size:40px;">📭</div><p>${t('noHistory')}</p></div>` : 
+                historyOrders.map(([id, o]) => `
+                <div class="history-item">
+                  <div class="h-header"><span class="h-id">${t('orderId')}${id.slice(-6).toUpperCase()}</span><span class="h-status">✅ ${t('deliveredLabel')}</span></div>
+                  <div class="h-items">${(o.items || []).map(i => `${i.name}×${i.qty}`).join('、') || '（无菜品）'}</div>
+                  <div class="h-meta"><span>🕐 ${o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : t('orderTime')}</span><span style="font-weight:700;color:var(--broth);">$${(o.total||0).toFixed(1)}</span></div>
+                  <div class="h-meta"><span style="font-size:11px;color:var(--ink-soft);">${t('deliveryFee')} $${(o.deliveryFee||0).toFixed(1)}</span><button class="delete-btn" data-id="${id}">🗑 ${t('delete') || '删除'}</button></div>
+                </div>`).join('');
+            document.getElementById('sheetBody').innerHTML = html;
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm(t('confirmDelete') + btn.dataset.id.slice(-6).toUpperCase() + '？')) {
+                        ordersRef.child(btn.dataset.id).remove().then(() => showHistoryOrders());
+                    }
+                });
+            });
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('closeSheet').onclick = () => document.getElementById('overlay').classList.remove('show');
+        }
+
+        function showTodayStats() {
+            if (!currentRider) return alert(t('loginFirst'));
+            const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+            let list = [], count = 0, earned = 0;
+            Object.entries(orders).forEach(([id, o]) => {
+                if (o.riderId === currentRider.id && o.status === 'delivered' && o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
+                    count++; earned += (o.deliveryFee || 0); list.push({ id, ...o });
+                }
+            });
+            list.sort((a, b) => (b.deliveredAt || 0) - (a.deliveredAt || 0));
+            document.getElementById('sheetTitle').textContent = t('todayStats');
+            document.getElementById('sheetBody').innerHTML = `
+            <div style="background:var(--card); padding:14px; border-radius:12px; margin-bottom:12px; border:1px solid var(--line);">
+              <div style="display:flex; justify-content:space-between; font-weight:600; font-size:14px; padding:4px 0;"><span>${t('todayDelivered')}</span><span style="color:var(--broth);">${count}</span></div>
+              <div style="display:flex; justify-content:space-between; font-weight:700; font-size:16px; padding:4px 0; border-top:1px solid var(--line); margin-top:4px; padding-top:8px;"><span>${t('todayEarnLabel')}</span><span style="color:var(--broth);">$${earned.toFixed(1)}</span></div>
+            </div>
+            <div style="max-height:50vh; overflow-y:auto; padding-right:4px;">${list.length ? list.map(o => `<div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px;"><div style="display:flex; justify-content:space-between;"><strong style="color:var(--broth);">${t('orderId')}${o.id.slice(-6).toUpperCase()}</strong><span style="font-weight:700;">$${(o.total||0).toFixed(1)}</span></div><div style="color:var(--ink-soft); font-size:12px;">${(o.items||[]).map(i => `${i.name}×${i.qty}`).join('、')}</div><div style="color:var(--ink-soft); font-size:11px;">${o.deliveredAt ? new Date(o.deliveredAt).toLocaleTimeString() : ''}</div></div>`).join('') : '<div style="padding:20px; text-align:center; color:var(--ink-soft);">' + t('noTodayOrders') + '</div>'}</div>`;
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('closeSheet').onclick = () => document.getElementById('overlay').classList.remove('show');
+        }
+
+        function exportExcel() {
+            if (!currentRider) return alert(t('loginFirst'));
+            const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+            const rows = [];
+            Object.entries(orders).forEach(([id, o]) => {
+                if (o.riderId === currentRider.id && o.status === 'delivered' && o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
+                    rows.push({ '订单号': id.slice(-6).toUpperCase(), '顾客': o.customerName || '', '电话': o.customerPhone || '', '地址': o.customerAddress || '', '菜品': (o.items || []).map(i => `${i.name}×${i.qty}`).join('; '), '总金额': o.total || 0, '配送费': o.deliveryFee || 0, '送达时间': o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : '' });
+                }
+            });
+            if (rows.length === 0) { alert('今日暂无已完成订单可导出'); return; }
+            const headers = Object.keys(rows[0]);
+            let csv = headers.join(',') + '\n' + rows.map(r => headers.map(h => `"${(r[h]||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `配送统计_${new Date().toLocaleDateString()}.csv`;
+            link.click();
+        }
+
+        function resetTodayOrders() {
+            if (!currentRider) return alert(t('loginFirst'));
+            if (!confirm(t('confirmReset'))) return;
+            const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+            const updates = {};
+            let count = 0;
+            Object.entries(orders).forEach(([id, o]) => {
+                if (o.riderId === currentRider.id && o.status === 'delivered' && o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
+                    updates[id] = null; count++;
+                }
+            });
+            if (count === 0) { alert('今日暂无已完成订单可重置'); return; }
+            if (confirm(t('resetConfirmFinal') + count + t('resetConfirmEnd'))) {
+                ordersRef.update(updates).then(() => { alert(t('resetSuccess') + count + t('resetDone')); updateEarnings(); renderList(); });
+            }
+        }
+
+        document.getElementById('historyBtn').addEventListener('click', showHistoryOrders);
+        document.getElementById('todayStatsBtn').addEventListener('click', showTodayStats);
+        document.getElementById('exportExcelBtn').addEventListener('click', exportExcel);
+        document.getElementById('resetTodayBtn').addEventListener('click', resetTodayOrders);
+
+        // ============================================================
+        // 恢复未完成订单
+        // ============================================================
+        function restoreActiveOrder() {
+            const savedOrderStr = localStorage.getItem('current_active_order');
+            if (savedOrderStr && currentRider) {
+                try {
+                    const savedOrder = JSON.parse(savedOrderStr);
+                    if (savedOrder.riderId === currentRider.id && savedOrder.status !== 'delivered') {
+                        console.log("🔍 发现未完成的订单，自动切换到进行中标签:", savedOrder.id);
+                        activeTab = 'active';
+                        renderTabs();
+                        renderList();
+                        return true;
+                    } else if (savedOrder.status === 'delivered') {
+                        localStorage.removeItem('current_active_order');
+                    }
+                } catch (e) {
+                    console.error("恢复订单失败:", e);
+                    localStorage.removeItem('current_active_order');
+                }
+            }
+            return false;
+        }
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+        // 添加缺失的 'delete' 翻译键
+        i18n.zh.delete = '删除';
+        i18n.en.delete = 'Delete';
+
+        // 启动 Firebase 订单监听
+        ordersRef.on('value', snap => {
+            const val = snap.val() || {};
+            orders = val;
+            const currentAvailable = new Set();
+            Object.entries(val).forEach(([id, o]) => { if (!o.riderId && o.status === 'ready') currentAvailable.add(id); });
+            let hasNew = false;
+            currentAvailable.forEach(id => { if (!knownAvailableIds.has(id)) hasNew = true; });
+            if (hasNew && isOnline && currentRider) {
+                try {
+                    if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.type = 'sine'; o.frequency.value = 660;
+                    g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+                    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.5);
+                } catch (e) {}
+                document.title = '🔔 新订单可接 · 骑手端';
+                setTimeout(() => { document.title = '铜锅记 · 骑手端'; }, 4000);
+            }
+            knownAvailableIds = currentAvailable;
+            renderTabs();
+            renderList();
+            updateEarnings();
+        });
+
+        // 执行登录状态检查
+        checkAuth();
+        updateRiderUI();
+        refreshOnlineUI();
+
+        // 监听页面可见性变化
+        window.addEventListener('visibilitychange', () => {
+            if (!document.hidden && currentRider) {
+                console.log("🔄 页面从后台唤醒，检查订单状态...");
+                restoreActiveOrder();
+            }
+        });
+
+        // 初始更新国际化
+        updateI18n();
+    </script>
+</body>
+</html>
