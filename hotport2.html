@@ -11,7 +11,7 @@
             margin: 0;
             padding: 0;
             color: #333;
-            padding-bottom: 80px; /* 为底部结算栏留出空间 */
+            padding-bottom: 80px;
         }
         .header {
             background: linear-gradient(135deg, #ff4b2b, #ff416c);
@@ -22,8 +22,36 @@
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .header h2 { margin: 0; font-size: 18px; }
-        .nav-icons { font-size: 20px; letter-spacing: 10px; }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .nav-icons {
+            display: flex;
+            gap: 15px;
+            font-size: 20px;
+        }
+        .nav-icon {
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+        .nav-icon:hover {
+            transform: scale(1.1);
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
         .lang-btn {
             background: rgba(255,255,255,0.2);
             border: 1px solid white;
@@ -34,9 +62,13 @@
             font-size: 14px;
             transition: 0.3s;
         }
-        .lang-btn:active { background: rgba(255,255,255,0.4); }
+        .lang-btn:active {
+            background: rgba(255,255,255,0.4);
+        }
         
-        .container { padding: 15px; }
+        .container {
+            padding: 15px;
+        }
         .card {
             background: white;
             border-radius: 10px;
@@ -44,10 +76,25 @@
             margin-bottom: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .subtitle { color: #888; font-size: 14px; margin-bottom: 10px; }
-        .store-name { font-size: 18px; font-weight: bold; margin: 0 0 10px 0; }
-        .info-row { font-size: 14px; color: #555; line-height: 1.8; }
-        .highlight { color: #ff4b2b; font-weight: bold; }
+        .subtitle {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .store-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+        .info-row {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.8;
+        }
+        .highlight {
+            color: #ff4b2b;
+            font-weight: bold;
+        }
         
         .stats-grid {
             display: grid;
@@ -55,8 +102,18 @@
             gap: 15px;
             text-align: center;
         }
-        .stat-item { background: #fafafa; padding: 10px; border-radius: 8px; }
-        .stat-value { font-size: 20px; font-weight: bold; color: #333; display: block; margin-top: 5px;}
+        .stat-item {
+            background: #fafafa;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-top: 5px;
+        }
 
         .footer-bar {
             position: fixed;
@@ -71,8 +128,13 @@
             align-items: center;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
-        .cart-info { font-size: 14px; }
-        .cart-info .fee { font-size: 12px; color: #aaa; }
+        .cart-info {
+            font-size: 14px;
+        }
+        .cart-info .fee {
+            font-size: 12px;
+            color: #aaa;
+        }
         .checkout-btn {
             background: #00c853;
             color: white;
@@ -83,17 +145,134 @@
             font-weight: bold;
             cursor: pointer;
         }
+
+        /* Side Menu */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            transition: left 0.3s;
+            z-index: 1000;
+        }
+        .side-menu.open {
+            left: 0;
+        }
+        .side-menu-header {
+            background: linear-gradient(135deg, #ff4b2b, #ff416c);
+            color: white;
+            padding: 20px;
+        }
+        .side-menu-header h3 {
+            margin: 0;
+        }
+        .side-menu-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .side-menu-item:hover {
+            background: #f5f5f5;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+        .overlay.show {
+            display: block;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 1001;
+            min-width: 300px;
+        }
+        .modal.show {
+            display: block;
+        }
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .modal-close {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 顶部导航与语言切换 -->
-    <div class="header">
-        <div>
-            <h2 id="title">铜锅记 · 火锅外卖</h2>
-            <div class="nav-icons">⛶ 📋 📊 👤</div>
+    <!-- Side Menu -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h3 id="menuTitle">铜锅记</h3>
         </div>
-        <button class="lang-btn" onclick="toggleLanguage()">🌐 <span id="langText">English</span></button>
+        <div class="side-menu-item" onclick="showPage('dashboard')">
+            <span>📊</span>
+            <span id="menuItem1">仪表盘</span>
+        </div>
+        <div class="side-menu-item" onclick="showPage('orders')">
+            <span>📋</span>
+            <span id="menuItem2">订单管理</span>
+        </div>
+        <div class="side-menu-item" onclick="showPage('menu')">
+            <span>🍲</span>
+            <span id="menuItem3">菜单管理</span>
+        </div>
+        <div class="side-menu-item" onclick="showPage('settings')">
+            <span>️</span>
+            <span id="menuItem4">设置</span>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="overlay" id="modalOverlay" onclick="closeModal()"></div>
+    <div class="modal" id="modal">
+        <div class="modal-header">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <span id="modalTitle">标题</span>
+        </div>
+        <div id="modalContent">内容</div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleMenu()">☰</button>
+            <div>
+                <h2 id="title">铜锅记 · 火锅外卖</h2>
+                <div class="nav-icons">
+                    <span class="nav-icon" onclick="showDocuments()" title="文档">📄</span>
+                    <span class="nav-icon" onclick="showAnalytics()" title="统计">📊</span>
+                    <span class="nav-icon" onclick="showProfile()" title="用户">👤</span>
+                </div>
+            </div>
+        </div>
+        <button class="lang-btn" onclick="toggleLanguage()"> <span id="langText">English</span></button>
     </div>
 
     <div class="container">
@@ -104,7 +283,7 @@
             <div class="info-row">
                 <span class="highlight" id="rating">★ 4.8 (2,309)</span> &nbsp;|&nbsp; 
                 🚴 <span id="deliveryTime">28 分钟送达</span> &nbsp;|&nbsp; 
-                📍 <span id="distance">距您 1.2 km</span>
+                 <span id="distance">距您 1.2 km</span>
             </div>
         </div>
 
@@ -113,27 +292,109 @@
             <div class="stats-grid">
                 <div class="stat-item">
                     📦 <span id="todayOrders">今日订单</span>
-                    <span class="stat-value">0</span>
+                    <span class="stat-value" id="orderCount">0</span>
                 </div>
                 <div class="stat-item">
                     💰 <span id="todaySales">今日销售额</span>
-                    <span class="stat-value">$0.0</span>
+                    <span class="stat-value" id="salesAmount">$0.0</span>
                 </div>
             </div>
+        </div>
+
+        <!-- Firebase 连接状态 -->
+        <div class="card">
+            <div class="subtitle" id="firebaseStatus">Firebase 状态</div>
+            <div id="connectionStatus">连接中...</div>
         </div>
     </div>
 
     <!-- 底部结算栏 -->
     <div class="footer-bar">
         <div class="cart-info">
-            <div>🛒 0 | <strong>$0.0</strong></div>
+            <div>🛒 <span id="cartCount">0</span> | <strong id="cartTotal">$0.0</strong></div>
             <div class="fee" id="deliveryFee">配送费另计</div>
         </div>
         <button class="checkout-btn" id="checkout">去结算</button>
     </div>
 
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase functions from CDN
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, onValue, push, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrrk3exoaA4PjYVlNnlIr1-qZcHYfXZtk",
+            authDomain: "restaurants-cs.firebaseapp.com",
+            databaseURL: "https://restaurants-cs-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "restaurants-cs",
+            storageBucket: "restaurants-cs.firebasestorage.app",
+            messagingSenderId: "209872919844",
+            appId: "1:209872919844:web:c1730801cd51d615e867b1"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Update connection status
+        const connectedRef = ref(database, '.info/connected');
+        onValue(connectedRef, (snapshot) => {
+            const statusElement = document.getElementById('connectionStatus');
+            if (snapshot.val() === true) {
+                statusElement.innerHTML = '<span style="color: green;">✓ 已连接到 Firebase</span>';
+                console.log('Firebase connected successfully');
+            } else {
+                statusElement.innerHTML = '<span style="color: red;">✗ 未连接</span>';
+                console.log('Firebase disconnected');
+            }
+        });
+
+        // Example: Read orders from Firebase
+        const ordersRef = ref(database, 'orders');
+        onValue(ordersRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const orderCount = Object.keys(data).length;
+                document.getElementById('orderCount').textContent = orderCount;
+                
+                // Calculate total sales
+                let totalSales = 0;
+                Object.values(data).forEach(order => {
+                    totalSales += order.amount || 0;
+                });
+                document.getElementById('salesAmount').textContent = '$' + totalSales.toFixed(1);
+            }
+        });
+
+        // Example function to add order to Firebase
+        window.addOrderToFirebase = function(orderData) {
+            const newOrderRef = push(ordersRef);
+            set(newOrderRef, {
+                ...orderData,
+                timestamp: Date.now()
+            }).then(() => {
+                console.log('Order added successfully');
+            }).catch((error) => {
+                console.error('Error adding order:', error);
+            });
+        };
+
+        // Expose Firebase functions to window
+        window.firebaseDB = {
+            app,
+            database,
+            ref,
+            set,
+            onValue,
+            push,
+            update
+        };
+    </script>
+
     <script>
-        // 多语言字典
+        // Multi-language dictionary
         const i18n = {
             zh: {
                 title: "铜锅记 · 火锅外卖",
@@ -146,7 +407,15 @@
                 todaySales: "今日销售额",
                 deliveryFee: "配送费另计",
                 checkout: "去结算",
-                langToggle: "English"
+                langToggle: "English",
+                menuTitle: "铜锅记",
+                menuItem1: "仪表盘",
+                menuItem2: "订单管理",
+                menuItem3: "菜单管理",
+                menuItem4: "设置",
+                firebaseStatus: "Firebase 状态",
+                cartCount: "购物车",
+                modalTitle: "提示"
             },
             en: {
                 title: "Tong Guo Ji · Hotpot Delivery",
@@ -159,34 +428,89 @@
                 todaySales: "Today's Sales",
                 deliveryFee: "Extra delivery fee",
                 checkout: "Checkout",
-                langToggle: "华语"
+                langToggle: "华语",
+                menuTitle: "Tong Guo Ji",
+                menuItem1: "Dashboard",
+                menuItem2: "Orders",
+                menuItem3: "Menu",
+                menuItem4: "Settings",
+                firebaseStatus: "Firebase Status",
+                cartCount: "Cart",
+                modalTitle: "Notice"
             }
         };
 
-        let currentLang = 'zh'; // 默认语言为华语
+        let currentLang = 'zh';
 
-        // 切换语言函数
+        // Toggle language
         function toggleLanguage() {
             currentLang = (currentLang === 'zh') ? 'en' : 'zh';
             applyLanguage(currentLang);
         }
 
-        // 应用语言到页面
+        // Apply language to page
         function applyLanguage(lang) {
             const texts = i18n[lang];
-            // 遍历字典并更新对应的DOM元素
             for (let key in texts) {
                 const element = document.getElementById(key);
                 if (element) {
                     element.innerText = texts[key];
                 }
             }
-            // 更新网页的 lang 属性以利于SEO和无障碍阅读
             document.documentElement.lang = (lang === 'zh') ? 'zh' : 'en';
         }
 
-        // 页面加载时初始化默认语言
+        // Toggle side menu
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('overlay');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        // Show page
+        function showPage(page) {
+            toggleMenu();
+            showModal('页面导航', `正在跳转到 ${page} 页面`);
+            console.log('Navigating to:', page);
+        }
+
+        // Show documents
+        function showDocuments() {
+            showModal('文档', '查看文档内容');
+        }
+
+        // Show analytics
+        function showAnalytics() {
+            showModal('统计分析', '查看数据分析报表');
+        }
+
+        // Show profile
+        function showProfile() {
+            showModal('用户资料', '查看和编辑用户资料');
+        }
+
+        // Show modal
+        function showModal(title, content) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalContent').innerText = content;
+            document.getElementById('modal').classList.add('show');
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        // Initialize default language
         applyLanguage(currentLang);
+
+        // Checkout button click
+        document.getElementById('checkout').addEventListener('click', function() {
+            showModal('结算', '正在处理结算...');
+        });
     </script>
 </body>
 </html>
