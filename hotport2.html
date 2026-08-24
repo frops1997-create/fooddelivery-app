@@ -221,6 +221,48 @@
             cursor: pointer;
             font-size: 24px;
         }
+
+        /* Order Form */
+        .order-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .submit-btn {
+            background: #ff4b2b;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        .submit-btn:hover {
+            background: #ff416c;
+        }
     </style>
 </head>
 <body>
@@ -240,7 +282,7 @@
             <span id="menuItem2">订单管理</span>
         </div>
         <div class="side-menu-item" onclick="showPage('menu')">
-            <span>🍲</span>
+            <span></span>
             <span id="menuItem3">菜单管理</span>
         </div>
         <div class="side-menu-item" onclick="showPage('settings')">
@@ -272,7 +314,7 @@
                 </div>
             </div>
         </div>
-        <button class="lang-btn" onclick="toggleLanguage()"> <span id="langText">English</span></button>
+        <button class="lang-btn" onclick="toggleLanguage()">🌐 <span id="langText">English</span></button>
     </div>
 
     <div class="container">
@@ -283,7 +325,7 @@
             <div class="info-row">
                 <span class="highlight" id="rating">★ 4.8 (2,309)</span> &nbsp;|&nbsp; 
                 🚴 <span id="deliveryTime">28 分钟送达</span> &nbsp;|&nbsp; 
-                 <span id="distance">距您 1.2 km</span>
+                📍 <span id="distance">距您 1.2 km</span>
             </div>
         </div>
 
@@ -291,7 +333,7 @@
         <div class="card">
             <div class="stats-grid">
                 <div class="stat-item">
-                    📦 <span id="todayOrders">今日订单</span>
+                     <span id="todayOrders">今日订单</span>
                     <span class="stat-value" id="orderCount">0</span>
                 </div>
                 <div class="stat-item">
@@ -306,6 +348,46 @@
             <div class="subtitle" id="firebaseStatus">Firebase 状态</div>
             <div id="connectionStatus">连接中...</div>
         </div>
+
+        <!-- 订餐表单 -->
+        <div class="card">
+            <div class="subtitle" id="orderSubtitle">在线订餐</div>
+            <div class="order-form">
+                <div class="form-group">
+                    <label id="labelName">姓名</label>
+                    <input type="text" id="customerName" placeholder="请输入您的姓名">
+                </div>
+                <div class="form-group">
+                    <label id="labelPhone">电话</label>
+                    <input type="tel" id="customerPhone" placeholder="请输入您的电话号码">
+                </div>
+                <div class="form-group">
+                    <label id="labelAddress">地址</label>
+                    <textarea id="customerAddress" placeholder="请输入送餐地址"></textarea>
+                </div>
+                <div class="form-group">
+                    <label id="labelItems">菜品选择</label>
+                    <select id="menuItems">
+                        <option value="0">请选择菜品</option>
+                        <option value="45">麻辣火锅 - $45</option>
+                        <option value="55">清汤火锅 - $55</option>
+                        <option value="65">鸳鸯火锅 - $65</option>
+                        <option value="35">肥牛卷 - $35</option>
+                        <option value="30">羊肉卷 - $30</option>
+                        <option value="25">蔬菜拼盘 - $25</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label id="labelQuantity">数量</label>
+                    <input type="number" id="quantity" value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label id="labelNotes">备注</label>
+                    <textarea id="orderNotes" placeholder="特殊要求或备注"></textarea>
+                </div>
+                <button class="submit-btn" id="submitOrder" onclick="submitOrder()">提交订单</button>
+            </div>
+        </div>
     </div>
 
     <!-- 底部结算栏 -->
@@ -314,7 +396,7 @@
             <div>🛒 <span id="cartCount">0</span> | <strong id="cartTotal">$0.0</strong></div>
             <div class="fee" id="deliveryFee">配送费另计</div>
         </div>
-        <button class="checkout-btn" id="checkout">去结算</button>
+        <button class="checkout-btn" id="checkout" onclick="checkout()">去结算</button>
     </div>
 
     <!-- Firebase SDK -->
@@ -368,16 +450,18 @@
             }
         });
 
-        // Example function to add order to Firebase
+        // Function to add order to Firebase
         window.addOrderToFirebase = function(orderData) {
             const newOrderRef = push(ordersRef);
-            set(newOrderRef, {
+            return set(newOrderRef, {
                 ...orderData,
                 timestamp: Date.now()
             }).then(() => {
                 console.log('Order added successfully');
+                return newOrderRef.key;
             }).catch((error) => {
                 console.error('Error adding order:', error);
+                throw error;
             });
         };
 
@@ -415,7 +499,19 @@
                 menuItem4: "设置",
                 firebaseStatus: "Firebase 状态",
                 cartCount: "购物车",
-                modalTitle: "提示"
+                modalTitle: "提示",
+                orderSubtitle: "在线订餐",
+                labelName: "姓名",
+                labelPhone: "电话",
+                labelAddress: "地址",
+                labelItems: "菜品选择",
+                labelQuantity: "数量",
+                labelNotes: "备注",
+                submitOrder: "提交订单",
+                placeholderName: "请输入您的姓名",
+                placeholderPhone: "请输入您的电话号码",
+                placeholderAddress: "请输入送餐地址",
+                placeholderNotes: "特殊要求或备注"
             },
             en: {
                 title: "Tong Guo Ji · Hotpot Delivery",
@@ -436,7 +532,19 @@
                 menuItem4: "Settings",
                 firebaseStatus: "Firebase Status",
                 cartCount: "Cart",
-                modalTitle: "Notice"
+                modalTitle: "Notice",
+                orderSubtitle: "Online Ordering",
+                labelName: "Name",
+                labelPhone: "Phone",
+                labelAddress: "Address",
+                labelItems: "Menu Items",
+                labelQuantity: "Quantity",
+                labelNotes: "Notes",
+                submitOrder: "Submit Order",
+                placeholderName: "Enter your name",
+                placeholderPhone: "Enter your phone number",
+                placeholderAddress: "Enter delivery address",
+                placeholderNotes: "Special requests or notes"
             }
         };
 
@@ -457,6 +565,18 @@
                     element.innerText = texts[key];
                 }
             }
+            
+            // Update placeholders
+            const nameInput = document.getElementById('customerName');
+            const phoneInput = document.getElementById('customerPhone');
+            const addressInput = document.getElementById('customerAddress');
+            const notesInput = document.getElementById('orderNotes');
+            
+            if (nameInput) nameInput.placeholder = texts.placeholderName;
+            if (phoneInput) phoneInput.placeholder = texts.placeholderPhone;
+            if (addressInput) addressInput.placeholder = texts.placeholderAddress;
+            if (notesInput) notesInput.placeholder = texts.placeholderNotes;
+            
             document.documentElement.lang = (lang === 'zh') ? 'zh' : 'en';
         }
 
@@ -504,13 +624,62 @@
             document.getElementById('modalOverlay').classList.remove('show');
         }
 
+        // Submit order
+        function submitOrder() {
+            const name = document.getElementById('customerName').value;
+            const phone = document.getElementById('customerPhone').value;
+            const address = document.getElementById('customerAddress').value;
+            const items = document.getElementById('menuItems');
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const notes = document.getElementById('orderNotes').value;
+            
+            if (!name || !phone || !address) {
+                showModal('错误', '请填写完整信息');
+                return;
+            }
+            
+            const selectedItem = items.options[items.selectedIndex];
+            const price = parseFloat(selectedItem.value);
+            const itemName = selectedItem.text.split(' - ')[0];
+            const amount = price * quantity;
+            
+            const orderData = {
+                name: name,
+                phone: phone,
+                address: address,
+                items: itemName,
+                quantity: quantity,
+                price: price,
+                amount: amount,
+                notes: notes,
+                status: 'pending'
+            };
+            
+            // Add to Firebase
+            if (window.addOrderToFirebase) {
+                window.addOrderToFirebase(orderData).then(() => {
+                    showModal('成功', '订单已提交！');
+                    // Clear form
+                    document.getElementById('customerName').value = '';
+                    document.getElementById('customerPhone').value = '';
+                    document.getElementById('customerAddress').value = '';
+                    document.getElementById('orderNotes').value = '';
+                    document.getElementById('quantity').value = '1';
+                }).catch((error) => {
+                    showModal('错误', '提交失败：' + error.message);
+                });
+            } else {
+                showModal('成功', '订单已提交！（演示模式）');
+            }
+        }
+
+        // Checkout
+        function checkout() {
+            showModal('结算', '正在处理结算...');
+        }
+
         // Initialize default language
         applyLanguage(currentLang);
-
-        // Checkout button click
-        document.getElementById('checkout').addEventListener('click', function() {
-            showModal('结算', '正在处理结算...');
-        });
     </script>
 </body>
 </html>
