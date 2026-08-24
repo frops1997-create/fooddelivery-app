@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ===== 全局与原有样式保持一致 ===== */
         :root {
             --cream: #FBF3E7; --cream-2: #F3E6D2; --broth: #B7371F; --broth-dark: #8E2A17;
             --copper: #C4894A; --copper-light: #E3B876; --ink: #2B2118; --ink-soft: #6B5D4F;
@@ -120,6 +119,10 @@
         .map-sheet .map-cancel { margin-top: 12px; padding: 13px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); cursor: pointer; font-weight: 600; font-size: 14px; text-align: center; color: var(--ink-soft); transition: all .15s ease; width: 100%; }
         .fullscreen .topbar { position: static; }
         .fullscreen .tabs { position: static; }
+
+        /* 语言切换按钮样式 */
+        .lang-btn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .lang-btn:hover { background: rgba(255,255,255,.2); }
     </style>
 </head>
 <body>
@@ -156,7 +159,7 @@
             <button id="exportExcelBtn" style="background:#2B6B3A;" data-i18n="exportExcel">📥 Excel</button>
             <button id="resetTodayBtn" style="background:#9A4A4A;" data-i18n="resetToday">↻ 重置今日</button>
             <button class="logout-btn" id="logoutBtn" data-i18n="logout">🚪 登出</button>
-            <button class="auth-btn" id="langToggleBtn" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;">🌐 EN</button>
+            <button class="lang-btn" id="langToggleBtn">🌐 EN</button>
             <div class="online-toggle" id="onlineToggle">
                 <div class="dot" id="onlineDot"></div>
                 <span id="onlineLabel" data-i18n="offline">离线</span>
@@ -303,6 +306,7 @@
                 loginFirst: '请先登录',
                 logoutSuccess: '已登出',
                 restoreSuccess: '恢复未完成订单',
+                delete: '删除'
             },
             en: {
                 brandName: 'Tongguoji · Rider',
@@ -384,6 +388,7 @@
                 loginFirst: 'Please sign in first',
                 logoutSuccess: 'Signed out',
                 restoreSuccess: 'Restored active order',
+                delete: 'Delete'
             }
         };
 
@@ -404,13 +409,10 @@
                 const val = t(key);
                 if (val) el.placeholder = val;
             });
-            // 动态更新标题
             const authMode = document.querySelector('.auth-tab.active')?.dataset.mode || 'login';
             updateAuthUIText(authMode);
-            // 重新渲染列表和标签
             renderTabs();
             renderList();
-            // 更新在线状态文字
             document.getElementById('onlineLabel').textContent = isOnline ? t('online') : t('offline');
         }
 
@@ -497,444 +499,4 @@
             try {
                 const riderId = 'rider_' + phone.replace(/\D/g, '');
                 if (authMode === 'register') {
-                    const snap = await ridersRef.child(riderId).once('value');
-                    if (snap.exists()) throw new Error(t('phoneRegistered'));
-                    await ridersRef.child(riderId).set({ name, phone, address, password: hashedPwd, registerTime: firebase.database.ServerValue.TIMESTAMP });
-                    currentRider = { id: riderId, name, phone, address };
-                } else {
-                    const snap = await ridersRef.child(riderId).once('value');
-                    if (!snap.exists()) throw new Error(t('notRegistered'));
-                    const data = snap.val();
-                    if (!data.password || data.password !== hashedPwd) throw new Error(t('wrongPassword'));
-                    currentRider = { id: riderId, name: data.name, phone: data.phone, address: data.address };
-                }
-                localStorage.setItem('riderSession', JSON.stringify(currentRider));
-                hideAuthModal();
-                updateRiderUI();
-                renderList();
-                updateEarnings();
-                alert(t('loginSuccess') + currentRider.name);
-                // 恢复未完成订单
-                setTimeout(() => restoreActiveOrder(), 300);
-            } catch (err) {
-                errorEl.textContent = err.message || '操作失败，请重试';
-            } finally {
-                btn.disabled = false;
-                btn.textContent = originalText;
-            }
-        }
-
-        function logout() {
-            if (!currentRider || !confirm(t('confirmLogout'))) return;
-            currentRider = null;
-            localStorage.removeItem('riderSession');
-            localStorage.removeItem('current_active_order');
-            updateRiderUI();
-            renderList();
-            showAuthModal();
-        }
-
-        function updateRiderUI() {
-            document.getElementById('riderSub').textContent = currentRider ? `🛵 ${currentRider.name} · ${currentRider.phone}` : t('notLoggedIn');
-            document.getElementById('logoutBtn').style.display = currentRider ? 'flex' : 'none';
-        }
-
-        function checkAuth() {
-            const saved = loadRiderFromStorage();
-            if (saved) {
-                const riderId = 'rider_' + saved.phone.replace(/\D/g, '');
-                ridersRef.child(riderId).once('value').then(snap => {
-                    if (snap.exists() && snap.val().name === saved.name) {
-                        currentRider = { id: riderId, name: snap.val().name, phone: snap.val().phone, address: snap.val().address };
-                        hideAuthModal();
-                        updateRiderUI();
-                        renderList();
-                        updateEarnings();
-                        setTimeout(() => restoreActiveOrder(), 300);
-                        return;
-                    }
-                    localStorage.removeItem('riderSession');
-                    localStorage.removeItem('current_active_order');
-                    showAuthModal();
-                }).catch(() => showAuthModal());
-            } else {
-                showAuthModal();
-            }
-        }
-
-        document.querySelectorAll('.auth-tab').forEach(tab => tab.addEventListener('click', () => { 
-            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            updateAuthUI();
-        }));
-        document.getElementById('authSubmitBtn').addEventListener('click', handleAuthSubmit);
-        document.getElementById('logoutBtn').addEventListener('click', logout);
-
-        // ============================================================
-        // 核心业务逻辑
-        // ============================================================
-        function timeAgo(ts) {
-            if (!ts) return '刚刚';
-            const diff = Math.floor((Date.now() - ts) / 1000);
-            if (diff < 60) return '刚刚';
-            if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
-            return new Date(ts).toLocaleString();
-        }
-
-        function googleLink(addr) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr || '')}`; }
-
-        function showMapChooser(address, label) {
-            if (!address) { alert('⚠️ 地址信息缺失，无法导航'); return; }
-            mapPendingAddress = address;
-            mapPendingLabel = label || '目的地';
-            document.getElementById('mapAddressDisplay').textContent = `📍 ${label || '目的地'}：${address}`;
-            document.getElementById('mapOverlay').classList.add('show');
-        }
-        function closeMapChooser() { document.getElementById('mapOverlay').classList.remove('show'); }
-
-        document.querySelector('.map-opt[data-map="google"]').addEventListener('click', () => {
-            if (mapPendingAddress) { window.open(googleLink(mapPendingAddress), '_blank'); closeMapChooser(); }
-        });
-        document.getElementById('mapCancelBtn').addEventListener('click', closeMapChooser);
-        document.getElementById('mapOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeMapChooser(); });
-
-        const TABS = [
-            { id: 'available', labelKey: 'available', match: o => o.status === 'ready' && !o.riderId },
-            { id: 'active', labelKey: 'active', match: o => o.riderId === currentRider?.id && ['assigned', 'picked_up'].includes(o.status) },
-            { id: 'done', labelKey: 'done', match: o => o.riderId === currentRider?.id && o.status === 'delivered' },
-        ];
-
-        function getStatusLabel(status) {
-            const map = { 'pending': t('pending'), 'ready': t('ready'), 'assigned': t('assigned'), 'picked_up': t('picked_up'), 'delivered': t('delivered') };
-            return map[status] || status;
-        }
-        function getStatusClass(status) {
-            const map = { 'pending': 'status-pending', 'ready': 'status-ready', 'assigned': 'status-assigned', 'picked_up': 'status-picked_up', 'delivered': 'status-delivered' };
-            return map[status] || '';
-        }
-
-        function renderTabs() {
-            const el = document.getElementById('tabs');
-            if (!currentRider) { el.innerHTML = ''; return; }
-            el.innerHTML = TABS.map(t => {
-                const count = Object.values(orders).filter(t.match).length;
-                const label = t(t.labelKey);
-                return `<div class="tab ${activeTab===t.id?'active':''}" data-id="${t.id}">${label} ${count>0 ? `<span class="badge">${count}</span>` : ''}</div>`;
-            }).join('');
-            el.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', () => { activeTab = tab.dataset.id; renderTabs(); renderList(); });
-            });
-        }
-
-        function orderCard(id, o) {
-            let actions = '';
-            if (activeTab === 'available' && o.status === 'ready' && !o.riderId) {
-                actions = `<div class="btn-row"><button class="btn btn-primary" data-action="claim" data-id="${id}">${t('claim')}</button></div>`;
-            } else if (o.status === 'assigned' && o.riderId === currentRider?.id) {
-                actions = `<div class="btn-row"><button class="btn btn-nav" data-action="nav-pickup" data-id="${id}"><span class="icon">📍</span> ${t('navPickup')}</button><button class="btn btn-blue" data-action="pickup" data-id="${id}">${t('confirmPickup')}</button></div>`;
-            } else if (o.status === 'picked_up' && o.riderId === currentRider?.id) {
-                actions = `<div class="btn-row"><button class="btn btn-nav" data-action="nav-dropoff" data-id="${id}"><span class="icon">📍</span> ${t('navDropoff')}</button><button class="btn btn-veg" data-action="deliver" data-id="${id}">${t('confirmDeliver')}</button></div>`;
-            } else if (o.status === 'delivered') {
-                actions = `<div style="text-align:center; color:var(--veg); font-weight:600; font-size:13px; margin-top:8px;">✅ ${t('deliveredLabel')}</div>`;
-            }
-            return `
-            <div class="order-card">
-              <div class="order-head">
-                <div><div class="order-id">${t('orderId')}${id.slice(-5).toUpperCase()}</div><div class="order-time">${timeAgo(o.createdAt)}</div></div>
-                <div style="display:flex; gap:6px; flex-wrap:wrap;"><div class="status-pill ${getStatusClass(o.status)}">${getStatusLabel(o.status)}</div><div class="fee-pill">${t('deliveryFee')} $${(o.deliveryFee||0).toFixed(1)}</div></div>
-              </div>
-              <div style="font-size:12px; color:var(--ink-soft); margin-bottom:6px;">${(o.items||[]).map(i => `${i.name}×${i.qty}`).join('、')}</div>
-              <div class="route">
-                <div class="route-row"><div class="route-dot pickup"></div><div><div class="route-label">${t('pickup')}${o.restaurantName||t('restaurant')}</div><div class="route-text">${o.restaurantAddress||'—'}</div></div></div>
-                <div class="route-row"><div class="route-dot dropoff"></div><div><div class="route-label">${t('deliverTo')}</div><div class="route-text">${o.customerAddress||'—'}</div></div></div>
-              </div>
-              <div class="divider"></div>
-              <div class="total-row"><span>${t('orderAmount')}</span><span>$${(o.total||0).toFixed(1)}</span></div>
-              ${actions}
-            </div>`;
-        }
-
-        function renderList() {
-            const el = document.getElementById('list');
-            if (!currentRider) { el.innerHTML = `<div class="empty"><span class="em">🔒</span>${t('loginFirst')}</div>`; return; }
-            const tabDef = TABS.find(t => t.id === activeTab);
-            const filtered = Object.entries(orders).filter(([id, o]) => tabDef.match(o)).sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
-            
-            if (!isOnline && activeTab === 'available') { el.innerHTML = `<div class="empty"><span class="em">😴</span>您已下线，上线后可查看可接订单</div>`; return; }
-            if (filtered.length === 0) {
-                let msg = activeTab === 'available' ? t('noOrders') : (activeTab === 'active' ? t('noActive') : t('noDone'));
-                el.innerHTML = `<div class="empty"><span class="em">📭</span>${msg}</div>`;
-                return;
-            }
-            el.innerHTML = filtered.map(([id, o]) => orderCard(id, o)).join('');
-            
-            el.querySelectorAll('[data-action]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.dataset.id;
-                    const action = btn.dataset.action;
-                    const order = orders[id];
-                    
-                    if (action === 'claim') {
-                        ordersRef.child(id).transaction(current => {
-                            if (current && current.status === 'ready' && !current.riderId) {
-                                current.status = 'assigned';
-                                current.riderId = currentRider.id;
-                                current.riderName = currentRider.name;
-                                current.assignedAt = firebase.database.ServerValue.TIMESTAMP;
-                                current.updatedAt = firebase.database.ServerValue.TIMESTAMP;
-                                return current;
-                            }
-                            return;
-                        }, (err, committed, snapshot) => {
-                            if (committed && snapshot) {
-                                localStorage.setItem('current_active_order', JSON.stringify(snapshot.val()));
-                                activeTab = 'active';
-                                renderTabs();
-                                renderList();
-                            } else {
-                                alert(t('claimed'));
-                            }
-                        });
-                    } else if (action === 'pickup') {
-                        ordersRef.child(id).update({ status: 'picked_up', pickedUpAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP });
-                        let activeOrder = JSON.parse(localStorage.getItem('current_active_order') || '{}');
-                        if(activeOrder.id === id) {
-                            activeOrder.status = 'picked_up';
-                            localStorage.setItem('current_active_order', JSON.stringify(activeOrder));
-                        }
-                    } else if (action === 'deliver') {
-                        ordersRef.child(id).update({ status: 'delivered', deliveredAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP });
-                        localStorage.removeItem('current_active_order');
-                    } else if (action === 'nav-pickup') {
-                        showMapChooser(order.restaurantAddress, `${t('pickup')}${order.restaurantName || t('restaurant')}`);
-                    } else if (action === 'nav-dropoff') {
-                        showMapChooser(order.customerAddress, t('deliverTo'));
-                    }
-                });
-            });
-        }
-
-        function updateEarnings() {
-            if (!currentRider) return;
-            const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
-            let earned = 0, count = 0;
-            Object.values(orders).forEach(o => {
-                if (o.riderId === currentRider.id && o.status === 'delivered' && o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
-                    earned += (o.deliveryFee || 0); count += 1;
-                }
-            });
-            document.getElementById('earnToday').textContent = '$' + earned.toFixed(1);
-            document.getElementById('deliveredToday').textContent = count;
-        }
-
-        ordersRef.on('value', snap => {
-            const val = snap.val() || {};
-            orders = val;
-            const currentAvailable = new Set();
-            Object.entries(val).forEach(([id, o]) => { if (!o.riderId && o.status === 'ready') currentAvailable.add(id); });
-            let hasNew = false;
-            currentAvailable.forEach(id => { if (!knownAvailableIds.has(id)) hasNew = true; });
-            if (hasNew && isOnline && currentRider) {
-                try {
-                    if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                    o.type = 'sine'; o.frequency.value = 660;
-                    g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-                    g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
-                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
-                    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.5);
-                } catch (e) {}
-                document.title = '🔔 新订单可接 · 骑手端';
-                setTimeout(() => { document.title = '铜锅记 · 骑手端'; }, 4000);
-            }
-            knownAvailableIds = currentAvailable;
-            renderTabs();
-            renderList();
-            updateEarnings();
-        });
-
-        db.ref('.info/connected').on('value', snap => {
-            document.getElementById('connBanner').classList.toggle('show', snap.val() === false);
-        });
-
-        function refreshOnlineUI() {
-            document.getElementById('onlineDot').classList.toggle('on', isOnline);
-            document.getElementById('onlineLabel').textContent = isOnline ? t('online') : t('offline');
-        }
-        document.getElementById('onlineToggle').addEventListener('click', () => {
-            isOnline = !isOnline;
-            localStorage.setItem('riderOnline', isOnline);
-            refreshOnlineUI();
-            renderList();
-        });
-        refreshOnlineUI();
-
-        document.getElementById('fullscreenBtn').addEventListener('click', () => {
-            if (!document.fullscreenElement) { document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.(); } 
-            else { document.exitFullscreen?.() || document.webkitExitFullscreen?.(); }
-        });
-
-        function showHistoryOrders() {
-            if (!currentRider) return alert(t('loginFirst'));
-            const historyOrders = Object.entries(orders).filter(([id, o]) => o.riderId === currentRider.id && o.status === 'delivered').sort((a, b) => (b[1].deliveredAt || 0) - (a[1].deliveredAt || 0));
-            document.getElementById('sheetTitle').textContent = t('history') + ' (' + historyOrders.length + ')';
-            let html = historyOrders.length === 0 ? `<div style="padding:40px 20px; text-align:center; color:var(--ink-soft);"><div style="font-size:40px;">📭</div><p>${t('noHistory')}</p></div>` : 
-                historyOrders.map(([id, o]) => `
-                <div class="history-item">
-                  <div class="h-header"><span class="h-id">${t('orderId')}${id.slice(-6).toUpperCase()}</span><span class="h-status">✅ ${t('deliveredLabel')}</span></div>
-                  <div class="h-items">${(o.items || []).map(i => `${i.name}×${i.qty}`).join('、') || '（无菜品）'}</div>
-                  <div class="h-meta"><span>🕐 ${o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : t('orderTime')}</span><span style="font-weight:700;color:var(--broth);">$${(o.total||0).toFixed(1)}</span></div>
-                  <div class="h-meta"><span style="font-size:11px;color:var(--ink-soft);">${t('deliveryFee')} $${(o.deliveryFee||0).toFixed(1)}</span><button class="delete-btn" data-id="${id}">🗑 ${t('delete') || '删除'}</button></div>
-                </div>`).join('');
-            document.getElementById('sheetBody').innerHTML = html;
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (confirm(t('confirmDelete') + btn.dataset.id.slice(-6).toUpperCase() + '？')) {
-                        ordersRef.child(btn.dataset.id).remove().then(() => showHistoryOrders());
-                    }
-                });
-            });
-            document.getElementById('overlay').classList.add('show');
-            document.getElementById('closeSheet').onclick = () => document.getElementById('overlay').classList.remove('show');
-        }
-
-        function showTodayStats() {
-            if (!currentRider) return alert(t('loginFirst'));
-            const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
-            let list = [], count = 0, earned = 0;
-            Object.entries(orders).forEach(([id, o]) => {
-                if (o.riderId === currentRider.id && o.status === 'delivered' && o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
-                    count++; earned += (o.deliveryFee || 0); list.push({ id, ...o });
-                }
-            });
-            list.sort((a, b) => (b.deliveredAt || 0) - (a.deliveredAt || 0));
-            document.getElementById('sheetTitle').textContent = t('todayStats');
-            document.getElementById('sheetBody').innerHTML = `
-            <div style="background:var(--card); padding:14px; border-radius:12px; margin-bottom:12px; border:1px solid var(--line);">
-              <div style="display:flex; justify-content:space-between; font-weight:600; font-size:14px; padding:4px 0;"><span>${t('todayDelivered')}</span><span style="color:var(--broth);">${count}</span></div>
-              <div style="display:flex; justify-content:space-between; font-weight:700; font-size:16px; padding:4px 0; border-top:1px solid var(--line); margin-top:4px; padding-top:8px;"><span>${t('todayEarnLabel')}</span><span style="color:var(--broth);">$${earned.toFixed(1)}</span></div>
-            </div>
-            <div style="max-height:50vh; overflow-y:auto; padding-right:4px;">${list.length ? list.map(o => `<div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px;"><div style="display:flex; justify-content:space-between;"><strong style="color:var(--broth);">${t('orderId')}${o.id.slice(-6).toUpperCase()}</strong><span style="font-weight:700;">$${(o.total||0).toFixed(1)}</span></div><div style="color:var(--ink-soft); font-size:12px;">${(o.items||[]).map(i => `${i.name}×${i.qty}`).join('、')}</div><div style="color:var(--ink-soft); font-size:11px;">${o.deliveredAt ? new Date(o.deliveredAt).toLocaleTimeString() : ''}</div></div>`).join('') : '<div style="padding:20px; text-align:center; color:var(--ink-soft);">' + t('noTodayOrders') + '</div>'}</div>`;
-            document.getElementById('overlay').classList.add('show');
-            document.getElementById('closeSheet').onclick = () => document.getElementById('overlay').classList.remove('show');
-        }
-
-        function exportExcel() {
-            if (!currentRider) return alert(t('loginFirst'));
-            const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
-            const rows = [];
-            Object.entries(orders).forEach(([id, o]) => {
-                if (o.riderId === currentRider.id && o.status === 'delivered' && o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
-                    rows.push({ '订单号': id.slice(-6).toUpperCase(), '顾客': o.customerName || '', '电话': o.customerPhone || '', '地址': o.customerAddress || '', '菜品': (o.items || []).map(i => `${i.name}×${i.qty}`).join('; '), '总金额': o.total || 0, '配送费': o.deliveryFee || 0, '送达时间': o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : '' });
-                }
-            });
-            if (rows.length === 0) { alert('今日暂无已完成订单可导出'); return; }
-            const headers = Object.keys(rows[0]);
-            let csv = headers.join(',') + '\n' + rows.map(r => headers.map(h => `"${(r[h]||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `配送统计_${new Date().toLocaleDateString()}.csv`;
-            link.click();
-        }
-
-        function resetTodayOrders() {
-            if (!currentRider) return alert(t('loginFirst'));
-            if (!confirm(t('confirmReset'))) return;
-            const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
-            const updates = {};
-            let count = 0;
-            Object.entries(orders).forEach(([id, o]) => {
-                if (o.riderId === currentRider.id && o.status === 'delivered' && o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
-                    updates[id] = null; count++;
-                }
-            });
-            if (count === 0) { alert('今日暂无已完成订单可重置'); return; }
-            if (confirm(t('resetConfirmFinal') + count + t('resetConfirmEnd'))) {
-                ordersRef.update(updates).then(() => { alert(t('resetSuccess') + count + t('resetDone')); updateEarnings(); renderList(); });
-            }
-        }
-
-        document.getElementById('historyBtn').addEventListener('click', showHistoryOrders);
-        document.getElementById('todayStatsBtn').addEventListener('click', showTodayStats);
-        document.getElementById('exportExcelBtn').addEventListener('click', exportExcel);
-        document.getElementById('resetTodayBtn').addEventListener('click', resetTodayOrders);
-
-        // ============================================================
-        // 恢复未完成订单
-        // ============================================================
-        function restoreActiveOrder() {
-            const savedOrderStr = localStorage.getItem('current_active_order');
-            if (savedOrderStr && currentRider) {
-                try {
-                    const savedOrder = JSON.parse(savedOrderStr);
-                    if (savedOrder.riderId === currentRider.id && savedOrder.status !== 'delivered') {
-                        console.log("🔍 发现未完成的订单，自动切换到进行中标签:", savedOrder.id);
-                        activeTab = 'active';
-                        renderTabs();
-                        renderList();
-                        return true;
-                    } else if (savedOrder.status === 'delivered') {
-                        localStorage.removeItem('current_active_order');
-                    }
-                } catch (e) {
-                    console.error("恢复订单失败:", e);
-                    localStorage.removeItem('current_active_order');
-                }
-            }
-            return false;
-        }
-
-        // ============================================================
-        // 初始化
-        // ============================================================
-        // 添加缺失的 'delete' 翻译键
-        i18n.zh.delete = '删除';
-        i18n.en.delete = 'Delete';
-
-        // 启动 Firebase 订单监听
-        ordersRef.on('value', snap => {
-            const val = snap.val() || {};
-            orders = val;
-            const currentAvailable = new Set();
-            Object.entries(val).forEach(([id, o]) => { if (!o.riderId && o.status === 'ready') currentAvailable.add(id); });
-            let hasNew = false;
-            currentAvailable.forEach(id => { if (!knownAvailableIds.has(id)) hasNew = true; });
-            if (hasNew && isOnline && currentRider) {
-                try {
-                    if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                    o.type = 'sine'; o.frequency.value = 660;
-                    g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-                    g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
-                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
-                    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.5);
-                } catch (e) {}
-                document.title = '🔔 新订单可接 · 骑手端';
-                setTimeout(() => { document.title = '铜锅记 · 骑手端'; }, 4000);
-            }
-            knownAvailableIds = currentAvailable;
-            renderTabs();
-            renderList();
-            updateEarnings();
-        });
-
-        // 执行登录状态检查
-        checkAuth();
-        updateRiderUI();
-        refreshOnlineUI();
-
-        // 监听页面可见性变化
-        window.addEventListener('visibilitychange', () => {
-            if (!document.hidden && currentRider) {
-                console.log("🔄 页面从后台唤醒，检查订单状态...");
-                restoreActiveOrder();
-            }
-        });
-
-        // 初始更新国际化
-        updateI18n();
-    </script>
-</body>
-</html>
+                    const snap = await ridersRef.child
