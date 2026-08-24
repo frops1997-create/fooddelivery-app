@@ -191,70 +191,70 @@
 <div class="topbar">
   <div class="brand">
     <div>
-      <div class="brand-name">铜锅记 · 商家端</div>
-      <div class="brand-sub" id="restaurantSub">接单管理</div>
+      <div class="brand-name" data-i18n="brandName">铜锅记 · 商家端</div>
+      <div class="brand-sub" id="restaurantSub" data-i18n="brandSub">接单管理</div>
     </div>
   </div>
   <div class="top-actions">
     <span class="restaurant-addr-tag" id="headerAddrTag" title="点击修改地址">📍 未设置地址</span>
     <div class="online-toggle" id="onlineToggle">
       <div class="dot" id="onlineDot"></div>
-      <span id="onlineLabel">营业中</span>
+      <span id="onlineLabel" data-i18n="online">营业中</span>
     </div>
-    <button class="auth-btn" id="authLoginBtn">登录</button>
-    <button class="logout-btn" id="logoutBtn">登出</button>
+    <button class="auth-btn" id="authLoginBtn" data-i18n="login">登录</button>
+    <button class="logout-btn" id="logoutBtn" data-i18n="logout">登出</button>
     <button class="auth-btn" id="langToggleBtn" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);">🌐 EN</button>
   </div>
 </div>
 
-<div class="conn-banner" id="connBanner">与服务器连接中断，正在重新连接…</div>
+<div class="conn-banner" id="connBanner" data-i18n="connBanner">与服务器连接中断，正在重新连接…</div>
 
 <div class="tabs" id="tabs"></div>
 <div class="list" id="list"></div>
 
-<button class="test-order-btn" id="testOrderBtn">＋ 生成测试订单</button>
+<button class="test-order-btn" id="testOrderBtn" data-i18n="testOrder">＋ 生成测试订单</button>
 
 <!-- Auth Modal -->
 <div class="modal-overlay" id="authModal">
   <div class="modal-box">
     <button class="modal-close" id="modalCloseBtn">✕</button>
-    <div class="modal-title">档口登录</div>
-    <div class="modal-sub">使用注册的手机号与姓名登录，地址将自动同步</div>
+    <div class="modal-title" data-i18n="authTitle">档口登录</div>
+    <div class="modal-sub" data-i18n="authSub">使用注册的手机号与姓名登录，地址将自动同步</div>
     <div class="tabs-auth" id="authTabs">
-      <div class="tab-auth active" data-tab="login">登录</div>
-      <div class="tab-auth" data-tab="register">注册</div>
+      <div class="tab-auth active" data-tab="login" data-i18n="loginTab">登录</div>
+      <div class="tab-auth" data-tab="register" data-i18n="registerTab">注册</div>
     </div>
     <!-- login form -->
     <div class="auth-form" id="loginForm">
       <div class="form-group">
-        <label>📱 手机号</label>
-        <input type="tel" id="loginPhone" placeholder="例如 91234567">
+        <label data-i18n="phoneLabel">📱 手机号</label>
+        <input type="tel" id="loginPhone" data-i18n-placeholder="loginPlaceholder" placeholder="例如 91234567">
       </div>
       <div class="form-group">
-        <label>👤 姓名</label>
-        <input type="text" id="loginName" placeholder="档口联系人姓名">
+        <label data-i18n="nameLabel">👤 姓名</label>
+        <input type="text" id="loginName" data-i18n-placeholder="namePlaceholder" placeholder="档口联系人姓名">
       </div>
       <div class="form-error" id="loginError"></div>
-      <button class="form-btn" id="loginBtn">登录</button>
+      <button class="form-btn" id="loginBtn" data-i18n="loginBtn">登录</button>
     </div>
     <!-- register form -->
     <div class="auth-form hide" id="registerForm">
       <div class="form-group">
-        <label>📱 手机号</label>
-        <input type="tel" id="registerPhone" placeholder="例如 91234567">
+        <label data-i18n="phoneLabel">📱 手机号</label>
+        <input type="tel" id="registerPhone" data-i18n-placeholder="loginPlaceholder" placeholder="例如 91234567">
       </div>
       <div class="form-group">
-        <label>👤 姓名</label>
-        <input type="text" id="registerName" placeholder="档口联系人姓名">
+        <label data-i18n="nameLabel">👤 姓名</label>
+        <input type="text" id="registerName" data-i18n-placeholder="namePlaceholder" placeholder="档口联系人姓名">
       </div>
       <div class="form-group">
-        <label>📍 档口地址 (永久保存，骑手按此导航)</label>
-        <input type="text" id="registerAddress" placeholder="例如 304 Anchorvale Link, Singapore 540304 号">
+        <label data-i18n="addressLabel">📍 档口地址 (永久保存，骑手按此导航)</label>
+        <input type="text" id="registerAddress" data-i18n-placeholder="addressPlaceholder" placeholder="例如 304 Anchorvale Link, Singapore 540304 号">
       </div>
       <div class="form-error" id="registerError"></div>
-      <button class="form-btn" id="registerBtn">注册</button>
+      <button class="form-btn" id="registerBtn" data-i18n="registerBtn">注册</button>
     </div>
-    <div class="auth-success" id="authSuccess">✅ 认证成功，即将刷新</div>
+    <div class="auth-success" id="authSuccess" data-i18n="authSuccess">✅ 认证成功，即将刷新</div>
   </div>
 </div>
 
@@ -262,14 +262,14 @@
 <div class="modal-overlay address-modal" id="addressModal">
   <div class="modal-box">
     <button class="modal-close" id="addressModalClose">✕</button>
-    <div class="modal-title">📍 修改档口地址</div>
-    <div class="modal-sub">骑手将根据此地址导航取餐，请填写详细地址</div>
+    <div class="modal-title" data-i18n="addressModalTitle">📍 修改档口地址</div>
+    <div class="modal-sub" data-i18n="addressModalSub">骑手将根据此地址导航取餐，请填写详细地址</div>
     <div class="form-group">
-      <label>档口地址</label>
-      <textarea id="addressInput" placeholder="请输入详细地址，例如：304 Anchorvale Link, Singapore 540304 号 #01-01"></textarea>
+      <label data-i18n="addressLabel2">档口地址</label>
+      <textarea id="addressInput" data-i18n-placeholder="addressPlaceholder2" placeholder="请输入详细地址，例如：304 Anchorvale Link, Singapore 540304 号 #01-01"></textarea>
     </div>
     <div class="form-error" id="addressError"></div>
-    <button class="form-btn" id="saveAddressBtn">保存地址</button>
+    <button class="form-btn" id="saveAddressBtn" data-i18n="saveAddress">保存地址</button>
   </div>
 </div>
 
@@ -430,47 +430,24 @@ function t(key) {
 }
 
 function updateI18n() {
-  // Topbar
-  document.querySelector('.brand-name').textContent = t('brandName');
-  document.getElementById('restaurantSub').textContent = t('brandSub');
-  document.getElementById('onlineLabel').textContent = isOnline ? t('online') : t('offline');
-  document.getElementById('authLoginBtn').textContent = t('login');
-  document.getElementById('logoutBtn').textContent = t('logout');
-  document.getElementById('langToggleBtn').textContent = t('langToggle');
-  // 地址标签
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const val = t(key);
+    if (val) el.textContent = val;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    const val = t(key);
+    if (val) el.placeholder = val;
+  });
+  // 动态更新部分
   if (currentUser && currentUser.address) {
     document.getElementById('headerAddrTag').textContent = '📍 ' + currentUser.address;
   } else {
     document.getElementById('headerAddrTag').textContent = t('addressTagDefault');
   }
-  // Auth modal
-  document.querySelector('.modal-title').textContent = t('authTitle');
-  document.querySelector('.modal-sub').textContent = t('authSub');
-  document.querySelectorAll('.tab-auth')[0].textContent = t('loginTab');
-  document.querySelectorAll('.tab-auth')[1].textContent = t('registerTab');
-  document.querySelector('#loginForm label:first-child').textContent = t('phoneLabel');
-  document.querySelector('#loginForm label:last-child').textContent = t('nameLabel');
-  document.querySelector('#loginForm input:first-child').placeholder = t('loginPlaceholder');
-  document.querySelector('#loginForm input:last-child').placeholder = t('namePlaceholder');
-  document.querySelector('#registerForm label:first-child').textContent = t('phoneLabel');
-  document.querySelector('#registerForm label:nth-child(2)').textContent = t('nameLabel');
-  document.querySelector('#registerForm label:last-child').textContent = t('addressLabel');
-  document.querySelector('#registerForm input:first-child').placeholder = t('loginPlaceholder');
-  document.querySelector('#registerForm input:nth-child(2)').placeholder = t('namePlaceholder');
-  document.querySelector('#registerForm input:last-child').placeholder = t('addressPlaceholder');
-  document.getElementById('loginBtn').textContent = t('loginBtn');
-  document.getElementById('registerBtn').textContent = t('registerBtn');
-  // Address modal
-  document.querySelector('.address-modal .modal-title').textContent = t('addressModalTitle');
-  document.querySelector('.address-modal .modal-sub').textContent = t('addressModalSub');
-  document.querySelector('.address-modal .form-group label').textContent = t('addressLabel2');
-  document.querySelector('.address-modal textarea').placeholder = t('addressPlaceholder2');
-  document.getElementById('saveAddressBtn').textContent = t('saveAddress');
-  // Test order
-  document.getElementById('testOrderBtn').textContent = t('testOrder');
-  // Connection banner
-  document.getElementById('connBanner').textContent = t('connBanner');
-  // Tabs & list
+  document.getElementById('onlineLabel').textContent = isOnline ? t('online') : t('offline');
+  // 重新渲染标签和列表
   renderTabs();
   renderList();
 }
@@ -687,11 +664,11 @@ function statusLabel(s){
 
 function renderTabs(){
   const el = document.getElementById('tabs');
-  el.innerHTML = TABS.map(t => {
-    const count = Object.values(orders).filter(t.match).length;
-    const label = t(t.labelKey);
-    return `<div class="tab ${activeTab===t.id?'active':''}" data-id="${t.id}">
-      ${label} ${t.id!=='done' && count>0 ? `<span class="badge">${count}</span>` : ''}
+  el.innerHTML = TABS.map(tab => {
+    const count = Object.values(orders).filter(tab.match).length;
+    const label = t(tab.labelKey);
+    return `<div class="tab ${activeTab===tab.id?'active':''}" data-id="${tab.id}">
+      ${label} ${tab.id!=='done' && count>0 ? `<span class="badge">${count}</span>` : ''}
     </div>`;
   }).join('');
   el.querySelectorAll('.tab').forEach(tab => {
@@ -821,9 +798,9 @@ document.getElementById('onlineToggle').addEventListener('click', () => {
 
 // Test order
 const SAMPLE_ITEMS = [
-  { name: (currentLang === 'zh' ? '麻酱鸡肉' : 'Sesame Chicken'), qty:1, price:8.9 },
-  { name: (currentLang === 'zh' ? '番茄肥牛' : 'Tomato Beef'), qty:2, price:9.9 },
-  { name: (currentLang === 'zh' ? '酸梅汤' : 'Sour Plum Drink'), qty:1, price:2.9 },
+  { name: '麻酱鸡肉', qty:1, price:8.9 },
+  { name: '番茄肥牛', qty:2, price:9.9 },
+  { name: '酸梅汤', qty:1, price:2.9 },
 ];
 document.getElementById('testOrderBtn').addEventListener('click', () => {
   const subtotal = SAMPLE_ITEMS.reduce((s,i)=>s+i.qty*i.price,0);
