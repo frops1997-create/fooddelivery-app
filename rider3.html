@@ -79,8 +79,9 @@
         .btn-nav { background: #E8DCC8; color: var(--ink); flex: 0 1 auto; padding: 11px 18px; font-size: 12.5px; }
         .btn-nav .icon { font-size: 16px; margin-right: 4px; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(43,33,24,.6); z-index: 90; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .modal-card { background: var(--cream); border-radius: 24px; padding: 28px 24px; max-width: 400px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(43,33,24,.6); z-index: 90; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal-card { background: var(--cream); border-radius: 24px; padding: 28px 24px; max-width: 420px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .modal-card .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .modal-card .auth-tab { flex: 1; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); cursor: pointer; text-align: center; font-weight: 600; font-size: 14px; transition: 0.2s; }
         .modal-card .auth-tab.active { background: var(--broth); color: #fff; border-color: var(--broth); }
@@ -120,7 +121,6 @@
         .fullscreen .topbar { position: static; }
         .fullscreen .tabs { position: static; }
 
-        /* 语言切换按钮样式 */
         .lang-btn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; }
         .lang-btn:hover { background: rgba(255,255,255,.2); }
     </style>
@@ -128,51 +128,51 @@
 <body>
 
     <!-- 登录/注册弹窗 -->
-    <div class="modal-overlay" id="authModal">
+    <div class="modal-overlay show" id="authModal">
         <div class="modal-card">
             <div class="auth-tabs">
-                <div class="auth-tab active" data-mode="login" data-i18n="loginTab">登录</div>
-                <div class="auth-tab" data-mode="register" data-i18n="registerTab">注册</div>
+                <div class="auth-tab active" data-mode="login">登录</div>
+                <div class="auth-tab" data-mode="register">注册</div>
             </div>
-            <h2 class="display" id="authTitle" data-i18n="authTitleLogin">骑手登录</h2>
-            <p id="authSub" data-i18n="authSubLogin">登录后即可接单配送</p>
-            <input id="authName" data-i18n-placeholder="namePlaceholder" placeholder="姓名 *" />
+            <h2 class="display" id="authTitle">骑手登录</h2>
+            <p id="authSub">登录后即可接单配送</p>
+            <input id="authName" placeholder="姓名 *" />
             <input id="authPhone" placeholder="手机号 *" type="tel" />
             <input id="authPwd" placeholder="密码 *" type="password" />
             <input id="authAddr" placeholder="常驻地址（注册时必填）*" />
             <div class="error" id="authError"></div>
-            <button class="primary-btn" id="authSubmitBtn" data-i18n="loginBtn">登录</button>
-            <div style="margin-top:12px; text-align:center; font-size:12px; color:var(--ink-soft);" data-i18n="authHint">💡 注册后信息永久保存，可在任何设备登录</div>
+            <button class="primary-btn" id="authSubmitBtn">登录</button>
+            <div style="margin-top:12px; text-align:center; font-size:12px; color:var(--ink-soft);">💡 注册后信息永久保存，可在任何设备登录</div>
         </div>
     </div>
 
     <!-- 主界面 -->
     <div class="topbar">
         <div>
-            <div class="brand-name" data-i18n="brandName">铜锅记 · 骑手端</div>
-            <div class="brand-sub" id="riderSub" data-i18n="notLoggedIn">未登录</div>
+            <div class="brand-name">铜锅记 · 骑手端</div>
+            <div class="brand-sub" id="riderSub">未登录</div>
         </div>
         <div class="top-actions">
-            <button id="fullscreenBtn" data-i18n="fullscreen">⛶ 全屏</button>
-            <button id="historyBtn" data-i18n="history">📋 历史</button>
-            <button id="todayStatsBtn" data-i18n="todayStats">📊 今日</button>
-            <button id="exportExcelBtn" style="background:#2B6B3A;" data-i18n="exportExcel">📥 Excel</button>
-            <button id="resetTodayBtn" style="background:#9A4A4A;" data-i18n="resetToday">↻ 重置今日</button>
-            <button class="logout-btn" id="logoutBtn" data-i18n="logout">🚪 登出</button>
+            <button id="fullscreenBtn">⛶ 全屏</button>
+            <button id="historyBtn">📋 历史</button>
+            <button id="todayStatsBtn">📊 今日</button>
+            <button id="exportExcelBtn" style="background:#2B6B3A;">📥 Excel</button>
+            <button id="resetTodayBtn" style="background:#9A4A4A;">↻ 重置今日</button>
+            <button class="logout-btn" id="logoutBtn">🚪 登出</button>
             <button class="lang-btn" id="langToggleBtn">🌐 EN</button>
             <div class="online-toggle" id="onlineToggle">
                 <div class="dot" id="onlineDot"></div>
-                <span id="onlineLabel" data-i18n="offline">离线</span>
+                <span id="onlineLabel">离线</span>
             </div>
         </div>
     </div>
 
     <div class="earnings-strip">
-        <div class="earn-card"><div class="earn-num" id="earnToday">$0.0</div><div class="earn-label" data-i18n="todayEarn">今日收入</div></div>
-        <div class="earn-card"><div class="earn-num" id="deliveredToday">0</div><div class="earn-label" data-i18n="todayDeliveries">今日单量</div></div>
+        <div class="earn-card"><div class="earn-num" id="earnToday">$0.0</div><div class="earn-label">今日收入</div></div>
+        <div class="earn-card"><div class="earn-num" id="deliveredToday">0</div><div class="earn-label">今日单量</div></div>
     </div>
 
-    <div class="conn-banner" id="connBanner" data-i18n="connBanner">与服务器连接中断，正在重新连接…</div>
+    <div class="conn-banner" id="connBanner">与服务器连接中断，正在重新连接…</div>
     <div class="tabs" id="tabs"></div>
     <div class="list" id="list"></div>
 
@@ -180,7 +180,7 @@
     <div class="overlay" id="overlay">
         <div class="sheet" id="sheet">
             <div class="sheet-head">
-                <h3 class="display" id="sheetTitle" data-i18n="records">📋 记录</h3>
+                <h3 class="display" id="sheetTitle">📋 记录</h3>
                 <button class="close-x" id="closeSheet">✕</button>
             </div>
             <div id="sheetBody"></div>
@@ -191,12 +191,12 @@
     <div class="map-overlay" id="mapOverlay">
         <div class="map-sheet">
             <div class="handle"></div>
-            <div class="map-title" data-i18n="navigation">🗺️ 导航</div>
+            <div class="map-title">🗺️ 导航</div>
             <div class="map-address" id="mapAddressDisplay">📍 地址加载中…</div>
             <div class="map-options">
-                <div class="map-opt" data-map="google"><span class="m-icon">🌍</span><span data-i18n="googleMaps">使用 Google Maps 导航</span></div>
+                <div class="map-opt" data-map="google"><span class="m-icon">🌍</span>使用 Google Maps 导航</div>
             </div>
-            <button class="map-cancel" id="mapCancelBtn" data-i18n="cancel">取消</button>
+            <button class="map-cancel" id="mapCancelBtn">取消</button>
         </div>
     </div>
 
@@ -222,208 +222,6 @@
         const ordersRef = db.ref('orders');
         const ridersRef = db.ref('riders');
 
-        // ============================================================
-        // 国际化 (i18n)
-        // ============================================================
-        const i18n = {
-            zh: {
-                brandName: '铜锅记 · 骑手端',
-                notLoggedIn: '未登录',
-                fullscreen: '⛶ 全屏',
-                history: '📋 历史',
-                todayStats: '📊 今日',
-                exportExcel: '📥 Excel',
-                resetToday: '↻ 重置今日',
-                logout: '🚪 登出',
-                offline: '离线',
-                online: '在线接单',
-                todayEarn: '今日收入',
-                todayDeliveries: '今日单量',
-                connBanner: '与服务器连接中断，正在重新连接…',
-                records: '📋 记录',
-                navigation: '🗺️ 导航',
-                googleMaps: '使用 Google Maps 导航',
-                cancel: '取消',
-                loginTab: '登录',
-                registerTab: '注册',
-                authTitleLogin: '骑手登录',
-                authSubLogin: '登录后即可接单配送',
-                authTitleRegister: '骑手注册',
-                authSubRegister: '注册信息永久保存，随时登录',
-                namePlaceholder: '姓名 *',
-                phonePlaceholder: '手机号 *',
-                pwdPlaceholder: '密码 *',
-                addrPlaceholder: '常驻地址（注册时必填）*',
-                loginBtn: '登录',
-                registerBtn: '注册',
-                authHint: '💡 注册后信息永久保存，可在任何设备登录',
-                loginError: '请输入有效的手机号',
-                pwdRequired: '密码为必填项',
-                nameAddrRequired: '姓名和地址为必填项',
-                processing: '处理中...',
-                loginSuccess: '✅ 操作成功！欢迎 ',
-                phoneRegistered: '该手机号已注册，请直接登录',
-                notRegistered: '该手机号未注册，请先注册',
-                wrongPassword: '密码错误，请重试',
-                confirmLogout: '确定要登出吗？',
-                noOrders: '暂无待配送订单 🛵',
-                noActive: '暂无进行中的配送 🚴',
-                noDone: '暂无已完成配送 ✅',
-                pleaseLogin: '请先登录',
-                orderId: '订单 #',
-                pickup: '取餐 · ',
-                deliverTo: '送达',
-                orderAmount: '订单金额',
-                deliveryFee: '配送费',
-                claimed: '该订单已被其他骑手接走 🛵',
-                confirmDelete: '确定要永久删除订单 #',
-                confirmReset: '⚠️ 确定要重置今天所有已完成订单吗？\n此操作将永久删除今日的配送记录！',
-                resetConfirmFinal: '找到 ',
-                resetConfirmEnd: ' 条今日订单，确认全部删除？',
-                resetSuccess: '已重置 ',
-                resetDone: ' 条今日订单',
-                noHistory: '暂无已完成订单',
-                noTodayOrders: '今日暂无已完成配送',
-                todayDelivered: '📦 完成单量',
-                todayEarnLabel: '💰 配送收入',
-                orderTime: '未知时间',
-                restaurant: '商家',
-                customer: '顾客',
-                available: '可接订单',
-                active: '进行中',
-                done: '已完成',
-                pending: '待商家接单',
-                ready: '待骑手取餐',
-                assigned: '已接单',
-                picked_up: '已取餐',
-                delivered: '已送达',
-                claim: '🛵 接单配送',
-                navPickup: '📍 导航取餐',
-                confirmPickup: '✅ 确认取餐',
-                navDropoff: '📍 导航送餐',
-                confirmDeliver: '✅ 确认送达',
-                deliveredLabel: '已送达',
-                loginFirst: '请先登录',
-                logoutSuccess: '已登出',
-                restoreSuccess: '恢复未完成订单',
-                delete: '删除'
-            },
-            en: {
-                brandName: 'Tongguoji · Rider',
-                notLoggedIn: 'Not logged in',
-                fullscreen: '⛶ Fullscreen',
-                history: '📋 History',
-                todayStats: '📊 Today',
-                exportExcel: '📥 Excel',
-                resetToday: '↻ Reset Today',
-                logout: '🚪 Sign out',
-                offline: 'Offline',
-                online: 'Online',
-                todayEarn: "Today's Earnings",
-                todayDeliveries: "Today's Deliveries",
-                connBanner: 'Connection lost, reconnecting…',
-                records: '📋 Records',
-                navigation: '🗺️ Navigation',
-                googleMaps: 'Navigate with Google Maps',
-                cancel: 'Cancel',
-                loginTab: 'Sign in',
-                registerTab: 'Sign up',
-                authTitleLogin: 'Rider Sign in',
-                authSubLogin: 'Sign in to start delivering',
-                authTitleRegister: 'Rider Sign up',
-                authSubRegister: 'Register once, use anywhere',
-                namePlaceholder: 'Name *',
-                phonePlaceholder: 'Phone *',
-                pwdPlaceholder: 'Password *',
-                addrPlaceholder: 'Resident address (required) *',
-                loginBtn: 'Sign in',
-                registerBtn: 'Sign up',
-                authHint: '💡 Register once, use on any device',
-                loginError: 'Please enter a valid phone number',
-                pwdRequired: 'Password is required',
-                nameAddrRequired: 'Name and address are required',
-                processing: 'Processing...',
-                loginSuccess: '✅ Welcome ',
-                phoneRegistered: 'Phone already registered, please sign in',
-                notRegistered: 'Phone not registered, please sign up',
-                wrongPassword: 'Wrong password, please retry',
-                confirmLogout: 'Are you sure you want to sign out?',
-                noOrders: 'No orders available 🛵',
-                noActive: 'No active deliveries 🚴',
-                noDone: 'No completed deliveries ✅',
-                pleaseLogin: 'Please sign in first',
-                orderId: 'Order #',
-                pickup: 'Pickup · ',
-                deliverTo: 'Deliver to',
-                orderAmount: 'Order Total',
-                deliveryFee: 'Delivery Fee',
-                claimed: 'This order has been claimed by another rider 🛵',
-                confirmDelete: 'Permanently delete order #',
-                confirmReset: '⚠️ Reset all completed orders today?\nThis will permanently delete today\'s delivery records!',
-                resetConfirmFinal: 'Found ',
-                resetConfirmEnd: ' orders today, confirm delete all?',
-                resetSuccess: 'Reset ',
-                resetDone: ' orders today',
-                noHistory: 'No completed orders',
-                noTodayOrders: 'No deliveries completed today',
-                todayDelivered: '📦 Completed',
-                todayEarnLabel: '💰 Earnings',
-                orderTime: 'Unknown time',
-                restaurant: 'Restaurant',
-                customer: 'Customer',
-                available: 'Available',
-                active: 'Active',
-                done: 'Completed',
-                pending: 'Pending restaurant',
-                ready: 'Ready for pickup',
-                assigned: 'Assigned',
-                picked_up: 'Picked up',
-                delivered: 'Delivered',
-                claim: '🛵 Claim',
-                navPickup: '📍 Navigate to pickup',
-                confirmPickup: '✅ Confirm pickup',
-                navDropoff: '📍 Navigate to dropoff',
-                confirmDeliver: '✅ Confirm delivery',
-                deliveredLabel: 'Delivered',
-                loginFirst: 'Please sign in first',
-                logoutSuccess: 'Signed out',
-                restoreSuccess: 'Restored active order',
-                delete: 'Delete'
-            }
-        };
-
-        let currentLang = 'zh';
-
-        function t(key) {
-            return i18n[currentLang]?.[key] || key;
-        }
-
-        function updateI18n() {
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.dataset.i18n;
-                const val = t(key);
-                if (val) el.textContent = val;
-            });
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-                const key = el.dataset.i18nPlaceholder;
-                const val = t(key);
-                if (val) el.placeholder = val;
-            });
-            const authMode = document.querySelector('.auth-tab.active')?.dataset.mode || 'login';
-            updateAuthUIText(authMode);
-            renderTabs();
-            renderList();
-            document.getElementById('onlineLabel').textContent = isOnline ? t('online') : t('offline');
-        }
-
-        document.getElementById('langToggleBtn').addEventListener('click', () => {
-            currentLang = (currentLang === 'zh') ? 'en' : 'zh';
-            updateI18n();
-        });
-
-        // ============================================================
-        // 业务逻辑
-        // ============================================================
         let currentRider = null;
         let authMode = 'login';
         let orders = {};
@@ -434,69 +232,849 @@
         let mapPendingAddress = '';
         let mapPendingLabel = '';
 
-        function loadRiderFromStorage() {
-            const saved = localStorage.getItem('riderSession');
-            if (saved) { try { return JSON.parse(saved); } catch (e) { return null; } }
-            return null;
+        // ============================================================
+        // 显示/隐藏登录弹窗
+        // ============================================================
+        function showAuthModal() { 
+            document.getElementById('authModal').classList.add('show'); 
+            document.getElementById('authModal').style.display = 'flex';
+            updateAuthUI();
+        }
+        function hideAuthModal() { 
+            document.getElementById('authModal').classList.remove('show');
+            document.getElementById('authModal').style.display = 'none';
         }
 
-        function showAuthModal() { document.getElementById('authModal').style.display = 'flex'; updateAuthUIText(authMode); }
-        function hideAuthModal() { document.getElementById('authModal').style.display = 'none'; }
+        // ============================================================
+        // 认证 UI 切换
+        // ============================================================
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                authMode = this.dataset.mode;
+                updateAuthUI();
+            });
+        });
 
-        function updateAuthUIText(mode) {
+        function updateAuthUI() {
+            const nameInput = document.getElementById('authName');
+            const addrInput = document.getElementById('authAddr');
             const title = document.getElementById('authTitle');
             const sub = document.getElementById('authSub');
             const btn = document.getElementById('authSubmitBtn');
-            const nameInput = document.getElementById('authName');
-            const addrInput = document.getElementById('authAddr');
-            if (mode === 'login') {
-                title.textContent = t('authTitleLogin');
-                sub.textContent = t('authSubLogin');
-                btn.textContent = t('loginBtn');
+
+            if (authMode === 'login') {
+                title.textContent = '骑手登录';
+                sub.textContent = '登录后即可接单配送';
+                btn.textContent = '登录';
                 nameInput.style.display = 'none';
                 addrInput.style.display = 'none';
             } else {
-                title.textContent = t('authTitleRegister');
-                sub.textContent = t('authSubRegister');
-                btn.textContent = t('registerBtn');
+                title.textContent = '骑手注册';
+                sub.textContent = '注册信息永久保存，随时登录';
+                btn.textContent = '注册';
                 nameInput.style.display = 'block';
                 addrInput.style.display = 'block';
             }
-        }
-
-        function updateAuthUI() {
-            authMode = document.querySelector('.auth-tab.active')?.dataset.mode || 'login';
-            updateAuthUIText(authMode);
             document.getElementById('authError').textContent = '';
         }
 
+        // ============================================================
+        // 密码哈希
+        // ============================================================
         async function hashPassword(pwd) {
             try {
                 const encoder = new TextEncoder();
                 const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(pwd));
                 return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-            } catch (e) { return btoa(pwd); }
+            } catch (e) { 
+                // 如果 crypto.subtle 不可用，使用简单哈希
+                let hash = 0;
+                for (let i = 0; i < pwd.length; i++) {
+                    const char = pwd.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return hash.toString(16);
+            }
         }
 
-        async function handleAuthSubmit() {
+        // ============================================================
+        // 处理登录/注册
+        // ============================================================
+        document.getElementById('authSubmitBtn').addEventListener('click', async function() {
             const name = document.getElementById('authName').value.trim();
             const phone = document.getElementById('authPhone').value.trim();
             const address = document.getElementById('authAddr').value.trim();
             const password = document.getElementById('authPwd').value;
             const errorEl = document.getElementById('authError');
-            const btn = document.getElementById('authSubmitBtn');
 
             errorEl.textContent = '';
-            if (!phone || !/^[\d\-+ ]{7,15}$/.test(phone)) { errorEl.textContent = t('loginError'); return; }
-            if (!password) { errorEl.textContent = t('pwdRequired'); return; }
-            if (authMode === 'register' && (!name || !address)) { errorEl.textContent = t('nameAddrRequired'); return; }
 
-            btn.disabled = true;
-            const originalText = btn.textContent;
-            btn.innerHTML = '<span class="spinner"></span> ' + t('processing');
-            const hashedPwd = await hashPassword(password);
+            // 验证手机号
+            if (!phone || !/^[\d\-+ ]{7,15}$/.test(phone)) {
+                errorEl.textContent = '请输入有效的手机号';
+                return;
+            }
+            if (!password || password.length < 4) {
+                errorEl.textContent = '密码至少4位';
+                return;
+            }
+            if (authMode === 'register' && (!name || !address)) {
+                errorEl.textContent = '姓名和地址为必填项';
+                return;
+            }
+
+            this.disabled = true;
+            const originalText = this.textContent;
+            this.innerHTML = '<span class="spinner"></span> 处理中...';
 
             try {
                 const riderId = 'rider_' + phone.replace(/\D/g, '');
+                const hashedPwd = await hashPassword(password);
+
                 if (authMode === 'register') {
-                    const snap = await ridersRef.child
+                    // 检查是否已注册
+                    const snap = await ridersRef.child(riderId).once('value');
+                    if (snap.exists()) {
+                        errorEl.textContent = '该手机号已注册，请直接登录';
+                        this.disabled = false;
+                        this.textContent = originalText;
+                        return;
+                    }
+                    // 保存注册信息
+                    await ridersRef.child(riderId).set({
+                        name: name,
+                        phone: phone,
+                        address: address,
+                        password: hashedPwd,
+                        registerTime: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    currentRider = { id: riderId, name, phone, address };
+                } else {
+                    // 登录验证
+                    const snap = await ridersRef.child(riderId).once('value');
+                    if (!snap.exists()) {
+                        errorEl.textContent = '该手机号未注册，请先注册';
+                        this.disabled = false;
+                        this.textContent = originalText;
+                        return;
+                    }
+                    const data = snap.val();
+                    if (data.password !== hashedPwd) {
+                        errorEl.textContent = '密码错误，请重试';
+                        this.disabled = false;
+                        this.textContent = originalText;
+                        return;
+                    }
+                    currentRider = { 
+                        id: riderId, 
+                        name: data.name, 
+                        phone: data.phone, 
+                        address: data.address || '' 
+                    };
+                }
+
+                // 保存会话
+                localStorage.setItem('riderSession', JSON.stringify(currentRider));
+                hideAuthModal();
+                updateRiderUI();
+                renderTabs();
+                renderList();
+                updateEarnings();
+                alert('✅ 操作成功！欢迎 ' + currentRider.name);
+                
+                // 恢复未完成订单
+                setTimeout(() => restoreActiveOrder(), 300);
+
+            } catch (err) {
+                errorEl.textContent = err.message || '操作失败，请重试';
+                console.error('认证错误:', err);
+            }
+
+            this.disabled = false;
+            this.textContent = originalText;
+        });
+
+        // ============================================================
+        // 登出
+        // ============================================================
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if (!currentRider) return;
+            if (!confirm('确定要登出吗？')) return;
+            currentRider = null;
+            localStorage.removeItem('riderSession');
+            localStorage.removeItem('current_active_order');
+            updateRiderUI();
+            renderTabs();
+            renderList();
+            showAuthModal();
+        });
+
+        // ============================================================
+        // 检查登录状态
+        // ============================================================
+        function loadRiderFromStorage() {
+            const saved = localStorage.getItem('riderSession');
+            if (saved) {
+                try { return JSON.parse(saved); } catch (e) { return null; }
+            }
+            return null;
+        }
+
+        function checkAuth() {
+            const saved = loadRiderFromStorage();
+            if (saved) {
+                const riderId = 'rider_' + saved.phone.replace(/\D/g, '');
+                ridersRef.child(riderId).once('value').then(snap => {
+                    if (snap.exists() && snap.val().name === saved.name) {
+                        const data = snap.val();
+                        currentRider = { 
+                            id: riderId, 
+                            name: data.name, 
+                            phone: data.phone, 
+                            address: data.address || '' 
+                        };
+                        hideAuthModal();
+                        updateRiderUI();
+                        renderTabs();
+                        renderList();
+                        updateEarnings();
+                        setTimeout(() => restoreActiveOrder(), 300);
+                        return;
+                    }
+                    localStorage.removeItem('riderSession');
+                    localStorage.removeItem('current_active_order');
+                    showAuthModal();
+                }).catch(() => {
+                    showAuthModal();
+                });
+            } else {
+                showAuthModal();
+            }
+        }
+
+        function updateRiderUI() {
+            document.getElementById('riderSub').textContent = currentRider ? 
+                `🛵 ${currentRider.name} · ${currentRider.phone}` : '未登录';
+            document.getElementById('logoutBtn').style.display = currentRider ? 'flex' : 'none';
+        }
+
+        // ============================================================
+        // 订单相关功能
+        // ============================================================
+        function timeAgo(ts) {
+            if (!ts) return '刚刚';
+            const diff = Math.floor((Date.now() - ts) / 1000);
+            if (diff < 60) return '刚刚';
+            if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+            return new Date(ts).toLocaleString();
+        }
+
+        function googleLink(addr) {
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr || '')}`;
+        }
+
+        function showMapChooser(address, label) {
+            if (!address) { 
+                alert('⚠️ 地址信息缺失，无法导航'); 
+                return; 
+            }
+            mapPendingAddress = address;
+            mapPendingLabel = label || '目的地';
+            document.getElementById('mapAddressDisplay').textContent = `📍 ${label || '目的地'}：${address}`;
+            document.getElementById('mapOverlay').classList.add('show');
+        }
+
+        function closeMapChooser() { 
+            document.getElementById('mapOverlay').classList.remove('show'); 
+        }
+
+        document.querySelector('.map-opt[data-map="google"]').addEventListener('click', () => {
+            if (mapPendingAddress) {
+                window.open(googleLink(mapPendingAddress), '_blank');
+                closeMapChooser();
+            }
+        });
+        document.getElementById('mapCancelBtn').addEventListener('click', closeMapChooser);
+        document.getElementById('mapOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeMapChooser();
+        });
+
+        // ============================================================
+        // 渲染订单列表
+        // ============================================================
+        function getStatusLabel(status) {
+            const map = { 
+                'pending': '待商家接单', 
+                'ready': '待骑手取餐', 
+                'assigned': '已接单', 
+                'picked_up': '已取餐', 
+                'delivered': '已送达' 
+            };
+            return map[status] || status;
+        }
+
+        function getStatusClass(status) {
+            const map = { 
+                'pending': 'status-pending', 
+                'ready': 'status-ready', 
+                'assigned': 'status-assigned', 
+                'picked_up': 'status-picked_up', 
+                'delivered': 'status-delivered' 
+            };
+            return map[status] || '';
+        }
+
+        function renderTabs() {
+            const el = document.getElementById('tabs');
+            if (!currentRider) { 
+                el.innerHTML = ''; 
+                return; 
+            }
+            
+            const tabs = [
+                { id: 'available', label: '可接订单', match: o => o.status === 'ready' && !o.riderId },
+                { id: 'active', label: '进行中', match: o => o.riderId === currentRider?.id && ['assigned', 'picked_up'].includes(o.status) },
+                { id: 'done', label: '已完成', match: o => o.riderId === currentRider?.id && o.status === 'delivered' },
+            ];
+
+            el.innerHTML = tabs.map(t => {
+                const count = Object.values(orders).filter(t.match).length;
+                return `<div class="tab ${activeTab===t.id?'active':''}" data-id="${t.id}">
+                    ${t.label} ${count>0 ? `<span class="badge">${count}</span>` : ''}
+                </div>`;
+            }).join('');
+
+            el.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    activeTab = tab.dataset.id;
+                    renderTabs();
+                    renderList();
+                });
+            });
+        }
+
+        function renderList() {
+            const el = document.getElementById('list');
+            if (!currentRider) {
+                el.innerHTML = `<div class="empty"><span class="em">🔒</span>请先登录</div>`;
+                return;
+            }
+
+            const tabs = [
+                { id: 'available', match: o => o.status === 'ready' && !o.riderId },
+                { id: 'active', match: o => o.riderId === currentRider?.id && ['assigned', 'picked_up'].includes(o.status) },
+                { id: 'done', match: o => o.riderId === currentRider?.id && o.status === 'delivered' },
+            ];
+            const tabDef = tabs.find(t => t.id === activeTab);
+            
+            // 修复：使用正确的匹配条件
+            let filtered = [];
+            if (activeTab === 'available') {
+                filtered = Object.entries(orders).filter(([id, o]) => o.status === 'ready' && !o.riderId);
+            } else if (activeTab === 'active') {
+                filtered = Object.entries(orders).filter(([id, o]) => 
+                    o.riderId === currentRider?.id && ['assigned', 'picked_up'].includes(o.status)
+                );
+            } else if (activeTab === 'done') {
+                filtered = Object.entries(orders).filter(([id, o]) => 
+                    o.riderId === currentRider?.id && o.status === 'delivered'
+                );
+            }
+            filtered.sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
+
+            if (!isOnline && activeTab === 'available') {
+                el.innerHTML = `<div class="empty"><span class="em">😴</span>您已下线，上线后可查看可接订单</div>`;
+                return;
+            }
+
+            if (filtered.length === 0) {
+                let msg = activeTab === 'available' ? '暂无待配送订单 🛵' : 
+                          (activeTab === 'active' ? '暂无进行中的配送 🚴' : '暂无已完成配送 ✅');
+                el.innerHTML = `<div class="empty"><span class="em">📭</span>${msg}</div>`;
+                return;
+            }
+
+            el.innerHTML = filtered.map(([id, o]) => {
+                const order = o;
+                let actions = '';
+                
+                if (activeTab === 'available' && order.status === 'ready' && !order.riderId) {
+                    actions = `<div class="btn-row"><button class="btn btn-primary" data-action="claim" data-id="${id}">🛵 接单配送</button></div>`;
+                } else if (order.status === 'assigned' && order.riderId === currentRider?.id) {
+                    actions = `<div class="btn-row">
+                        <button class="btn btn-nav" data-action="nav-pickup" data-id="${id}"><span class="icon">📍</span> 导航取餐</button>
+                        <button class="btn btn-blue" data-action="pickup" data-id="${id}">✅ 确认取餐</button>
+                    </div>`;
+                } else if (order.status === 'picked_up' && order.riderId === currentRider?.id) {
+                    actions = `<div class="btn-row">
+                        <button class="btn btn-nav" data-action="nav-dropoff" data-id="${id}"><span class="icon">📍</span> 导航送餐</button>
+                        <button class="btn btn-veg" data-action="deliver" data-id="${id}">✅ 确认送达</button>
+                    </div>`;
+                } else if (order.status === 'delivered') {
+                    actions = `<div style="text-align:center; color:var(--veg); font-weight:600; font-size:13px; margin-top:8px;">✅ 已送达</div>`;
+                }
+
+                return `
+                <div class="order-card">
+                  <div class="order-head">
+                    <div>
+                        <div class="order-id">订单 #${id.slice(-5).toUpperCase()}</div>
+                        <div class="order-time">${timeAgo(order.createdAt)}</div>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <div class="status-pill ${getStatusClass(order.status)}">${getStatusLabel(order.status)}</div>
+                        <div class="fee-pill">配送费 $${(order.deliveryFee||0).toFixed(1)}</div>
+                    </div>
+                  </div>
+                  <div style="font-size:12px; color:var(--ink-soft); margin-bottom:6px;">
+                    ${(order.items||[]).map(i => `${i.name}×${i.qty}`).join('、')}
+                  </div>
+                  <div class="route">
+                    <div class="route-row">
+                        <div class="route-dot pickup"></div>
+                        <div>
+                            <div class="route-label">取餐 · ${order.restaurantName||'商家'}</div>
+                            <div class="route-text">${order.restaurantAddress||'—'}</div>
+                        </div>
+                    </div>
+                    <div class="route-row">
+                        <div class="route-dot dropoff"></div>
+                        <div>
+                            <div class="route-label">送达</div>
+                            <div class="route-text">${order.customerAddress||'—'}</div>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="divider"></div>
+                  <div class="total-row"><span>订单金额</span><span>$${(order.total||0).toFixed(1)}</span></div>
+                  ${actions}
+                </div>`;
+            }).join('');
+
+            // 绑定按钮事件
+            el.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const action = this.dataset.action;
+                    const order = orders[id];
+
+                    if (action === 'claim') {
+                        ordersRef.child(id).transaction(current => {
+                            if (current && current.status === 'ready' && !current.riderId) {
+                                current.status = 'assigned';
+                                current.riderId = currentRider.id;
+                                current.riderName = currentRider.name;
+                                current.assignedAt = firebase.database.ServerValue.TIMESTAMP;
+                                current.updatedAt = firebase.database.ServerValue.TIMESTAMP;
+                                return current;
+                            }
+                            return;
+                        }, (err, committed, snapshot) => {
+                            if (committed && snapshot && snapshot.val()) {
+                                localStorage.setItem('current_active_order', JSON.stringify(snapshot.val()));
+                                activeTab = 'active';
+                                renderTabs();
+                                renderList();
+                            } else {
+                                alert('该订单已被其他骑手接走 🛵');
+                            }
+                        });
+                    } else if (action === 'pickup') {
+                        ordersRef.child(id).update({ 
+                            status: 'picked_up', 
+                            pickedUpAt: firebase.database.ServerValue.TIMESTAMP, 
+                            updatedAt: firebase.database.ServerValue.TIMESTAMP 
+                        });
+                        let activeOrder = JSON.parse(localStorage.getItem('current_active_order') || '{}');
+                        if (activeOrder.id === id) {
+                            activeOrder.status = 'picked_up';
+                            localStorage.setItem('current_active_order', JSON.stringify(activeOrder));
+                        }
+                        renderList();
+                    } else if (action === 'deliver') {
+                        ordersRef.child(id).update({ 
+                            status: 'delivered', 
+                            deliveredAt: firebase.database.ServerValue.TIMESTAMP, 
+                            updatedAt: firebase.database.ServerValue.TIMESTAMP 
+                        });
+                        localStorage.removeItem('current_active_order');
+                        renderList();
+                        updateEarnings();
+                    } else if (action === 'nav-pickup') {
+                        showMapChooser(order.restaurantAddress, `取餐 · ${order.restaurantName || '商家'}`);
+                    } else if (action === 'nav-dropoff') {
+                        showMapChooser(order.customerAddress, '送餐 · 顾客');
+                    }
+                });
+            });
+        }
+
+        // ============================================================
+        // 更新收入
+        // ============================================================
+        function updateEarnings() {
+            if (!currentRider) return;
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            let earned = 0, count = 0;
+            Object.values(orders).forEach(o => {
+                if (o.riderId === currentRider.id && o.status === 'delivered' && 
+                    o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
+                    earned += (o.deliveryFee || 0);
+                    count += 1;
+                }
+            });
+            document.getElementById('earnToday').textContent = '$' + earned.toFixed(1);
+            document.getElementById('deliveredToday').textContent = count;
+        }
+
+        // ============================================================
+        // 恢复未完成订单
+        // ============================================================
+        function restoreActiveOrder() {
+            const savedOrderStr = localStorage.getItem('current_active_order');
+            if (savedOrderStr && currentRider) {
+                try {
+                    const savedOrder = JSON.parse(savedOrderStr);
+                    if (savedOrder.riderId === currentRider.id && 
+                        savedOrder.status !== 'delivered' && savedOrder.status !== 'rejected') {
+                        console.log("🔍 发现未完成的订单，切换到进行中标签:", savedOrder.id);
+                        activeTab = 'active';
+                        renderTabs();
+                        renderList();
+                        return true;
+                    } else if (savedOrder.status === 'delivered' || savedOrder.status === 'rejected') {
+                        localStorage.removeItem('current_active_order');
+                    }
+                } catch (e) {
+                    console.error("恢复订单失败:", e);
+                    localStorage.removeItem('current_active_order');
+                }
+            }
+            return false;
+        }
+
+        // ============================================================
+        // Firebase 实时监听
+        // ============================================================
+        ordersRef.on('value', snap => {
+            const val = snap.val() || {};
+            orders = val;
+            
+            // 检测新订单
+            const currentAvailable = new Set();
+            Object.entries(val).forEach(([id, o]) => {
+                if (!o.riderId && o.status === 'ready') currentAvailable.add(id);
+            });
+            let hasNew = false;
+            currentAvailable.forEach(id => {
+                if (!knownAvailableIds.has(id)) hasNew = true;
+            });
+            if (hasNew && isOnline && currentRider) {
+                try {
+                    if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.type = 'sine';
+                    o.frequency.value = 660;
+                    g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.start();
+                    o.stop(audioCtx.currentTime + 0.5);
+                } catch (e) {}
+                document.title = '🔔 新订单可接 · 骑手端';
+                setTimeout(() => {
+                    document.title = '铜锅记 · 骑手端';
+                }, 4000);
+            }
+            knownAvailableIds = currentAvailable;
+            
+            renderTabs();
+            renderList();
+            updateEarnings();
+        });
+
+        // ============================================================
+        // 在线状态
+        // ============================================================
+        function refreshOnlineUI() {
+            document.getElementById('onlineDot').classList.toggle('on', isOnline);
+            document.getElementById('onlineLabel').textContent = isOnline ? '在线接单' : '离线';
+        }
+
+        document.getElementById('onlineToggle').addEventListener('click', () => {
+            isOnline = !isOnline;
+            localStorage.setItem('riderOnline', isOnline);
+            refreshOnlineUI();
+            renderList();
+        });
+        refreshOnlineUI();
+
+        // ============================================================
+        // 连接状态
+        // ============================================================
+        db.ref('.info/connected').on('value', snap => {
+            document.getElementById('connBanner').classList.toggle('show', snap.val() === false);
+        });
+
+        // ============================================================
+        // 全屏
+        // ============================================================
+        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen?.() || 
+                document.documentElement.webkitRequestFullscreen?.();
+            } else {
+                document.exitFullscreen?.() || document.webkitExitFullscreen?.();
+            }
+        });
+
+        // ============================================================
+        // 历史记录
+        // ============================================================
+        document.getElementById('historyBtn').addEventListener('click', function() {
+            if (!currentRider) { alert('请先登录'); return; }
+            
+            const historyOrders = Object.entries(orders)
+                .filter(([id, o]) => o.riderId === currentRider.id && o.status === 'delivered')
+                .sort((a, b) => (b[1].deliveredAt || 0) - (a[1].deliveredAt || 0));
+            
+            document.getElementById('sheetTitle').textContent = '📋 历史记录 (' + historyOrders.length + ')';
+            
+            let html = historyOrders.length === 0 ? 
+                `<div style="padding:40px 20px; text-align:center; color:var(--ink-soft);">
+                    <div style="font-size:40px;">📭</div><p>暂无已完成订单</p>
+                </div>` : 
+                historyOrders.map(([id, o]) => `
+                <div class="history-item">
+                    <div class="h-header">
+                        <span class="h-id">#${id.slice(-6).toUpperCase()}</span>
+                        <span class="h-status">✅ 已送达</span>
+                    </div>
+                    <div class="h-items">${(o.items || []).map(i => `${i.name}×${i.qty}`).join('、') || '（无菜品）'}</div>
+                    <div class="h-meta">
+                        <span>🕐 ${o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : '未知时间'}</span>
+                        <span style="font-weight:700;color:var(--broth);">$${(o.total||0).toFixed(1)}</span>
+                    </div>
+                    <div class="h-meta">
+                        <span style="font-size:11px;color:var(--ink-soft);">配送费 $${(o.deliveryFee||0).toFixed(1)}</span>
+                        <button class="delete-btn" data-id="${id}">🗑 删除</button>
+                    </div>
+                </div>`).join('');
+            
+            document.getElementById('sheetBody').innerHTML = html;
+            
+            // 删除按钮
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    if (confirm(`确定要永久删除订单 #${id.slice(-6).toUpperCase()} 吗？`)) {
+                        ordersRef.child(id).remove().then(() => {
+                            showHistoryOrders();
+                        });
+                    }
+                });
+            });
+            
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('closeSheet').onclick = () => {
+                document.getElementById('overlay').classList.remove('show');
+            };
+        });
+
+        // ============================================================
+        // 今日统计
+        // ============================================================
+        document.getElementById('todayStatsBtn').addEventListener('click', function() {
+            if (!currentRider) { alert('请先登录'); return; }
+            
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            let list = [], count = 0, earned = 0;
+            
+            Object.entries(orders).forEach(([id, o]) => {
+                if (o.riderId === currentRider.id && o.status === 'delivered' && 
+                    o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
+                    count++;
+                    earned += (o.deliveryFee || 0);
+                    list.push({ id, ...o });
+                }
+            });
+            list.sort((a, b) => (b.deliveredAt || 0) - (a.deliveredAt || 0));
+            
+            document.getElementById('sheetTitle').textContent = '📊 今日配送';
+            document.getElementById('sheetBody').innerHTML = `
+                <div style="background:var(--card); padding:14px; border-radius:12px; margin-bottom:12px; border:1px solid var(--line);">
+                    <div style="display:flex; justify-content:space-between; font-weight:600; font-size:14px; padding:4px 0;">
+                        <span>📦 完成单量</span>
+                        <span style="color:var(--broth);">${count}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-weight:700; font-size:16px; padding:4px 0; border-top:1px solid var(--line); margin-top:4px; padding-top:8px;">
+                        <span>💰 配送收入</span>
+                        <span style="color:var(--broth);">$${earned.toFixed(1)}</span>
+                    </div>
+                </div>
+                <div style="max-height:50vh; overflow-y:auto; padding-right:4px;">
+                    ${list.length ? list.map(o => `
+                        <div style="border-bottom:1px solid var(--line); padding:8px 0; font-size:13px;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <strong style="color:var(--broth);">#${o.id.slice(-6).toUpperCase()}</strong>
+                                <span style="font-weight:700;">$${(o.total||0).toFixed(1)}</span>
+                            </div>
+                            <div style="color:var(--ink-soft); font-size:12px;">
+                                ${(o.items||[]).map(i => `${i.name}×${i.qty}`).join('、')}
+                            </div>
+                            <div style="color:var(--ink-soft); font-size:11px;">
+                                ${o.deliveredAt ? new Date(o.deliveredAt).toLocaleTimeString() : ''}
+                            </div>
+                        </div>
+                    `).join('') : '<div style="padding:20px; text-align:center; color:var(--ink-soft);">今日暂无已完成配送</div>'}
+                </div>
+            `;
+            
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('closeSheet').onclick = () => {
+                document.getElementById('overlay').classList.remove('show');
+            };
+        });
+
+        // ============================================================
+        // 导出 Excel
+        // ============================================================
+        document.getElementById('exportExcelBtn').addEventListener('click', function() {
+            if (!currentRider) { alert('请先登录'); return; }
+            
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const rows = [];
+            
+            Object.entries(orders).forEach(([id, o]) => {
+                if (o.riderId === currentRider.id && o.status === 'delivered' && 
+                    o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
+                    rows.push({
+                        '订单号': id.slice(-6).toUpperCase(),
+                        '顾客': o.customerName || '',
+                        '电话': o.customerPhone || '',
+                        '地址': o.customerAddress || '',
+                        '菜品': (o.items || []).map(i => `${i.name}×${i.qty}`).join('; '),
+                        '总金额': o.total || 0,
+                        '配送费': o.deliveryFee || 0,
+                        '送达时间': o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : ''
+                    });
+                }
+            });
+            
+            if (rows.length === 0) {
+                alert('今日暂无已完成订单可导出');
+                return;
+            }
+            
+            const headers = Object.keys(rows[0]);
+            let csv = headers.join(',') + '\n' + 
+                rows.map(r => headers.map(h => `"${(r[h]||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+            
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `配送统计_${new Date().toLocaleDateString()}.csv`;
+            link.click();
+        });
+
+        // ============================================================
+        // 重置今日
+        // ============================================================
+        document.getElementById('resetTodayBtn').addEventListener('click', function() {
+            if (!currentRider) { alert('请先登录'); return; }
+            
+            if (!confirm('⚠️ 确定要重置今天所有已完成订单吗？\n此操作将永久删除今日的配送记录！')) return;
+            
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const updates = {};
+            let count = 0;
+            
+            Object.entries(orders).forEach(([id, o]) => {
+                if (o.riderId === currentRider.id && o.status === 'delivered' && 
+                    o.deliveredAt && o.deliveredAt >= startOfDay.getTime()) {
+                    updates[id] = null;
+                    count++;
+                }
+            });
+            
+            if (count === 0) {
+                alert('今日暂无已完成订单可重置');
+                return;
+            }
+            
+            if (confirm(`找到 ${count} 条今日订单，确认全部删除？`)) {
+                ordersRef.update(updates).then(() => {
+                    alert(`已重置 ${count} 条今日订单`);
+                    updateEarnings();
+                    renderList();
+                });
+            }
+        });
+
+        // ============================================================
+        // 语言切换
+        // ============================================================
+        document.getElementById('langToggleBtn').addEventListener('click', function() {
+            // 简单语言切换，仅切换按钮文字
+            if (this.textContent.includes('EN')) {
+                this.textContent = '🌐 中文';
+                document.querySelector('.brand-name').textContent = 'Tongguoji · Rider';
+                document.getElementById('riderSub').textContent = currentRider ? 
+                    `🛵 ${currentRider.name} · ${currentRider.phone}` : 'Not logged in';
+                document.getElementById('onlineLabel').textContent = isOnline ? 'Online' : 'Offline';
+                document.querySelector('.earn-label').textContent = "Today's Earnings";
+                document.querySelectorAll('.earn-label')[1].textContent = "Today's Deliveries";
+                document.getElementById('fullscreenBtn').textContent = '⛶ Fullscreen';
+                document.getElementById('historyBtn').textContent = '📋 History';
+                document.getElementById('todayStatsBtn').textContent = '📊 Today';
+                document.getElementById('exportExcelBtn').textContent = '📥 Excel';
+                document.getElementById('resetTodayBtn').textContent = '↻ Reset Today';
+                document.getElementById('logoutBtn').textContent = '🚪 Sign out';
+            } else {
+                this.textContent = '🌐 EN';
+                document.querySelector('.brand-name').textContent = '铜锅记 · 骑手端';
+                document.getElementById('riderSub').textContent = currentRider ? 
+                    `🛵 ${currentRider.name} · ${currentRider.phone}` : '未登录';
+                document.getElementById('onlineLabel').textContent = isOnline ? '在线接单' : '离线';
+                document.querySelector('.earn-label').textContent = '今日收入';
+                document.querySelectorAll('.earn-label')[1].textContent = '今日单量';
+                document.getElementById('fullscreenBtn').textContent = '⛶ 全屏';
+                document.getElementById('historyBtn').textContent = '📋 历史';
+                document.getElementById('todayStatsBtn').textContent = '📊 今日';
+                document.getElementById('exportExcelBtn').textContent = '📥 Excel';
+                document.getElementById('resetTodayBtn').textContent = '↻ 重置今日';
+                document.getElementById('logoutBtn').textContent = '🚪 登出';
+            }
+        });
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+        // 检查登录状态
+        checkAuth();
+        updateRiderUI();
+        refreshOnlineUI();
+
+        // 页面可见性变化时恢复订单
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && currentRider) {
+                console.log("🔄 页面从后台唤醒，检查订单状态...");
+                restoreActiveOrder();
+            }
+        });
+
+        console.log('✅ 骑手端已启动，等待订单...');
+    </script>
+</body>
+</html>
