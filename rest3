@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>铜锅记 · 商家接单</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --cream:#FBF3E7; --cream-2:#F3E6D2; --broth:#B7371F; --broth-dark:#8E2A17;
+      --copper:#C4894A; --copper-light:#E3B876; --ink:#2B2118; --ink-soft:#6B5D4F;
+      --line:#E9DCC7; --veg:#4C7A52; --card:#FFFDF9; --amber:#B7871F;
+    }
+    *{box-sizing:border-box; margin:0; padding:0;}
+    body{ background:var(--cream); color:var(--ink); font-family:'Noto Sans SC',sans-serif; padding-bottom:30px; }
+    h1,h2,.display{ font-family:'Noto Serif SC', serif; }
+
+    .topbar{
+      position:sticky; top:0; z-index:40; background:var(--broth); color:#fff;
+      padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:0 4px 14px rgba(43,33,24,.15);
+    }
+    .brand{ display:flex; align-items:center; gap:10px; }
+    .brand-name{ font-weight:800; font-size:17px; letter-spacing:.5px; }
+    .brand-sub{ font-size:11px; color:#F1D9C2; }
+    .top-actions{ display:flex; align-items:center; gap:12px; }
+    .auth-btn{
+      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff;
+      padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer;
+      transition:all .2s;
+    }
+    .auth-btn:hover{ background:rgba(255,255,255,.25); }
+    .logout-btn{ background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); color:#fff; padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; display:none; }
+    .logout-btn:hover{ background:rgba(255,255,255,.25); }
+    .online-toggle{
+      display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.12);
+      padding:6px 12px; border-radius:999px; cursor:pointer; font-size:12.5px; font-weight:600;
+    }
+    .dot{ width:9px; height:9px; border-radius:50%; background:#8A8A8A; }
+    .dot.on{ background:#5FCB6E; box-shadow:0 0 6px #5FCB6E; }
+
+    .conn-banner{
+      text-align:center; font-size:12px; padding:6px; background:var(--cream-2); color:var(--ink-soft);
+      display:none;
+    }
+    .conn-banner.show{ display:block; }
+
+    /* modal overlay */
+    .modal-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(3px);
+      display:none; align-items:center; justify-content:center; z-index:1000;
+    }
+    .modal-overlay.open{ display:flex; }
+    .modal-box{
+      background:var(--card); max-width:420px; width:92%; border-radius:28px; padding:28px 24px;
+      box-shadow:0 20px 40px rgba(0,0,0,.3); position:relative;
+    }
+    .modal-close{
+      position:absolute; top:14px; right:18px; font-size:22px; cursor:pointer; color:var(--ink-soft);
+      background:transparent; border:0;
+    }
+    .modal-title{ font-size:20px; font-weight:900; margin-bottom:8px; font-family:'Noto Serif SC',serif; }
+    .modal-sub{ font-size:13px; color:var(--ink-soft); margin-bottom:20px; }
+    .tabs-auth{
+      display:flex; gap:4px; margin-bottom:22px; background:var(--cream-2); border-radius:999px; padding:4px;
+    }
+    .tab-auth{
+      flex:1; text-align:center; padding:8px 0; border-radius:999px; font-weight:700; font-size:14px;
+      cursor:pointer; transition:all .2s; background:transparent; color:var(--ink-soft);
+    }
+    .tab-auth.active{ background:var(--card); color:var(--broth); box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .auth-form{ display:flex; flex-direction:column; gap:14px; }
+    .auth-form.hide{ display:none; }
+    .form-group{ display:flex; flex-direction:column; gap:4px; }
+    .form-group label{ font-size:12.5px; font-weight:600; color:var(--ink-soft); }
+    .form-group input{
+      padding:12px 14px; border-radius:14px; border:1px solid var(--line); font-size:14px;
+      background:#fff; transition:border .2s; outline:none;
+    }
+    .form-group input:focus{ border-color:var(--broth); }
+    .form-btn{
+      margin-top:6px; background:var(--broth); color:#fff; border:none; padding:14px;
+      border-radius:999px; font-weight:700; font-size:16px; cursor:pointer;
+    }
+    .form-error{ color:#B7371F; font-size:12px; margin-top:-6px; min-height:18px; }
+    .auth-success{ display:none; text-align:center; padding:20px 0; color:var(--veg); font-weight:700; }
+
+    .tabs{
+      display:flex; gap:8px; padding:14px 18px 8px; overflow-x:auto; scrollbar-width:none;
+      background:var(--cream); position:sticky; top:60px; z-index:35; border-bottom:1px solid var(--line);
+    }
+    .tabs::-webkit-scrollbar{ display:none; }
+    .tab{
+      flex-shrink:0; padding:9px 15px; border-radius:999px; font-size:13.5px; font-weight:700;
+      background:var(--card); border:1px solid var(--line); color:var(--ink-soft); cursor:pointer; position:relative;
+      display:flex; align-items:center; gap:6px; white-space:nowrap;
+    }
+    .tab.active{ background:var(--broth); color:#fff; border-color:var(--broth); }
+    .badge{
+      background:var(--broth); color:#fff; font-size:11px; font-weight:800; border-radius:999px;
+      padding:1px 7px; min-width:16px; text-align:center;
+    }
+    .tab.active .badge{ background:#fff; color:var(--broth); }
+
+    .list{ padding:16px 18px; display:flex; flex-direction:column; gap:12px; }
+    .empty{ text-align:center; padding:50px 20px; color:var(--ink-soft); font-size:14px; }
+    .empty .em{ font-size:34px; display:block; margin-bottom:10px; }
+
+    .order-card{
+      background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px;
+      animation:pop .25s ease;
+    }
+    @keyframes pop{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+    .order-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+    .order-id{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+    .order-time{ font-size:11.5px; color:var(--ink-soft); }
+    .status-pill{
+      font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px;
+    }
+    .status-pending{ background:#FCE7E1; color:var(--broth); }
+    .status-preparing{ background:#FBEFD9; color:var(--amber); }
+    .status-ready{ background:#E4EFE3; color:var(--veg); }
+    .status-assigned, .status-picked_up{ background:#E4EAF2; color:#4A5F8A; }
+    .status-delivered{ background:#EAEAEA; color:#7A7A7A; }
+    .status-rejected{ background:#F2E0E0; color:#9A4A4A; }
+
+    .items-list{ font-size:13.5px; margin:8px 0; color:var(--ink); }
+    .items-list div{ display:flex; justify-content:space-between; padding:2px 0; }
+    .items-list .n{ color:var(--ink-soft); }
+
+    .addr-row{ display:flex; gap:6px; font-size:12.5px; color:var(--ink-soft); margin-top:6px; }
+    .divider{ height:1px; background:var(--line); margin:10px 0; }
+    .total-row{ display:flex; justify-content:space-between; font-weight:700; font-size:15px; margin-top:2px; }
+
+    .rider-tag{
+      margin-top:8px; font-size:12px; background:var(--cream-2); color:var(--ink-soft);
+      padding:6px 10px; border-radius:10px;
+    }
+
+    .btn-row{ display:flex; gap:8px; margin-top:12px; }
+    .btn{
+      flex:1; border:none; padding:11px; border-radius:12px; font-weight:700; font-size:13.5px; cursor:pointer;
+    }
+    .btn-primary{ background:var(--broth); color:#fff; }
+    .btn-ghost{ background:var(--cream-2); color:var(--ink-soft); }
+    .btn-amber{ background:var(--amber); color:#fff; }
+    .btn-veg{ background:var(--veg); color:#fff; }
+    .btn:active{ transform:scale(.97); }
+
+    .test-order-btn{
+      position:fixed; right:16px; bottom:16px; background:var(--ink); color:#fff;
+      border:none; padding:12px 16px; border-radius:14px; font-size:12.5px; font-weight:700;
+      box-shadow:0 8px 20px rgba(43,33,24,.3); cursor:pointer; z-index:45;
+    }
+    .restaurant-addr-tag{
+      font-size:11px; background:rgba(255,255,255,.1); padding:3px 12px; border-radius:999px; color:#F1D9C2;
+      max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      cursor:pointer;
+      transition:all .2s;
+    }
+    .restaurant-addr-tag:hover{
+      background:rgba(255,255,255,.2);
+    }
+    .restaurant-addr-tag.editable{
+      cursor:pointer;
+    }
+    .restaurant-addr-tag.editable::after{
+      content: ' ✏️';
+      font-size:10px;
+    }
+    
+    /* 地址修改弹窗 */
+    .address-modal .modal-box{
+      max-width:480px;
+    }
+    .address-modal .modal-sub{
+      margin-bottom:16px;
+    }
+    .address-modal .form-group textarea{
+      padding:12px 14px; border-radius:14px; border:1px solid var(--line); font-size:14px;
+      background:#fff; transition:border .2s; outline:none;
+      width:100%; min-height:60px; resize:vertical;
+      font-family:'Noto Sans SC',sans-serif;
+    }
+    .address-modal .form-group textarea:focus{ border-color:var(--broth); }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <div class="brand-name">铜锅记 · 商家端</div>
+      <div class="brand-sub" id="restaurantSub">接单管理</div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <span class="restaurant-addr-tag" id="headerAddrTag" title="点击修改地址">📍 未设置地址</span>
+    <div class="online-toggle" id="onlineToggle">
+      <div class="dot" id="onlineDot"></div>
+      <span id="onlineLabel">营业中</span>
+    </div>
+    <button class="auth-btn" id="authLoginBtn">登录</button>
+    <button class="logout-btn" id="logoutBtn">登出</button>
+    <button class="auth-btn" id="langToggleBtn" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);">🌐 EN</button>
+  </div>
+</div>
+
+<div class="conn-banner" id="connBanner">与服务器连接中断，正在重新连接…</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="list" id="list"></div>
+
+<button class="test-order-btn" id="testOrderBtn">＋ 生成测试订单</button>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" id="modalCloseBtn">✕</button>
+    <div class="modal-title">档口登录</div>
+    <div class="modal-sub">使用注册的手机号与姓名登录，地址将自动同步</div>
+    <div class="tabs-auth" id="authTabs">
+      <div class="tab-auth active" data-tab="login">登录</div>
+      <div class="tab-auth" data-tab="register">注册</div>
+    </div>
+    <!-- login form -->
+    <div class="auth-form" id="loginForm">
+      <div class="form-group">
+        <label>📱 手机号</label>
+        <input type="tel" id="loginPhone" placeholder="例如 91234567">
+      </div>
+      <div class="form-group">
+        <label>👤 姓名</label>
+        <input type="text" id="loginName" placeholder="档口联系人姓名">
+      </div>
+      <div class="form-error" id="loginError"></div>
+      <button class="form-btn" id="loginBtn">登录</button>
+    </div>
+    <!-- register form -->
+    <div class="auth-form hide" id="registerForm">
+      <div class="form-group">
+        <label>📱 手机号</label>
+        <input type="tel" id="registerPhone" placeholder="例如 91234567">
+      </div>
+      <div class="form-group">
+        <label>👤 姓名</label>
+        <input type="text" id="registerName" placeholder="档口联系人姓名">
+      </div>
+      <div class="form-group">
+        <label>📍 档口地址 (永久保存，骑手按此导航)</label>
+        <input type="text" id="registerAddress" placeholder="例如 304 Anchorvale Link, Singapore 540304 号">
+      </div>
+      <div class="form-error" id="registerError"></div>
+      <button class="form-btn" id="registerBtn">注册</button>
+    </div>
+    <div class="auth-success" id="authSuccess">✅ 认证成功，即将刷新</div>
+  </div>
+</div>
+
+<!-- Address Edit Modal -->
+<div class="modal-overlay address-modal" id="addressModal">
+  <div class="modal-box">
+    <button class="modal-close" id="addressModalClose">✕</button>
+    <div class="modal-title">📍 修改档口地址</div>
+    <div class="modal-sub">骑手将根据此地址导航取餐，请填写详细地址</div>
+    <div class="form-group">
+      <label>档口地址</label>
+      <textarea id="addressInput" placeholder="请输入详细地址，例如：304 Anchorvale Link, Singapore 540304 号 #01-01"></textarea>
+    </div>
+    <div class="form-error" id="addressError"></div>
+    <button class="form-btn" id="saveAddressBtn">保存地址</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDrrk3exoaA4PjYVlNnlIr1-qZcHYfXZtk",
+  authDomain: "restaurants-cs.firebaseapp.com",
+  databaseURL: "https://restaurants-cs-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "restaurants-cs",
+  storageBucket: "restaurants-cs.firebasestorage.app",
+  messagingSenderId: "209872919844",
+  appId: "1:209872919844:web:c1730801cd51d615e867b1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const RESTAURANT_ID = "tongguoji";
+const ordersRef = db.ref('orders');
+const onlineRef = db.ref('restaurants/' + RESTAURANT_ID + '/online');
+const restaurantInfoRef = db.ref('restaurants/' + RESTAURANT_ID + '/info');
+
+// ============ 国际化 ============
+const i18n = {
+  zh: {
+    brandName: '铜锅记 · 商家端',
+    brandSub: '接单管理',
+    online: '营业中',
+    offline: '已打烊',
+    login: '登录',
+    logout: '登出',
+    langToggle: '🌐 EN',
+    authTitle: '档口登录',
+    authSub: '使用注册的手机号与姓名登录，地址将自动同步',
+    loginTab: '登录',
+    registerTab: '注册',
+    phoneLabel: '📱 手机号',
+    nameLabel: '👤 姓名',
+    addressLabel: '📍 档口地址 (永久保存，骑手按此导航)',
+    loginPlaceholder: '例如 91234567',
+    namePlaceholder: '档口联系人姓名',
+    addressPlaceholder: '例如 304 Anchorvale Link, Singapore 540304 号',
+    loginBtn: '登录',
+    registerBtn: '注册',
+    loginError: '请填写手机号和姓名',
+    registerError: '请完整填写所有字段',
+    notFound: '未找到注册信息，请先注册',
+    mismatch: '手机号或姓名不匹配',
+    phoneExists: '该手机号已注册，请直接登录',
+    saveFailed: '保存失败，请重试',
+    networkError: '网络错误，请重试',
+    authSuccess: '✅ 认证成功，即将刷新',
+    addressModalTitle: '📍 修改档口地址',
+    addressModalSub: '骑手将根据此地址导航取餐，请填写详细地址',
+    addressLabel2: '档口地址',
+    addressPlaceholder2: '请输入详细地址，例如：304 Anchorvale Link, Singapore 540304 号 #01-01',
+    saveAddress: '保存地址',
+    addressErrorEmpty: '请填写档口地址',
+    addressErrorShort: '地址至少3个字符',
+    addressSaved: '✅ 地址已保存',
+    testOrder: '＋ 生成测试订单',
+    noOrders: '暂时没有相关订单',
+    newOrders: '新订单',
+    preparing: '制作中',
+    ready: '待取餐',
+    done: '已完成',
+    orderId: '订单 #',
+    total: '合计',
+    pickup: '取餐·',
+    deliverTo: '送达',
+    rider: '🛵 骑手',
+    reject: '拒绝',
+    accept: '接单 · 开始制作',
+    readyBtn: '餐品已备好',
+    pending: '新订单',
+    preparingStatus: '制作中',
+    readyStatus: '待取餐',
+    assigned: '骑手已接单',
+    picked_up: '骑手已取餐',
+    delivered: '已送达',
+    rejected: '已拒绝',
+    justNow: '刚刚',
+    minutesAgo: ' 分钟前',
+    hoursAgo: ' 小时前',
+    connBanner: '与服务器连接中断，正在重新连接…',
+    addressTagDefault: '📍 未设置地址',
+  },
+  en: {
+    brandName: 'Tongguoji · Merchant',
+    brandSub: 'Order Management',
+    online: 'Open',
+    offline: 'Closed',
+    login: 'Sign in',
+    logout: 'Sign out',
+    langToggle: '🌐 中文',
+    authTitle: 'Merchant Login',
+    authSub: 'Sign in with registered phone & name, address auto-sync',
+    loginTab: 'Sign in',
+    registerTab: 'Sign up',
+    phoneLabel: '📱 Phone',
+    nameLabel: '👤 Name',
+    addressLabel: '📍 Stall Address (permanent, for rider navigation)',
+    loginPlaceholder: 'e.g. 91234567',
+    namePlaceholder: 'Contact name',
+    addressPlaceholder: 'e.g. 304 Anchorvale Link, Singapore 540304',
+    loginBtn: 'Sign in',
+    registerBtn: 'Sign up',
+    loginError: 'Please fill in phone and name',
+    registerError: 'Please fill in all fields',
+    notFound: 'No registration found, please sign up first',
+    mismatch: 'Phone or name mismatch',
+    phoneExists: 'Phone already registered, please sign in',
+    saveFailed: 'Save failed, please retry',
+    networkError: 'Network error, please retry',
+    authSuccess: '✅ Authenticated, refreshing...',
+    addressModalTitle: '📍 Edit Stall Address',
+    addressModalSub: 'Riders will navigate to this address for pickup',
+    addressLabel2: 'Stall Address',
+    addressPlaceholder2: 'e.g. 304 Anchorvale Link, Singapore 540304 #01-01',
+    saveAddress: 'Save Address',
+    addressErrorEmpty: 'Please fill in stall address',
+    addressErrorShort: 'Address must be at least 3 characters',
+    addressSaved: '✅ Address saved',
+    testOrder: '＋ Generate Test Order',
+    noOrders: 'No orders yet',
+    newOrders: 'New Orders',
+    preparing: 'Preparing',
+    ready: 'Ready',
+    done: 'Completed',
+    orderId: 'Order #',
+    total: 'Total',
+    pickup: 'Pickup·',
+    deliverTo: 'Deliver to',
+    rider: '🛵 Rider',
+    reject: 'Reject',
+    accept: 'Accept · Start Cooking',
+    readyBtn: 'Ready for Pickup',
+    pending: 'New Order',
+    preparingStatus: 'Preparing',
+    readyStatus: 'Ready',
+    assigned: 'Rider Assigned',
+    picked_up: 'Rider Picked Up',
+    delivered: 'Delivered',
+    rejected: 'Rejected',
+    justNow: 'Just now',
+    minutesAgo: ' min ago',
+    hoursAgo: ' h ago',
+    connBanner: 'Connection lost, reconnecting…',
+    addressTagDefault: '📍 No address set',
+  }
+};
+
+let currentLang = 'zh';
+
+function t(key) {
+  return i18n[currentLang]?.[key] || key;
+}
+
+function updateI18n() {
+  // Topbar
+  document.querySelector('.brand-name').textContent = t('brandName');
+  document.getElementById('restaurantSub').textContent = t('brandSub');
+  document.getElementById('onlineLabel').textContent = isOnline ? t('online') : t('offline');
+  document.getElementById('authLoginBtn').textContent = t('login');
+  document.getElementById('logoutBtn').textContent = t('logout');
+  document.getElementById('langToggleBtn').textContent = t('langToggle');
+  // 地址标签
+  if (currentUser && currentUser.address) {
+    document.getElementById('headerAddrTag').textContent = '📍 ' + currentUser.address;
+  } else {
+    document.getElementById('headerAddrTag').textContent = t('addressTagDefault');
+  }
+  // Auth modal
+  document.querySelector('.modal-title').textContent = t('authTitle');
+  document.querySelector('.modal-sub').textContent = t('authSub');
+  document.querySelectorAll('.tab-auth')[0].textContent = t('loginTab');
+  document.querySelectorAll('.tab-auth')[1].textContent = t('registerTab');
+  document.querySelector('#loginForm label:first-child').textContent = t('phoneLabel');
+  document.querySelector('#loginForm label:last-child').textContent = t('nameLabel');
+  document.querySelector('#loginForm input:first-child').placeholder = t('loginPlaceholder');
+  document.querySelector('#loginForm input:last-child').placeholder = t('namePlaceholder');
+  document.querySelector('#registerForm label:first-child').textContent = t('phoneLabel');
+  document.querySelector('#registerForm label:nth-child(2)').textContent = t('nameLabel');
+  document.querySelector('#registerForm label:last-child').textContent = t('addressLabel');
+  document.querySelector('#registerForm input:first-child').placeholder = t('loginPlaceholder');
+  document.querySelector('#registerForm input:nth-child(2)').placeholder = t('namePlaceholder');
+  document.querySelector('#registerForm input:last-child').placeholder = t('addressPlaceholder');
+  document.getElementById('loginBtn').textContent = t('loginBtn');
+  document.getElementById('registerBtn').textContent = t('registerBtn');
+  // Address modal
+  document.querySelector('.address-modal .modal-title').textContent = t('addressModalTitle');
+  document.querySelector('.address-modal .modal-sub').textContent = t('addressModalSub');
+  document.querySelector('.address-modal .form-group label').textContent = t('addressLabel2');
+  document.querySelector('.address-modal textarea').placeholder = t('addressPlaceholder2');
+  document.getElementById('saveAddressBtn').textContent = t('saveAddress');
+  // Test order
+  document.getElementById('testOrderBtn').textContent = t('testOrder');
+  // Connection banner
+  document.getElementById('connBanner').textContent = t('connBanner');
+  // Tabs & list
+  renderTabs();
+  renderList();
+}
+
+document.getElementById('langToggleBtn').addEventListener('click', () => {
+  currentLang = (currentLang === 'zh') ? 'en' : 'zh';
+  updateI18n();
+});
+
+// ============ 业务逻辑 ============
+let orders = {};
+let activeTab = 'pending';
+let knownPendingIds = new Set();
+let audioCtx = null;
+
+let currentUser = null;
+let isLoggedIn = false;
+let isOnline = true;
+
+// DOM refs
+const authModal = document.getElementById('authModal');
+const authLoginBtn = document.getElementById('authLoginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+const authTabs = document.getElementById('authTabs');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const loginPhone = document.getElementById('loginPhone');
+const loginName = document.getElementById('loginName');
+const loginError = document.getElementById('loginError');
+const registerPhone = document.getElementById('registerPhone');
+const registerName = document.getElementById('registerName');
+const registerAddress = document.getElementById('registerAddress');
+const registerError = document.getElementById('registerError');
+const loginBtn = document.getElementById('loginBtn');
+const registerBtn = document.getElementById('registerBtn');
+const authSuccess = document.getElementById('authSuccess');
+const headerAddrTag = document.getElementById('headerAddrTag');
+const restaurantSub = document.getElementById('restaurantSub');
+
+// Address modal
+const addressModal = document.getElementById('addressModal');
+const addressInput = document.getElementById('addressInput');
+const addressError = document.getElementById('addressError');
+const saveAddressBtn = document.getElementById('saveAddressBtn');
+const addressModalClose = document.getElementById('addressModalClose');
+
+function showModal(){ authModal.classList.add('open'); }
+function hideModal(){ authModal.classList.remove('open'); authSuccess.style.display='none'; loginError.textContent=''; registerError.textContent=''; }
+function showAddressModal(){
+  if(!isLoggedIn){ showModal(); return; }
+  addressInput.value = currentUser?.address || '';
+  addressError.textContent = '';
+  addressModal.classList.add('open');
+}
+function hideAddressModal(){ addressModal.classList.remove('open'); addressError.textContent=''; }
+
+// Auth tabs
+document.querySelectorAll('.tab-auth').forEach(tab => {
+  tab.addEventListener('click', function(){
+    document.querySelectorAll('.tab-auth').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+    const target = this.dataset.tab;
+    if(target==='login'){ loginForm.classList.remove('hide'); registerForm.classList.add('hide'); }
+    else{ loginForm.classList.add('hide'); registerForm.classList.remove('hide'); }
+    loginError.textContent=''; registerError.textContent='';
+  });
+});
+
+loginBtn.addEventListener('click', ()=>{
+  const phone = loginPhone.value.trim();
+  const name = loginName.value.trim();
+  if(!phone || !name){ loginError.textContent = t('loginError'); return; }
+  restaurantInfoRef.once('value').then(snap => {
+    const info = snap.val();
+    if(!info){ loginError.textContent = t('notFound'); return; }
+    if(info.phone === phone && info.name === name){
+      currentUser = { phone, name, address: info.address || '' };
+      isLoggedIn = true;
+      applyAuthUI();
+      hideModal();
+      restaurantInfoRef.update({ phone, name, address: info.address || '' });
+      updateHeaderAddress(info.address || '');
+      restaurantSub.textContent = (currentLang === 'zh' ? '👋 ' : '👋 ') + name + ' · ' + t('brandSub');
+    }else{ loginError.textContent = t('mismatch'); }
+  }).catch(()=>{ loginError.textContent = t('networkError'); });
+});
+
+registerBtn.addEventListener('click', ()=>{
+  const phone = registerPhone.value.trim();
+  const name = registerName.value.trim();
+  const address = registerAddress.value.trim();
+  if(!phone || !name || !address){ registerError.textContent = t('registerError'); return; }
+  restaurantInfoRef.once('value').then(snap => {
+    const info = snap.val();
+    if(info && info.phone === phone){ registerError.textContent = t('phoneExists'); return; }
+    restaurantInfoRef.update({ phone, name, address }).then(()=>{
+      currentUser = { phone, name, address };
+      isLoggedIn = true;
+      applyAuthUI();
+      hideModal();
+      updateHeaderAddress(address);
+      restaurantSub.textContent = (currentLang === 'zh' ? '👋 ' : '👋 ') + name + ' · ' + t('brandSub');
+    }).catch(()=>{ registerError.textContent = t('saveFailed'); });
+  }).catch(()=>{ registerError.textContent = t('networkError'); });
+});
+
+logoutBtn.addEventListener('click', ()=>{
+  isLoggedIn = false; currentUser = null;
+  applyAuthUI();
+  restaurantSub.textContent = t('brandSub');
+  headerAddrTag.textContent = t('addressTagDefault');
+  headerAddrTag.classList.remove('editable');
+});
+
+function applyAuthUI(){
+  if(isLoggedIn && currentUser){
+    authLoginBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    updateHeaderAddress(currentUser.address || '');
+    headerAddrTag.classList.add('editable');
+    restaurantSub.textContent = (currentLang === 'zh' ? '👋 ' : '👋 ') + currentUser.name + ' · ' + t('brandSub');
+  }else{
+    authLoginBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    headerAddrTag.textContent = t('addressTagDefault');
+    headerAddrTag.classList.remove('editable');
+    restaurantSub.textContent = t('brandSub');
+  }
+}
+
+function updateHeaderAddress(addr){
+  if(addr) headerAddrTag.textContent = '📍 ' + addr;
+  else headerAddrTag.textContent = t('addressTagDefault');
+}
+
+authLoginBtn.addEventListener('click', ()=>{ if(isLoggedIn) return; showModal(); document.querySelector('.tab-auth[data-tab="login"]')?.click(); loginError.textContent=''; registerError.textContent=''; });
+modalCloseBtn.addEventListener('click', hideModal);
+authModal.addEventListener('click', (e)=>{ if(e.target===authModal) hideModal(); });
+headerAddrTag.addEventListener('click', showAddressModal);
+addressModalClose.addEventListener('click', hideAddressModal);
+addressModal.addEventListener('click', (e)=>{ if(e.target===addressModal) hideAddressModal(); });
+
+saveAddressBtn.addEventListener('click', ()=>{
+  const newAddress = addressInput.value.trim();
+  if(!newAddress){ addressError.textContent = t('addressErrorEmpty'); return; }
+  if(newAddress.length < 3){ addressError.textContent = t('addressErrorShort'); return; }
+  restaurantInfoRef.update({ address: newAddress }).then(() => {
+    if(currentUser) currentUser.address = newAddress;
+    updateHeaderAddress(newAddress);
+    hideAddressModal();
+    headerAddrTag.textContent = '✅ ' + newAddress;
+    setTimeout(() => { updateHeaderAddress(newAddress); }, 2000);
+  }).catch((err) => { addressError.textContent = t('saveFailed') + ': ' + err.message; });
+});
+
+function loadSession(){
+  restaurantInfoRef.once('value').then(snap => {
+    const info = snap.val();
+    if(info && info.phone && info.name){
+      currentUser = { phone: info.phone, name: info.name, address: info.address || '' };
+      isLoggedIn = true;
+      applyAuthUI();
+      updateHeaderAddress(info.address || '');
+      restaurantSub.textContent = (currentLang === 'zh' ? '👋 ' : '👋 ') + info.name + ' · ' + t('brandSub');
+    }else{ applyAuthUI(); }
+  }).catch(()=>{ applyAuthUI(); });
+}
+loadSession();
+
+// ---- 订单相关 ----
+const TABS = [
+  { id:'pending', labelKey:'newOrders', match:o => o.status === 'pending' },
+  { id:'preparing', labelKey:'preparing', match:o => o.status === 'preparing' },
+  { id:'ready', labelKey:'ready', match:o => ['ready','assigned','picked_up'].includes(o.status) },
+  { id:'done', labelKey:'done', match:o => ['delivered','rejected'].includes(o.status) },
+];
+
+function beep(){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = 880;
+    g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + 0.5);
+  }catch(e){}
+}
+
+function timeAgo(ts){
+  if(!ts) return t('justNow');
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if(diff < 60) return t('justNow');
+  if(diff < 3600) return Math.floor(diff/60) + t('minutesAgo');
+  if(diff < 86400) return Math.floor(diff/3600) + t('hoursAgo');
+  return new Date(ts).toLocaleString();
+}
+
+function statusLabel(s){
+  const map = {
+    pending: t('pending'),
+    preparing: t('preparingStatus'),
+    ready: t('readyStatus'),
+    assigned: t('assigned'),
+    picked_up: t('picked_up'),
+    delivered: t('delivered'),
+    rejected: t('rejected')
+  };
+  return map[s] || s;
+}
+
+function renderTabs(){
+  const el = document.getElementById('tabs');
+  el.innerHTML = TABS.map(t => {
+    const count = Object.values(orders).filter(t.match).length;
+    const label = t(t.labelKey);
+    return `<div class="tab ${activeTab===t.id?'active':''}" data-id="${t.id}">
+      ${label} ${t.id!=='done' && count>0 ? `<span class="badge">${count}</span>` : ''}
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => { activeTab = tab.dataset.id; renderTabs(); renderList(); });
+  });
+}
+
+function orderCard(id, o){
+  const itemsHtml = (o.items||[]).map(i =>
+    `<div><span class="n">${i.qty}×</span> ${i.name}</div>`
+  ).join('');
+
+  let actions = '';
+  if(o.status === 'pending'){
+    actions = `
+      <div class="btn-row">
+        <button class="btn btn-ghost" data-action="reject" data-id="${id}">${t('reject')}</button>
+        <button class="btn btn-primary" data-action="accept" data-id="${id}">${t('accept')}</button>
+      </div>`;
+  } else if(o.status === 'preparing'){
+    actions = `
+      <div class="btn-row">
+        <button class="btn btn-amber" data-action="ready" data-id="${id}">${t('readyBtn')}</button>
+      </div>`;
+  }
+
+  const riderHtml = o.riderName
+    ? `<div class="rider-tag">${t('rider')} ${o.riderName} · ${statusLabel(o.status)}</div>`
+    : '';
+
+  const pickupAddress = o.restaurantAddress || (currentUser?.address) || '未设置地址';
+  const restaurantName = o.restaurantName || '铜锅记';
+
+  return `
+    <div class="order-card">
+      <div class="order-head">
+        <div>
+          <div class="order-id">${t('orderId')}${id.slice(-5).toUpperCase()}</div>
+          <div class="order-time">${timeAgo(o.createdAt)}</div>
+        </div>
+        <div class="status-pill status-${o.status}">${statusLabel(o.status)}</div>
+      </div>
+      <div class="items-list">${itemsHtml}</div>
+      <div class="addr-row">📍 ${t('pickup')}${restaurantName} ${pickupAddress}</div>
+      <div class="addr-row">📦 ${t('deliverTo')} ${o.customerAddress || '—'}</div>
+      <div class="addr-row">📞 ${o.customerPhone || '—'}</div>
+      <div class="divider"></div>
+      <div class="total-row"><span>${t('total')}</span><span>$${(o.total||0).toFixed(1)}</span></div>
+      ${riderHtml}
+      ${actions}
+    </div>
+  `;
+}
+
+function renderList(){
+  const el = document.getElementById('list');
+  const tabDef = TABS.find(t => t.id === activeTab);
+  const filtered = Object.entries(orders)
+    .filter(([id,o]) => tabDef.match(o))
+    .sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+
+  if(filtered.length === 0){
+    el.innerHTML = `<div class="empty"><span class="em">🍲</span>${t('noOrders')}</div>`;
+    return;
+  }
+  
+  const restaurantAddress = currentUser?.address || '未设置地址';
+  el.innerHTML = filtered.map(([id,o]) => {
+    const orderWithUpdatedAddress = { ...o, restaurantAddress: restaurantAddress };
+    return orderCard(id, orderWithUpdatedAddress);
+  }).join('');
+  
+  el.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      if (!isLoggedIn) {
+        alert('⚠️ ' + (currentLang === 'zh' ? '请先登录才能操作订单' : 'Please sign in to manage orders'));
+        showModal();
+        return;
+      }
+      if(action === 'accept'){
+        ordersRef.child(id).update({ status:'preparing', acceptedAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP }).catch(err => console.error('接单失败:', err));
+      } else if(action === 'reject'){
+        ordersRef.child(id).update({ status:'rejected', updatedAt: firebase.database.ServerValue.TIMESTAMP }).catch(err => console.error('拒绝订单失败:', err));
+      } else if(action === 'ready'){
+        ordersRef.child(id).update({ status:'ready', readyAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP }).catch(err => console.error('标记备好失败:', err));
+      }
+    });
+  });
+}
+
+ordersRef.on('value', snap => {
+  const val = snap.val() || {};
+  orders = val;
+
+  const currentPending = new Set(Object.entries(val).filter(([id,o]) => o.status==='pending').map(([id]) => id));
+  let hasNew = false;
+  currentPending.forEach(id => { if(!knownPendingIds.has(id)) hasNew = true; });
+  if(hasNew && knownPendingIds.size >= 0){
+    beep();
+    document.title = (currentLang === 'zh' ? '🔔 新订单 · 铜锅记商家端' : '🔔 New Order · Tongguoji Merchant');
+    setTimeout(() => { document.title = (currentLang === 'zh' ? '铜锅记 · 商家接单' : 'Tongguoji · Merchant'); }, 4000);
+  }
+  knownPendingIds = currentPending;
+
+  renderTabs();
+  renderList();
+});
+
+ordersRef.on('value', () => {}, () => {
+  document.getElementById('connBanner').classList.add('show');
+});
+db.ref('.info/connected').on('value', snap => {
+  document.getElementById('connBanner').classList.toggle('show', snap.val() === false);
+});
+
+// Online toggle
+onlineRef.on('value', snap => {
+  isOnline = snap.val() !== false;
+  document.getElementById('onlineDot').classList.toggle('on', isOnline);
+  document.getElementById('onlineLabel').textContent = isOnline ? t('online') : t('offline');
+});
+document.getElementById('onlineToggle').addEventListener('click', () => {
+  onlineRef.set(!isOnline);
+});
+
+// Test order
+const SAMPLE_ITEMS = [
+  { name: (currentLang === 'zh' ? '麻酱鸡肉' : 'Sesame Chicken'), qty:1, price:8.9 },
+  { name: (currentLang === 'zh' ? '番茄肥牛' : 'Tomato Beef'), qty:2, price:9.9 },
+  { name: (currentLang === 'zh' ? '酸梅汤' : 'Sour Plum Drink'), qty:1, price:2.9 },
+];
+document.getElementById('testOrderBtn').addEventListener('click', () => {
+  const subtotal = SAMPLE_ITEMS.reduce((s,i)=>s+i.qty*i.price,0);
+  const deliveryFee = 2.9;
+  const newRef = ordersRef.push();
+  newRef.set({
+    restaurantId: RESTAURANT_ID,
+    restaurantName: (currentLang === 'zh' ? '铜锅记' : 'Tongguoji'),
+    restaurantAddress: currentUser?.address || '304 Anchorvale Link, Singapore 540304 号',
+    customerAddress: (currentLang === 'zh' ? '客户测试地址 ' : 'Test Address ') + Math.floor(Math.random()*100),
+    customerPhone: '9' + Math.floor(10000000 + Math.random()*89999999),
+    items: SAMPLE_ITEMS.map(i => ({ ...i, name: currentLang === 'zh' ? i.name : (i.name === '麻酱鸡肉' ? 'Sesame Chicken' : i.name === '番茄肥牛' ? 'Tomato Beef' : 'Sour Plum Drink') })),
+    subtotal, deliveryFee, total: subtotal + deliveryFee,
+    status: 'pending',
+    createdAt: firebase.database.ServerValue.TIMESTAMP,
+    updatedAt: firebase.database.ServerValue.TIMESTAMP,
+  });
+});
+
+// 初始渲染
+updateI18n();
+</script>
+</body>
+</html>
