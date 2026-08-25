@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>铜锅记 · 骑手端</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,11 +12,11 @@
             --copper: #C4894A; --copper-light: #E3B876; --ink: #2B2118; --ink-soft: #6B5D4F;
             --line: #E9DCC7; --veg: #4C7A52; --card: #FFFDF9; --blue: #4A5F8A;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--cream); color: var(--ink); font-family: 'Noto Sans SC', sans-serif; padding-bottom: 30px; }
         h1,h2,.display { font-family: 'Noto Serif SC', serif; }
 
-        /* ================= 顶部栏 (简化版) ================= */
+        /* ================= 顶部栏 ================= */
         .topbar { 
             position: sticky; top: 0; z-index: 40; background: var(--ink); color: #fff; 
             padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; 
@@ -73,7 +73,7 @@
         .earn-num { font-size: 18px; font-weight: 800; color: var(--broth); }
         .earn-label { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
 
-        .conn-banner { text-align: center; font-size: 12px; padding: 6px; background: var(--cream-2); color: var(--ink-soft); display: none; }
+        .conn-banner { text-align: center; font-size: 12px; padding: 6px; background: #FCE7E1; color: var(--broth); display: none; font-weight: 600; }
         .conn-banner.show { display: block; }
 
         .tabs { display: flex; gap: 8px; padding: 14px 18px 8px; overflow-x: auto; scrollbar-width: none; background: var(--cream); position: sticky; top: 60px; z-index: 35; border-bottom: 1px solid var(--line); }
@@ -157,13 +157,12 @@
         .lang-btn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; }
         .lang-btn:hover { background: rgba(255,255,255,.2); }
 
-        /* 隐藏原有的顶部操作按钮，由侧滑菜单接管 */
         .top-actions-hidden { display: none; }
     </style>
 </head>
 <body>
 
-<!-- ================= 顶部栏 (简化) ================= -->
+<!-- ================= 顶部栏 ================= -->
 <div class="topbar">
     <div style="display:flex; align-items:center;">
         <button id="menu-toggle" class="menu-btn" aria-label="打开菜单">☰</button>
@@ -209,7 +208,6 @@
 <div class="list" id="list"></div>
 
 <!-- ================= 弹窗组件 ================= -->
-<!-- 登录/注册弹窗 -->
 <div class="modal-overlay show" id="authModal">
     <div class="modal-card">
         <div class="auth-tabs">
@@ -239,7 +237,7 @@
     </div>
 </div>
 
-<!-- ================= 隐藏的原功能按钮 (供侧滑菜单触发) ================= -->
+<!-- 隐藏的原功能按钮 (供侧滑菜单触发) -->
 <div class="top-actions-hidden">
     <button id="fullscreenBtn">⛶ 全屏</button>
     <button id="historyBtn">📋 历史</button>
@@ -256,7 +254,7 @@
 
 <script>
     // ============================================================
-    // 1. 侧滑导航控制逻辑 (新增)
+    // 1. 侧滑导航与返回键拦截逻辑 (核心修复)
     // ============================================================
     const menuToggle = document.getElementById('menu-toggle');
     const navClose = document.getElementById('nav-close');
@@ -264,35 +262,80 @@
     const navOverlay = document.getElementById('nav-overlay');
     const navItems = document.querySelectorAll('.nav-item');
 
-    const openNav = () => { sideNav.classList.add('active'); navOverlay.classList.add('active'); };
-    const closeNav = () => { sideNav.classList.remove('active'); navOverlay.classList.remove('active'); };
+    let isNavOpen = false;
+
+    const openNav = () => { 
+        sideNav.classList.add('active'); 
+        navOverlay.classList.add('active'); 
+        isNavOpen = true;
+        // 推入历史状态，拦截物理返回键
+        history.pushState({ panel: 'nav' }, '');
+    };
+
+    const closeNav = () => { 
+        sideNav.classList.remove('active'); 
+        navOverlay.classList.remove('active'); 
+        isNavOpen = false;
+    };
 
     menuToggle.addEventListener('click', openNav);
     navClose.addEventListener('click', closeNav);
     navOverlay.addEventListener('click', closeNav);
 
-    // 侧滑菜单点击后，触发原有隐藏按钮的逻辑，确保业务代码 100% 兼容
+    // 拦截浏览器/手机物理返回键
+    window.addEventListener('popstate', function(event) {
+        if (isNavOpen) {
+            // 如果菜单是打开的，点击返回键则关闭菜单
+            closeNav();
+        } else {
+            // 如果菜单已关闭，强制将视图锁定在“可接订单”页面，防止退出应用
+            if (activeTab !== 'available') {
+                activeTab = 'available';
+                renderTabs();
+                renderList();
+            }
+            // 重新推入状态，保持应用内的“返回”循环
+            history.pushState({ page: 'order_page' }, '');
+        }
+    });
+    // 初始化时推入一个基础状态
+    history.pushState({ page: 'order_page' }, '');
+
+    // 侧滑菜单点击后，触发原有隐藏按钮的逻辑
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             closeNav();
             const action = item.getAttribute('data-action');
-            
-            // 使用 setTimeout 确保菜单关闭动画开始后再执行，体验更好
             setTimeout(() => {
-                if (action === 'history') document.getElementById('historyBtn').click();
-                else if (action === 'today') document.getElementById('todayStatsBtn').click();
-                else if (action === 'excel') document.getElementById('exportExcelBtn').click();
-                else if (action === 'reset') document.getElementById('resetTodayBtn').click();
-                else if (action === 'fullscreen') document.getElementById('fullscreenBtn').click();
-                else if (action === 'lang') document.getElementById('langToggleBtn').click();
-                else if (action === 'logout') document.getElementById('logoutBtn').click();
+                const targetBtn = document.getElementById(action === 'history' ? 'historyBtn' : 
+                                                         action === 'today' ? 'todayStatsBtn' :
+                                                         action === 'excel' ? 'exportExcelBtn' :
+                                                         action === 'reset' ? 'resetTodayBtn' :
+                                                         action === 'fullscreen' ? 'fullscreenBtn' :
+                                                         action === 'lang' ? 'langToggleBtn' :
+                                                         action === 'logout' ? 'logoutBtn' : null);
+                if (targetBtn) targetBtn.click();
             }, 150);
         });
     });
 
     // ============================================================
-    // 2. 原有 Firebase 及业务逻辑 (保持不变)
+    // 2. 安全导航唤起函数 (防止当前页被替换/白屏)
+    // ============================================================
+    function openMapNavigation(address, type) {
+        if (!address) {
+            alert(`⚠️ ${type === 'pickup' ? '商家' : '顾客'}地址信息缺失，无法导航`);
+            return;
+        }
+        // 使用 _blank 在新标签页打开，移动端通常会直接唤起地图 App
+        // 这样当前 H5 接单页面的状态和历史记录不会被破坏
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+        window.open(url, '_blank');
+    }
+
+    // ============================================================
+    // 3. Firebase 及核心业务逻辑
     // ============================================================
     const firebaseConfig = {
         apiKey: "AIzaSyDrrk3exoaA4PjYVlNnlIr1-qZcHYfXZtk",
@@ -508,10 +551,6 @@
         return new Date(ts).toLocaleString();
     }
 
-    function getNavigationLink(addr) {
-        return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr || '')}`;
-    }
-
     function getStatusLabel(status) {
         const map = { 'pending': '待商家接单', 'ready': '待骑手取餐', 'assigned': '已接单', 'picked_up': '已取餐', 'delivered': '已送达' };
         return map[status] || status;
@@ -652,11 +691,9 @@
                     ordersRef.child(id).update({ status: 'delivered', deliveredAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP });
                     localStorage.removeItem('current_active_order'); renderList(); updateEarnings();
                 } else if (action === 'nav-pickup') {
-                    if (order.restaurantAddress) window.open(getNavigationLink(order.restaurantAddress), '_blank');
-                    else alert('⚠️ 商家地址信息缺失，无法导航');
+                    openMapNavigation(order.restaurantAddress, 'pickup');
                 } else if (action === 'nav-dropoff') {
-                    if (order.customerAddress) window.open(getNavigationLink(order.customerAddress), '_blank');
-                    else alert('⚠️ 顾客地址信息缺失，无法导航');
+                    openMapNavigation(order.customerAddress, 'dropoff');
                 }
             });
         });
@@ -847,16 +884,22 @@
         }
     });
 
+    // ============================================================
+    // 4. 生命周期与初始化
+    // ============================================================
     checkAuth();
     updateRiderUI();
     refreshOnlineUI();
 
+    // 页面可见性变化监听 (从地图App切回时自动恢复状态)
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden && currentRider) {
-            console.log("🔄 页面从后台唤醒，检查订单状态...");
+            console.log("🔄 页面从后台唤醒，恢复接单页面状态...");
             restoreActiveOrder();
+            renderList(); // 刷新列表，确保状态最新
         }
     });
+    
     console.log('✅ 骑手端已启动，等待订单...');
 </script>
 </body>
