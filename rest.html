@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>铜锅记 · 商家接单</title>
+  <title>香港烧腊 · 商家接单</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -191,7 +191,7 @@
 <div class="topbar">
   <div class="brand">
     <div>
-      <div class="brand-name" data-i18n="brandName">铜锅记 · 商家端</div>
+      <div class="brand-name" data-i18n="brandName">香港烧腊 · 商家端</div>
       <div class="brand-sub" id="restaurantSub" data-i18n="brandSub">接单管理</div>
     </div>
   </div>
@@ -296,7 +296,7 @@ const restaurantInfoRef = db.ref('restaurants/' + RESTAURANT_ID + '/info');
 // ============ 国际化 ============
 const i18n = {
   zh: {
-    brandName: '铜锅记 · 商家端',
+    brandName: '香港烧腊 · 商家端',
     brandSub: '接单管理',
     online: '营业中',
     offline: '已打烊',
@@ -700,7 +700,7 @@ function orderCard(id, o){
     : '';
 
   const pickupAddress = o.restaurantAddress || (currentUser?.address) || '未设置地址';
-  const restaurantName = o.restaurantName || '铜锅记';
+  const restaurantName = o.restaurantName || '香港烧腊';
 
   return `
     <div class="order-card">
@@ -770,8 +770,8 @@ ordersRef.on('value', snap => {
   currentPending.forEach(id => { if(!knownPendingIds.has(id)) hasNew = true; });
   if(hasNew && knownPendingIds.size >= 0){
     beep();
-    document.title = (currentLang === 'zh' ? '🔔 新订单 · 铜锅记商家端' : '🔔 New Order · Tongguoji Merchant');
-    setTimeout(() => { document.title = (currentLang === 'zh' ? '铜锅记 · 商家接单' : 'Tongguoji · Merchant'); }, 4000);
+    document.title = (currentLang === 'zh' ? '🔔 新订单 · 香港烧腊商家端' : '🔔 New Order · HK Roast Merchant');
+    setTimeout(() => { document.title = (currentLang === 'zh' ? '香港烧腊 · 商家接单' : 'HK Roast · Merchant'); }, 4000);
   }
   knownPendingIds = currentPending;
 
