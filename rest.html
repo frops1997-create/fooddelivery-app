@@ -313,7 +313,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const RESTAURANT_ID = "tongguoji";
+const RESTAURANT_ID = "HK Roast";
 const ordersRef = db.ref('orders');
 const onlineRef = db.ref('restaurants/' + RESTAURANT_ID + '/online');
 const restaurantInfoRef = db.ref('restaurants/' + RESTAURANT_ID + '/info');
@@ -398,7 +398,7 @@ const i18n = {
     loginFirst: '请先登录才能操作',
   },
   en: {
-    brandName: 'Tongguoji · Merchant',
+    brandName: 'HK Roast · Merchant',
     brandSub: 'Order Management',
     online: 'Open',
     offline: 'Closed',
@@ -824,8 +824,8 @@ ordersRef.on('value', snap => {
   currentPending.forEach(id => { if(!knownPendingIds.has(id)) hasNew = true; });
   if(hasNew && knownPendingIds.size >= 0){
     beep();
-    document.title = (currentLang === 'zh' ? '🔔 新订单 · 香港烧腊,商家端' : '🔔 New Order · Tongguoji Merchant');
-    setTimeout(() => { document.title = (currentLang === 'zh' ? '香港烧腊 · 商家接单' : 'Tongguoji · Merchant'); }, 4000);
+    document.title = (currentLang === 'zh' ? '🔔 新订单 · 香港烧腊,商家端' : '🔔 New Order · HK Roast Merchant');
+    setTimeout(() => { document.title = (currentLang === 'zh' ? '香港烧腊 · 商家接单' : 'HK Roast · Merchant'); }, 4000);
   }
   knownPendingIds = currentPending;
 
