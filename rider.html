@@ -167,7 +167,7 @@
     <div style="display:flex; align-items:center;">
         <button id="menu-toggle" class="menu-btn" aria-label="打开菜单">☰</button>
         <div>
-            <div class="brand-name">铜锅记 · 骑手端</div>
+            <div class="brand-name">香港烧腊 · 骑手端</div>
             <div class="brand-sub" id="riderSub">未登录</div>
         </div>
     </div>
@@ -749,7 +749,7 @@
                 o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.5);
             } catch (e) {}
             document.title = '🔔 新订单可接 · 骑手端';
-            setTimeout(() => { document.title = '铜锅记 · 骑手端'; }, 4000);
+            setTimeout(() => { document.title = '香港烧腊· 骑手端'; }, 4000);
         }
         knownAvailableIds = currentAvailable;
         renderTabs(); renderList(); updateEarnings();
@@ -878,7 +878,7 @@
         XLSX.utils.book_append_sheet(wb, ws, '历史记录');
         const now = new Date();
         const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-        XLSX.writeFile(wb, `铜锅记_骑手历史记录_${dateStr}.xlsx`);
+        XLSX.writeFile(wb, `香港烧腊_骑手历史记录_${dateStr}.xlsx`);
     }
 
     function resetAllHistory() {
@@ -928,7 +928,7 @@
             document.querySelectorAll('.earn-label')[1].textContent = "Today's Deliveries";
         } else {
             this.textContent = '🌐 EN';
-            document.querySelector('.brand-name').textContent = '铜锅记 · 骑手端';
+            document.querySelector('.brand-name').textContent = '香港烧腊· 骑手端';
             document.getElementById('riderSub').textContent = currentRider ? `🛵 ${currentRider.name} · ${currentRider.phone}` : '未登录';
             document.getElementById('onlineLabel').textContent = isOnline ? '在线接单' : '离线';
             document.querySelectorAll('.earn-label')[0].textContent = '今日收入';
