@@ -921,7 +921,7 @@
     document.getElementById('langToggleBtn').addEventListener('click', function() {
         if (this.textContent.includes('EN')) {
             this.textContent = '🌐 中文';
-            document.querySelector('.brand-name').textContent = 'Tongguoji · Rider';
+            document.querySelector('.brand-name').textContent = 'HK Roast · Rider';
             document.getElementById('riderSub').textContent = currentRider ? `🛵 ${currentRider.name} · ${currentRider.phone}` : 'Not logged in';
             document.getElementById('onlineLabel').textContent = isOnline ? 'Online' : 'Offline';
             document.querySelectorAll('.earn-label')[0].textContent = "Today's Earnings";
