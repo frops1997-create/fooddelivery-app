@@ -388,11 +388,11 @@ const i18n = {
     historyEmpty: '暂无历史记录',
     historyCount: '共 {n} 单 · 已送达销售额 ${s}',
     downloadExcel: '📥 下载历史记录 Excel',
-    resetHistory: '♻️ 重启所有历史记录',
-    resetPrompt: '此操作将永久删除全部 {n} 笔历史订单（已送达与已拒绝），且无法恢复！\n进行中的订单不受影响。\n如admin123，请输入：admin123',
+    resetHistory: '♻️ 重启所有历史记录（含待取餐）',
+    resetPrompt: '此操作将永久删除全部 {n} 笔订单（历史记录 + 待取餐），且无法恢复！\n新订单和制作中的订单不受影响。\n请输入：admin123',
     resetKeyword: 'admin123',
     resetMismatch: '输入内容不匹配，已取消操作',
-    resetDone: '所有历史记录已重启',
+    resetDone: '所有历史记录和待取餐订单已清空',
     resetFailed: '操作失败，请重试',
     excelFail: 'Excel 组件加载失败，请检查网络后重试',
     loginFirst: '请先登录才能操作',
@@ -465,11 +465,11 @@ const i18n = {
     historyEmpty: 'No history yet',
     historyCount: '{n} orders · Delivered sales ${s}',
     downloadExcel: '📥 Download History (Excel)',
-    resetHistory: '♻️ Reset All History',
-    resetPrompt: 'This will permanently delete all {n} history orders (delivered & rejected) and cannot be undone!\nOrders in progress are not affected.\nTo confirm, type: RESET',
+    resetHistory: '♻️ Reset All History (incl. Ready)',
+    resetPrompt: 'This will permanently delete all {n} orders (history + ready for pickup) and cannot be undone!\nNew and preparing orders are not affected.\nTo confirm, type: RESET',
     resetKeyword: 'RESET',
     resetMismatch: 'Input does not match, cancelled',
-    resetDone: 'All history has been reset',
+    resetDone: 'All history and ready-for-pickup orders have been cleared',
     resetFailed: 'Operation failed, please retry',
     excelFail: 'Excel library failed to load, check your network',
     loginFirst: 'Please sign in first',
@@ -854,6 +854,8 @@ document.getElementById('onlineToggle').addEventListener('click', () => {
 // ============ 历史记录 / Excel / 重启 ============
 const historyModal = document.getElementById('historyModal');
 const HISTORY_STATUSES = ['delivered', 'rejected'];
+// 重启时要清除的订单：历史记录 + 待取餐
+const RESET_STATUSES = ['delivered', 'rejected', 'ready', 'assigned', 'picked_up'];
 
 function getHistoryOrders(){
   return Object.entries(orders)
@@ -861,35 +863,53 @@ function getHistoryOrders(){
     .sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
 }
 
+function getResetOrders(){
+  return Object.entries(orders)
+    .filter(([id, o]) => RESET_STATUSES.includes(o.status));
+}
+
 function renderHistory(){
   const list = getHistoryOrders();
+  const resetList = getResetOrders();
   const body = document.getElementById('historyBody');
-  if (list.length === 0){
+  // 历史和待取餐都为空时，才显示空状态
+  if (list.length === 0 && resetList.length === 0){
     body.innerHTML = `<div class="empty"><span class="em">📭</span>${t('historyEmpty')}</div>`;
     return;
   }
-  const sales = list.reduce((sum, [, o]) => sum + (o.status === 'delivered' ? (o.total || 0) : 0), 0);
-  const summary = t('historyCount').replace('{n}', list.length).replace('${s}', '$' + sales.toFixed(1));
-  const rows = list.map(([id, o]) => {
-    const itemsStr = (o.items || []).map(i => `${i.name}×${i.qty}`).join('、');
-    const time = o.createdAt ? new Date(o.createdAt).toLocaleString() : '—';
-    return `
-      <div class="h-item">
-        <div class="h-head">
-          <span class="h-id">#${id.slice(-6).toUpperCase()}</span>
-          <span class="status-pill status-${o.status}">${statusLabel(o.status)}</span>
-        </div>
-        <div class="h-items">${itemsStr || '—'}</div>
-        <div class="h-meta"><span>🕐 ${time}</span><strong style="color:var(--broth);">$${(o.total || 0).toFixed(1)}</strong></div>
-        <div class="h-meta"><span>📞 ${o.customerPhone || '—'}</span><span>📦 ${o.customerAddress || '—'}</span></div>
-      </div>`;
-  }).join('');
+
+  let listHtml = '';
+  if (list.length === 0){
+    listHtml = `<div class="empty" style="padding:24px 20px;"><span class="em">📭</span>${t('historyEmpty')}</div>`;
+  } else {
+    const sales = list.reduce((sum, [, o]) => sum + (o.status === 'delivered' ? (o.total || 0) : 0), 0);
+    const summary = t('historyCount').replace('{n}', list.length).replace('${s}', '$' + sales.toFixed(1));
+    const rows = list.map(([id, o]) => {
+      const itemsStr = (o.items || []).map(i => `${i.name}×${i.qty}`).join('、');
+      const time = o.createdAt ? new Date(o.createdAt).toLocaleString() : '—';
+      return `
+        <div class="h-item">
+          <div class="h-head">
+            <span class="h-id">#${id.slice(-6).toUpperCase()}</span>
+            <span class="status-pill status-${o.status}">${statusLabel(o.status)}</span>
+          </div>
+          <div class="h-items">${itemsStr || '—'}</div>
+          <div class="h-meta"><span>🕐 ${time}</span><strong style="color:var(--broth);">$${(o.total || 0).toFixed(1)}</strong></div>
+          <div class="h-meta"><span>📞 ${o.customerPhone || '—'}</span><span>📦 ${o.customerAddress || '—'}</span></div>
+        </div>`;
+    }).join('');
+    listHtml = `
+      <div class="h-summary">${summary}</div>
+      <div class="h-list">${rows}</div>
+      <button class="form-btn" id="downloadHistoryBtn" style="width:100%;">${t('downloadExcel')}</button>`;
+  }
+
   body.innerHTML = `
-    <div class="h-summary">${summary}</div>
-    <div class="h-list">${rows}</div>
-    <button class="form-btn" id="downloadHistoryBtn" style="width:100%;">${t('downloadExcel')}</button>
+    ${listHtml}
     <button class="form-btn danger" id="resetHistoryBtn" style="width:100%;">${t('resetHistory')}</button>`;
-  document.getElementById('downloadHistoryBtn').addEventListener('click', downloadHistoryExcel);
+
+  const dl = document.getElementById('downloadHistoryBtn');
+  if (dl) dl.addEventListener('click', downloadHistoryExcel);
   document.getElementById('resetHistoryBtn').addEventListener('click', resetAllHistory);
 }
 
@@ -926,7 +946,7 @@ function downloadHistoryExcel(){
 
 function resetAllHistory(){
   if (!isLoggedIn){ alert('⚠️ ' + t('loginFirst')); historyModal.classList.remove('open'); showModal(); return; }
-  const list = getHistoryOrders();
+  const list = getResetOrders();   // 历史记录 + 待取餐
   if (list.length === 0) return;
   const input = prompt(t('resetPrompt').replace('{n}', list.length));
   if (input === null) return;
