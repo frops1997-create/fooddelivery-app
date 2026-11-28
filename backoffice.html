@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>铜锅记 · 运营管理后台</title>
+  <title>香港烧腊· 运营管理后台</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -184,7 +184,7 @@
 <!-- ====== 登录遮罩 ====== -->
 <div id="loginOverlay">
   <div class="login-card">
-    <div class="logo">🔐 铜锅记</div>
+    <div class="logo">🔐 香港烧腊</div>
     <div class="sub">运营管理后台 · 请输入密码</div>
     <input type="password" id="loginPasswordInput" placeholder="请输入管理密码" autofocus />
     <button id="loginSubmitBtn">进入后台</button>
@@ -196,7 +196,7 @@
 <div class="container" id="mainApp" style="display:none;">
   <div class="topbar">
     <div>
-      <span class="brand">铜锅记 · 运营后台</span>
+      <span class="brand">香港烧腊· 运营后台</span>
       <span class="sub">数据中枢</span>
     </div>
     <div class="top-actions">
@@ -616,7 +616,7 @@ function exportUsersToExcel(){
   ws['!cols'] = Object.keys(rows[0]).map(() => ({ wch: 16 }));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '用户');
-  XLSX.writeFile(wb, `铜锅记_用户_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb, `香港烧腊_用户_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 function exportAllExcel(){
@@ -643,7 +643,7 @@ function exportAllExcel(){
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws1, '订单');
   XLSX.utils.book_append_sheet(wb, ws2, '用户');
-  XLSX.writeFile(wb, `铜锅记_全量数据_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb, `香港烧腊_全量数据_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 // ===== 刷新UI =====
